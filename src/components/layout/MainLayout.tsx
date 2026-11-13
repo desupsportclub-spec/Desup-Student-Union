@@ -3,9 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
-import { motion, AnimatePresence } from 'motion/react';
+import { motion } from 'motion/react';
 import Lenis from 'lenis';
 import { Navbar } from '../common/Navbar';
 import { Footer } from '../common/Footer';
@@ -14,6 +14,7 @@ import { Preloader } from '../common/Preloader';
 import { CookieConsent } from '../common/CookieConsent';
 import { doc, updateDoc, increment } from 'firebase/firestore';
 import { db } from '../../lib/firebase';
+import { prefetchNews } from '../../lib/publicDataService';
 import { useSiteSettings } from '../../context/SiteSettingsContext';
 
 export const MainLayout: React.FC = () => {
@@ -43,6 +44,16 @@ export const MainLayout: React.FC = () => {
       cancelAnimationFrame(animId);
       lenis.destroy();
     };
+  }, []);
+
+  // Prefetch News routes & warm news cache on idle so navigating to /news or articles is instant
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      prefetchNews();
+      void import('../../pages/News');
+      void import('../../pages/NewsDetail');
+    }, 600);
+    return () => clearTimeout(timer);
   }, []);
 
   // Increment total site visits once per session
@@ -82,19 +93,16 @@ export const MainLayout: React.FC = () => {
       {/* Main sticky navigation */}
       <Navbar tickerItems={tickerItems} />
 
-      {/* Animated Route View with curtain sweep */}
+      {/* Crisp route view without blocking exit delay */}
       <main className="flex-1">
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={location.pathname}
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -16 }}
-            transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
-          >
-            <Outlet />
-          </motion.div>
-        </AnimatePresence>
+        <motion.div
+          key={location.pathname}
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.16, ease: [0.22, 1, 0.36, 1] }}
+        >
+          <Outlet />
+        </motion.div>
       </main>
 
       {/* Main Footer */}

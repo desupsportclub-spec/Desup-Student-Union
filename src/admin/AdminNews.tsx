@@ -12,6 +12,7 @@ import { NewsCategoryBadge } from '../components/common/StatusBadge';
 import { ImageUploader } from '../components/common/ImageUploader';
 import { detectSocialPlatform } from '../components/news/SocialMediaEmbed';
 import { SuccessFeedbackModal } from '../components/common/SuccessFeedbackModal';
+import { invalidatePublicDataCache } from '../lib/publicDataService';
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 
@@ -150,7 +151,6 @@ export const AdminNews: React.FC = () => {
         excerpt: excerpt.trim(),
         content: contentHTML,
         coverImage,
-        coverUrl: coverImage.url,
         videoUrl: videoUrl.trim(),
         socialLinks: finalSocialLinks,
         published,
@@ -161,6 +161,7 @@ export const AdminNews: React.FC = () => {
       };
 
       await setDoc(doc(db, 'news', id), newsDoc);
+      invalidatePublicDataCache('news');
       setIsModalOpen(false);
       await fetchNews();
       setSuccessModalTitle(editingItem ? 'บันทึกการแก้ไขข่าวสารเรียบร้อยแล้ว' : 'เผยแพร่ข่าวสารใหม่เรียบร้อยแล้ว');
@@ -176,6 +177,7 @@ export const AdminNews: React.FC = () => {
 
     try {
       await deleteDoc(doc(db, 'news', id));
+      invalidatePublicDataCache('news');
       await fetchNews();
       setSuccessModalTitle('ลบข่าวสารเรียบร้อยแล้ว');
     } catch (err) {
@@ -419,6 +421,8 @@ export const AdminNews: React.FC = () => {
                   onChange={(asset) => setCoverImage(asset)}
                   aspectRatioLabel="สัดส่วนแนะนำ 16:9 หรือ 3:2"
                   folder="news_covers"
+                  maxDimension={1200}
+                  maxSizeMB={0.22}
                 />
               </div>
 

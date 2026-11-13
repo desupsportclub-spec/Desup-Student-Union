@@ -5,8 +5,9 @@
 
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { doc, getDoc, updateDoc, increment, collection, query, where, getDocs } from 'firebase/firestore';
+import { doc, updateDoc, increment } from 'firebase/firestore';
 import { db } from '../lib/firebase';
+import { getCachedNewsSync, loadNewsArticle, loadPublishedNews } from '../lib/publicDataService';
 import { NewsItem } from '../types';
 import { formatThaiDate, formatNumber } from '../lib/format';
 import { NewsCategoryBadge } from '../components/common/StatusBadge';
@@ -18,65 +19,84 @@ import 'yet-another-react-lightbox/styles.css';
 
 export const NewsDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
-  const [news, setNews] = useState<NewsItem | null>(null);
-  const [related, setRelated] = useState<NewsItem[]>([]);
-  const [loading, setLoading] = useState(true);
+
+  const initialCachedItem = id ? getCachedNewsSync()?.find((n) => n.id === id) || null : null;
+  const [news, setNews] = useState<NewsItem | null>(() => initialCachedItem);
+  const [related, setRelated] = useState<NewsItem[]>(() => {
+    if (!initialCachedItem) return [];
+    return (getCachedNewsSync() || [])
+      .filter((n) => n.id !== id && n.category === initialCachedItem.category)
+      .slice(0, 3);
+  });
+  const [loading, setLoading] = useState<boolean>(() => !initialCachedItem);
   const [copyNotice, setCopyNotice] = useState(false);
 
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(0);
 
   useEffect(() => {
+    if (!id) return;
+    let active = true;
+
+    const cachedMatch = getCachedNewsSync()?.find((n) => n.id === id) || null;
+    if (cachedMatch) {
+      setNews(cachedMatch);
+      setLoading(false);
+    } else {
+      setLoading(true);
+    }
+
     async function loadArticle() {
       if (!id) return;
-      setLoading(true);
-
       try {
-        const docRef = doc(db, 'news', id);
-        const snap = await getDoc(docRef);
+        const resolved = await loadNewsArticle(id, (item) => {
+          if (!active) return;
+          if (item) {
+            setNews(item);
+            setLoading(false);
+          }
+        });
 
-        if (snap.exists()) {
-          const data = { id: snap.id, ...snap.data() } as NewsItem;
-          setNews(data);
+        if (!active) return;
+        setLoading(false);
 
-          // Increment view count once per browser session for this article
+        if (resolved) {
+          // Increment view count once per browser session for this article (non-blocking)
           const sessionKey = `desup_view_${id}`;
           if (!sessionStorage.getItem(sessionKey)) {
             sessionStorage.setItem(sessionKey, 'true');
-            try {
-              await updateDoc(docRef, {
-                views: increment(1)
-              });
-              setNews(prev => prev ? { ...prev, views: (prev.views || 0) + 1 } : null);
-            } catch (e) {
-              // Ignore view increment error
-            }
+            updateDoc(doc(db, 'news', id), { views: increment(1) })
+              .then(() => {
+                if (active) {
+                  setNews((prev) => (prev ? { ...prev, views: (prev.views || 0) + 1 } : null));
+                }
+              })
+              .catch(() => {});
           }
 
-          // Fetch 3 related news in the same category (filtered client-side to avoid composite index)
-          const relQuery = query(
-            collection(db, 'news'),
-            where('published', '==', true)
-          );
-          const relSnap = await getDocs(relQuery);
-          const relList: NewsItem[] = [];
-          relSnap.forEach((d) => {
-            const item = { id: d.id, ...d.data() } as NewsItem;
-            if (d.id !== id && item.category === data.category) {
-              relList.push(item);
-            }
-          });
-          relList.sort((a, b) => (b.createdAt || '').localeCompare(a.createdAt || ''));
-          setRelated(relList.slice(0, 3));
+          // Compute related articles from shared cache (avoids redundant full Firestore scan)
+          loadPublishedNews((allItems) => {
+            if (!active) return;
+            const relList = allItems
+              .filter((item) => item.id !== id && item.category === resolved.category)
+              .slice(0, 3);
+            setRelated(relList);
+          }).catch(() => {});
+        } else {
+          setNews(null);
         }
       } catch (err) {
         console.warn("Could not load article:", err);
       } finally {
-        setLoading(false);
+        if (active) setLoading(false);
       }
     }
 
     loadArticle();
+
+    return () => {
+      active = false;
+    };
   }, [id]);
 
   const handleCopyLink = () => {
@@ -196,6 +216,8 @@ export const NewsDetail: React.FC = () => {
             <img
               src={news.coverImage?.url || news.coverUrl}
               alt={news.coverImage?.alt || news.title}
+              decoding="async"
+              fetchPriority="high"
               className="w-full h-full object-cover"
             />
           </div>
@@ -244,6 +266,8 @@ export const NewsDetail: React.FC = () => {
                   <img
                     src={img.url}
                     alt={img.alt || `ภาพประกอบ ${idx + 1}`}
+                    loading="lazy"
+                    decoding="async"
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                   />
                 </div>
@@ -300,6 +324,8 @@ export const NewsDetail: React.FC = () => {
                       <img
                         src={item.coverImage?.url || item.coverUrl}
                         alt={item.title}
+                        loading="lazy"
+                        decoding="async"
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform"
                       />
                     ) : (

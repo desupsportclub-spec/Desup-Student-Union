@@ -72,6 +72,9 @@ export const HeroBannerSlider: React.FC<HeroBannerSliderProps> = ({ banners }) =
                   <img
                     src={banner.imageUrl}
                     alt={banner.title || 'แบนเนอร์องค์การนักเรียน'}
+                    loading={index === 0 ? 'eager' : 'lazy'}
+                    decoding="async"
+                    fetchPriority={index === 0 ? 'high' : 'auto'}
                     className="w-full h-full object-cover object-center transition-transform duration-700 ease-out group-hover:scale-[1.02]"
                   />
                   {hasText && (

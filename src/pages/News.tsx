@@ -3,10 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { collection, query, where, getDocs } from 'firebase/firestore';
-import { db } from '../lib/firebase';
+import { getCachedNewsSync, loadPublishedNews } from '../lib/publicDataService';
 import { NewsItem } from '../types';
 import { formatThaiDate, formatNumber } from '../lib/format';
 import { NewsCategoryBadge } from '../components/common/StatusBadge';
@@ -28,63 +27,64 @@ export const News: React.FC = () => {
   const [selectedCat, setSelectedCat] = useState<string>(urlCategory || 'all');
   const [searchTerm, setSearchTerm] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
-  const [news, setNews] = useState<NewsItem[]>([]);
-  const [loading, setLoading] = useState(true);
+
+  const initialCached = getCachedNewsSync();
+  const [allNews, setAllNews] = useState<NewsItem[]>(() => initialCached || []);
+  const [loading, setLoading] = useState<boolean>(() => !initialCached);
   const [displayCount, setDisplayCount] = useState(9);
 
-  // Sync with URL param if changes
+  // Sync with URL param if changes and reset pagination count
   useEffect(() => {
     setSelectedCat(urlCategory || 'all');
+    setDisplayCount(9);
   }, [urlCategory]);
 
-  // Debounce search input by 300ms
+  // Debounce search input by 200ms
   useEffect(() => {
     const handler = setTimeout(() => {
       setDebouncedSearch(searchTerm);
-    }, 300);
+    }, 200);
     return () => clearTimeout(handler);
   }, [searchTerm]);
 
-  // Fetch news from Firestore without requiring composite indexes
+  // Fetch published news ONCE via cache-first publicDataService (switching categories never re-fetches!)
   useEffect(() => {
-    async function fetchNews() {
-      setLoading(true);
-      try {
-        const q = query(
-          collection(db, 'news'),
-          where('published', '==', true)
-        );
-        const snap = await getDocs(q);
-        const items: NewsItem[] = [];
-        snap.forEach((docSnap) => {
-          const item = { id: docSnap.id, ...docSnap.data() } as NewsItem;
-          if (selectedCat === 'all' || item.category === selectedCat) {
-            items.push(item);
-          }
-        });
-        items.sort((a, b) => (b.createdAt || '').localeCompare(a.createdAt || ''));
-        setNews(items);
-      } catch (err) {
+    let active = true;
+
+    loadPublishedNews((items) => {
+      if (!active) return;
+      setAllNews(items);
+      setLoading(false);
+    })
+      .catch((err) => {
         console.warn("Could not load news from Firestore:", err);
-      } finally {
-        setLoading(false);
-      }
-    }
+      })
+      .finally(() => {
+        if (active) setLoading(false);
+      });
 
-    fetchNews();
-  }, [selectedCat]);
+    return () => {
+      active = false;
+    };
+  }, []);
 
-  // Filter client-side by debounced search term
-  const filteredNews = news.filter((item) => {
-    if (!debouncedSearch) return true;
-    const term = debouncedSearch.toLowerCase();
-    return (
-      item.title.toLowerCase().includes(term) ||
-      item.excerpt?.toLowerCase().includes(term)
-    );
-  });
+  // Filter instantaneously client-side by selected category & debounced search term
+  const filteredNews = useMemo(() => {
+    const term = debouncedSearch.trim().toLowerCase();
+    return allNews.filter((item) => {
+      if (selectedCat !== 'all' && item.category !== selectedCat) return false;
+      if (!term) return true;
+      return (
+        item.title.toLowerCase().includes(term) ||
+        item.excerpt?.toLowerCase().includes(term)
+      );
+    });
+  }, [allNews, selectedCat, debouncedSearch]);
 
-  const visibleNews = filteredNews.slice(0, displayCount);
+  const visibleNews = useMemo(
+    () => filteredNews.slice(0, displayCount),
+    [filteredNews, displayCount]
+  );
 
   return (
     <div className="max-w-[1240px] mx-auto px-4 sm:px-6 md:px-12 py-6 sm:py-10 space-y-6 sm:space-y-10">
@@ -106,7 +106,10 @@ export const News: React.FC = () => {
           {CATEGORIES.map((cat) => (
             <button
               key={cat.id}
-              onClick={() => setSelectedCat(cat.id)}
+              onClick={() => {
+                setSelectedCat(cat.id);
+                setDisplayCount(9);
+              }}
               className={`pb-2 whitespace-nowrap transition-colors relative ${
                 selectedCat === cat.id
                   ? 'text-[#4B1F7A] font-semibold'
@@ -142,7 +145,7 @@ export const News: React.FC = () => {
       </div>
 
       {/* News Grid */}
-      {loading ? (
+      {loading && allNews.length === 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-8">
           {[1, 2, 3, 4, 5, 6].map((i) => (
             <div key={i} className="animate-pulse space-y-3 p-4 border border-stone-200 rounded-sm">
@@ -155,7 +158,7 @@ export const News: React.FC = () => {
         </div>
       ) : visibleNews.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-8">
-          {visibleNews.map((item) => (
+          {visibleNews.map((item, idx) => (
             <Link
               key={item.id}
               to={`/news/read/${item.id}`}
@@ -173,7 +176,8 @@ export const News: React.FC = () => {
                       src={item.coverImage?.url || item.coverUrl}
                       alt={item.title}
                       className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.04]"
-                      loading="lazy"
+                      loading={idx < 3 ? 'eager' : 'lazy'}
+                      decoding="async"
                     />
                   ) : (
                     <div className="w-full h-full bg-[#EDE6F5] flex items-center justify-center text-[#4B1F7A]">

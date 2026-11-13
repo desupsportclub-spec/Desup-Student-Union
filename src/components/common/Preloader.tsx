@@ -27,7 +27,7 @@ export const Preloader: React.FC = () => {
       } catch (e) {
         // Ignore session storage error
       }
-    }, 1500);
+    }, 700);
 
     return () => clearTimeout(timer);
   }, [visible]);
@@ -40,25 +40,25 @@ export const Preloader: React.FC = () => {
           initial={{ y: 0 }}
           exit={{
             y: '-100%',
-            transition: { duration: 0.6, ease: [0.22, 1, 0.36, 1] }
+            transition: { duration: 0.35, ease: [0.22, 1, 0.36, 1] }
           }}
           className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-[#2A1245] text-[#FAF7F0] select-none"
         >
           {/* Subtle Thai gold line motif */}
           <div className="relative flex flex-col items-center">
             <motion.div
-              initial={{ scale: 0.85, opacity: 0 }}
+              initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
-              transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+              transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
               className="mb-4"
             >
               <Emblem size={72} animate />
             </motion.div>
 
             <motion.div
-              initial={{ y: 16, opacity: 0 }}
+              initial={{ y: 10, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
-              transition={{ delay: 0.3, duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+              transition={{ delay: 0.12, duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
               className="text-center"
             >
               <h1 className="font-serif text-2xl text-[#FAF7F0] tracking-wide mb-1">
@@ -73,7 +73,7 @@ export const Preloader: React.FC = () => {
             <motion.div
               initial={{ width: 0 }}
               animate={{ width: 120 }}
-              transition={{ duration: 1.2, ease: 'easeInOut' }}
+              transition={{ duration: 0.65, ease: 'easeInOut' }}
               className="h-[1.5px] bg-[#B8923A] mt-6"
             />
           </div>

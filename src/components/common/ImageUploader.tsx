@@ -13,6 +13,7 @@ interface ImageUploaderProps {
   aspectRatioLabel?: string; // e.g. "3:2 (ปกข่าว)", "4:5 (บุคลากร)", "1:1"
   folder?: string;
   maxDimension?: number;
+  maxSizeMB?: number;
 }
 
 export const ImageUploader: React.FC<ImageUploaderProps> = ({
@@ -20,7 +21,8 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
   onChange,
   aspectRatioLabel = "สัดส่วนแนะนำ 3:2 หรือ 4:5",
   folder = "uploads",
-  maxDimension = 1600
+  maxDimension = 1600,
+  maxSizeMB
 }) => {
   const [tab, setTab] = useState<'upload' | 'url'>('upload');
   const [isUploading, setIsUploading] = useState(false);
@@ -46,6 +48,7 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
       const asset = await uploadImage(file, {
         folder,
         maxDimension,
+        maxSizeMB,
         alt: altText || file.name.replace(/\.[^/.]+$/, "")
       });
       setUploadProgress(100);

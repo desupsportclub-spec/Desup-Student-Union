@@ -10,6 +10,7 @@ import { BannerItem, ImageAsset } from '../types';
 import { ImageUploader } from '../components/common/ImageUploader';
 import { CornerBracket } from '../components/common/Ornament';
 import { SuccessFeedbackModal } from '../components/common/SuccessFeedbackModal';
+import { invalidatePublicDataCache } from '../lib/publicDataService';
 
 export const AdminBanners: React.FC = () => {
   const [banners, setBanners] = useState<BannerItem[]>([]);
@@ -100,6 +101,7 @@ export const AdminBanners: React.FC = () => {
       };
 
       await setDoc(doc(db, 'banners', id), bannerDoc);
+      invalidatePublicDataCache('banners');
       setIsModalOpen(false);
       await fetchBanners();
       setSuccessModalTitle(editingItem ? 'บันทึกการแก้ไขแบนเนอร์เรียบร้อยแล้ว' : 'เพิ่มแบนเนอร์ใหม่เรียบร้อยแล้ว');
@@ -117,6 +119,7 @@ export const AdminBanners: React.FC = () => {
 
     try {
       await deleteDoc(doc(db, 'banners', id));
+      invalidatePublicDataCache('banners');
       await fetchBanners();
       setSuccessModalTitle('ลบแบนเนอร์เรียบร้อยแล้ว');
     } catch (err) {

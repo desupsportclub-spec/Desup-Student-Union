@@ -3,14 +3,24 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import useEmblaCarousel from 'embla-carousel-react';
 import Lightbox from 'yet-another-react-lightbox';
 import 'yet-another-react-lightbox/styles.css';
 
-import { collection, query, where, getDocs, doc, getDoc } from 'firebase/firestore';
-import { db } from '../lib/firebase';
+import { collection, getDocs } from 'firebase/firestore';
+import { auth, db } from '../lib/firebase';
+import {
+  getCachedBannersSync,
+  getCachedEventsSync,
+  getCachedNewsSync,
+  getCachedPeopleSync,
+  loadActiveBanners,
+  loadPeopleList,
+  loadPublishedEvents,
+  loadPublishedNews,
+} from '../lib/publicDataService';
 import { NewsItem, EventItem, PersonItem, BannerItem } from '../types';
 import { formatThaiDate, getThaiDateParts, formatNumber } from '../lib/format';
 import { SectionEyebrow, CornerBracket } from '../components/common/Ornament';
@@ -19,21 +29,64 @@ import { Emblem } from '../components/common/Emblem';
 import { HeroBannerSlider } from '../components/home/HeroBannerSlider';
 import { useSiteSettings } from '../context/SiteSettingsContext';
 
+function pickFeaturedAndRecent(newsList: NewsItem[]) {
+  if (newsList.length === 0) {
+    return { featured: null, recent: [], photos: [] };
+  }
+  const pinned = newsList.find((n) => n.pinned) || newsList[0];
+  const recent = newsList.filter((n) => n.id !== pinned.id).slice(0, 4);
+  const photos: { src: string; title: string }[] = [];
+  newsList
+    .filter((n) => n.category === 'activity')
+    .slice(0, 6)
+    .forEach((item) => {
+      const src = item.coverImage?.url || item.coverUrl;
+      if (src) {
+        photos.push({ src, title: item.title });
+      }
+    });
+  return { featured: pinned, recent, photos };
+}
+
+function resolvePresident(peopleList: PersonItem[]): PersonItem | null {
+  const candidates = peopleList.filter((p) => {
+    const pos = (p.position || '').trim();
+    const isVice = pos.includes('อุปนายก') || pos.includes('รองนายก') || pos.includes('รองประธาน');
+    const isPresidentTitle = (pos.includes('นายก') || pos.includes('ประธาน')) && !isVice;
+    return p.role === 'president' || isPresidentTitle;
+  });
+  candidates.sort((a, b) => {
+    const yrDiff = (b.yearTH || '').localeCompare(a.yearTH || '');
+    if (yrDiff !== 0) return yrDiff;
+    const timeA = a.updatedAt || a.createdAt || '';
+    const timeB = b.updatedAt || b.createdAt || '';
+    if (timeB !== timeA) return timeB.localeCompare(timeA);
+    return (a.order || 999) - (b.order || 999);
+  });
+  return candidates.length > 0 ? candidates[0] : null;
+}
+
 export const Home: React.FC = () => {
-  const { academicYearTH, presidentHeadline, presidentMessage } = useSiteSettings();
-  const [banners, setBanners] = useState<BannerItem[]>([]);
-  const [featuredNews, setFeaturedNews] = useState<NewsItem | null>(null);
-  const [recentNews, setRecentNews] = useState<NewsItem[]>([]);
-  const [upcomingEvents, setUpcomingEvents] = useState<EventItem[]>([]);
-  const [president, setPresident] = useState<PersonItem | null>(null);
-  const [galleryPhotos, setGalleryPhotos] = useState<{ src: string; title: string }[]>([]);
+  const { academicYearTH, presidentHeadline, presidentMessage, totalVisits } = useSiteSettings();
+
+  const initialNews = getCachedNewsSync();
+  const initialNewsSplit = initialNews ? pickFeaturedAndRecent(initialNews) : null;
+  const initialEvents = getCachedEventsSync();
+  const initialPeople = getCachedPeopleSync();
+
+  const [banners, setBanners] = useState<BannerItem[]>(() => getCachedBannersSync() || []);
+  const [featuredNews, setFeaturedNews] = useState<NewsItem | null>(() => initialNewsSplit?.featured || null);
+  const [recentNews, setRecentNews] = useState<NewsItem[]>(() => initialNewsSplit?.recent || []);
+  const [newsLoading, setNewsLoading] = useState<boolean>(() => !initialNews);
+  const [upcomingEvents, setUpcomingEvents] = useState<EventItem[]>(() => (initialEvents ? initialEvents.slice(0, 6) : []));
+  const [president, setPresident] = useState<PersonItem | null>(() => (initialPeople ? resolvePresident(initialPeople) : null));
+  const [galleryPhotos, setGalleryPhotos] = useState<{ src: string; title: string }[]>(() => initialNewsSplit?.photos || []);
 
   // Statistics
   const [stats, setStats] = useState({
-    visits: 0,
     complaintsTotal: 0,
     resolvedPercent: 100,
-    eventsCount: 0
+    eventsCount: initialEvents?.length || 0,
   });
 
   const [lightboxOpen, setLightboxOpen] = useState(false);
@@ -42,132 +95,72 @@ export const Home: React.FC = () => {
   // Embla Carousel for upcoming events
   const [emblaRef] = useEmblaCarousel({ align: 'start', loop: false, dragFree: true });
 
-  // Load live data from Firestore (without composite-index queries)
-  useEffect(() => {
-    async function loadData() {
-      try {
-        // 0. Banners for Hero Slider
-        try {
-          const bannersSnap = await getDocs(collection(db, 'banners'));
-          const bannersList: BannerItem[] = [];
-          bannersSnap.forEach(d => {
-            const item = { id: d.id, ...d.data() } as BannerItem;
-            if (item.active !== false) {
-              bannersList.push(item);
-            }
-          });
-          bannersList.sort((a, b) => (a.order || 0) - (b.order || 0));
-          setBanners(bannersList);
-        } catch (bErr) {
-          console.warn("Banners query warning:", bErr);
-        }
-
-        // 1. News: published only (sorted client-side to avoid composite index dependency)
-        const newsQuery = query(
-          collection(db, 'news'),
-          where('published', '==', true)
-        );
-        const newsSnap = await getDocs(newsQuery);
-        const newsList: NewsItem[] = [];
-        newsSnap.forEach(d => {
-          newsList.push({ id: d.id, ...d.data() } as NewsItem);
-        });
-        newsList.sort((a, b) => (b.createdAt || '').localeCompare(a.createdAt || ''));
-
-        if (newsList.length > 0) {
-          const pinned = newsList.find(n => n.pinned) || newsList[0];
-          setFeaturedNews(pinned);
-          setRecentNews(newsList.filter(n => n.id !== pinned.id).slice(0, 4));
-        }
-
-        // 4. Activity Gallery from published activity news
-        const photos: { src: string; title: string }[] = [];
-        newsList
-          .filter(n => n.category === 'activity')
-          .slice(0, 6)
-          .forEach(item => {
-            const src = item.coverImage?.url || item.coverUrl;
-            if (src) {
-              photos.push({ src, title: item.title });
-            }
-          });
-        setGalleryPhotos(photos);
-
-        // 2. Events: published only (sorted client-side)
-        const eventsQuery = query(
-          collection(db, 'events'),
-          where('published', '==', true)
-        );
-        const eventsSnap = await getDocs(eventsQuery);
-        const eventsList: EventItem[] = [];
-        eventsSnap.forEach(d => {
-          eventsList.push({ id: d.id, ...d.data() } as EventItem);
-        });
-        eventsList.sort((a, b) => (a.startAt || '').localeCompare(b.startAt || ''));
-        setUpcomingEvents(eventsList.slice(0, 6));
-
-        // 3. President: resolve latest นายกองค์การนักเรียน across 'president' OR 'board' roles
-        const peopleSnap = await getDocs(collection(db, 'people'));
-        const candidates: PersonItem[] = [];
-        peopleSnap.forEach(d => {
-          const p = { id: d.id, ...d.data() } as PersonItem;
-          const pos = (p.position || '').trim();
-          const isVice = pos.includes('อุปนายก') || pos.includes('รองนายก') || pos.includes('รองประธาน');
-          const isPresidentTitle = (pos.includes('นายก') || pos.includes('ประธาน')) && !isVice;
-          if (p.role === 'president' || isPresidentTitle) {
-            candidates.push(p);
-          }
-        });
-        candidates.sort((a, b) => {
-          const yrDiff = (b.yearTH || '').localeCompare(a.yearTH || '');
-          if (yrDiff !== 0) return yrDiff;
-          const timeA = a.updatedAt || a.createdAt || '';
-          const timeB = b.updatedAt || b.createdAt || '';
-          if (timeB !== timeA) return timeB.localeCompare(timeA);
-          return (a.order || 999) - (b.order || 999);
-        });
-        if (candidates.length > 0) {
-          setPresident(candidates[0]);
-        } else {
-          setPresident(null);
-        }
-
-        // 5. Site visits and complaint statistics
-        const settingsSnap = await getDoc(doc(db, 'settings', 'site'));
-        let totalVisits = 0;
-        if (settingsSnap.exists()) {
-          totalVisits = settingsSnap.data().totalVisits || 0;
-        }
-
-        let totalComplaints = 0;
-        let resolvedCount = 0;
-        try {
-          const complaintsSnap = await getDocs(collection(db, 'complaints'));
-          complaintsSnap.forEach(d => {
-            totalComplaints++;
-            const data = d.data();
-            if (data.status === 'resolved') resolvedCount++;
-          });
-        } catch {
-          // Non-admin listing is blocked by Firestore security rules
-        }
-
-        const percent = totalComplaints > 0 ? Math.round((resolvedCount / totalComplaints) * 100) : 100;
-
-        setStats({
-          visits: totalVisits,
-          complaintsTotal: totalComplaints,
-          resolvedPercent: percent,
-          eventsCount: eventsList.length
-        });
-
-      } catch (err) {
-        console.warn("Firestore data load warning:", err);
-      }
-    }
-
-    loadData();
+  const applyNewsList = useCallback((newsList: NewsItem[]) => {
+    const { featured, recent, photos } = pickFeaturedAndRecent(newsList);
+    setFeaturedNews(featured);
+    setRecentNews(recent);
+    setGalleryPhotos(photos);
+    setNewsLoading(false);
   }, []);
+
+  // Load live data from Firestore in parallel with cache-first hydration
+  useEffect(() => {
+    let active = true;
+
+    const loadBannersTask = loadActiveBanners((list) => {
+      if (active) setBanners(list);
+    });
+
+    const loadNewsTask = loadPublishedNews((list) => {
+      if (active) applyNewsList(list);
+    }).finally(() => {
+      if (active) setNewsLoading(false);
+    });
+
+    const loadEventsTask = loadPublishedEvents((list) => {
+      if (!active) return;
+      setUpcomingEvents(list.slice(0, 6));
+      setStats((prev) => ({ ...prev, eventsCount: list.length }));
+    });
+
+    const loadPeopleTask = loadPeopleList((list) => {
+      if (!active) return;
+      setPresident(resolvePresident(list));
+    });
+
+    // Only attempt complaints stats if signed in (public users cannot list complaints)
+    const loadComplaintsTask = auth.currentUser
+      ? getDocs(collection(db, 'complaints'))
+          .then((complaintsSnap) => {
+            if (!active) return;
+            let totalComplaints = 0;
+            let resolvedCount = 0;
+            complaintsSnap.forEach((d) => {
+              totalComplaints++;
+              if (d.data().status === 'resolved') resolvedCount++;
+            });
+            const percent = totalComplaints > 0 ? Math.round((resolvedCount / totalComplaints) * 100) : 100;
+            setStats((prev) => ({
+              ...prev,
+              complaintsTotal: totalComplaints,
+              resolvedPercent: percent,
+            }));
+          })
+          .catch(() => {})
+      : Promise.resolve();
+
+    Promise.allSettled([
+      loadBannersTask,
+      loadNewsTask,
+      loadEventsTask,
+      loadPeopleTask,
+      loadComplaintsTask,
+    ]);
+
+    return () => {
+      active = false;
+    };
+  }, [applyNewsList]);
 
   return (
     <div className={`space-y-12 sm:space-y-16 md:space-y-24 ${banners.length === 0 ? 'pt-8 sm:pt-10' : ''}`}>
@@ -193,7 +186,27 @@ export const Home: React.FC = () => {
           </Link>
         </div>
 
-        {featuredNews ? (
+        {newsLoading && !featuredNews ? (
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8 animate-pulse">
+            <div className="lg:col-span-7 border border-[#4B1F7A]/10 bg-[#FAF7F0] p-4 sm:p-6 rounded-sm space-y-4">
+              <div className="aspect-[16/9] bg-stone-200 rounded-sm" />
+              <div className="h-4 bg-stone-200 rounded w-1/3" />
+              <div className="h-6 bg-stone-200 rounded w-4/5" />
+              <div className="h-4 bg-stone-200 rounded w-2/3" />
+            </div>
+            <div className="lg:col-span-5 flex flex-col justify-between space-y-3 sm:space-y-4">
+              {[1, 2, 3, 4].map((i) => (
+                <div key={i} className="flex gap-3 sm:gap-4 p-3 sm:p-3.5 border border-[#4B1F7A]/10 bg-[#FAF7F0] rounded-sm">
+                  <div className="w-20 h-16 sm:w-24 sm:h-20 bg-stone-200 rounded-sm shrink-0" />
+                  <div className="flex-1 space-y-2 py-1">
+                    <div className="h-3 bg-stone-200 rounded w-1/2" />
+                    <div className="h-4 bg-stone-200 rounded w-full" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        ) : featuredNews ? (
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8">
             {/* Left 7 cols: Large Featured Card */}
             <div className="lg:col-span-7">
@@ -211,6 +224,8 @@ export const Home: React.FC = () => {
                     <img
                       src={featuredNews.coverImage?.url || featuredNews.coverUrl}
                       alt={featuredNews.title}
+                      decoding="async"
+                      fetchPriority="high"
                       className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.04]"
                     />
                   ) : (
@@ -254,6 +269,8 @@ export const Home: React.FC = () => {
                         <img
                           src={item.coverImage?.url || item.coverUrl}
                           alt={item.title}
+                          loading="lazy"
+                          decoding="async"
                           className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                         />
                       ) : (
@@ -305,7 +322,7 @@ export const Home: React.FC = () => {
             {/* Stat 1: Visits */}
             <div className="space-y-1.5 sm:space-y-2 border-r border-b lg:border-b-0 border-[#B8923A]/20 pb-5 lg:pb-0 pr-2 lg:pr-0">
               <div className="font-serif text-3xl sm:text-4xl md:text-5xl lg:text-6xl text-[#D9B867] tabular-numbers font-medium">
-                {formatNumber(stats.visits)}
+                {formatNumber(totalVisits)}
               </div>
               <div className="text-[11px] sm:text-xs tracking-wider text-[#FAF7F0]/80 uppercase">ผู้เข้าชมสะสม</div>
             </div>
@@ -484,6 +501,8 @@ export const Home: React.FC = () => {
                 <img
                   src={photo.src}
                   alt={photo.title}
+                  loading="lazy"
+                  decoding="async"
                   className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                 />
                 <div className="absolute inset-0 bg-[#2A1245]/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-3 sm:p-4 text-white text-xs">
@@ -520,6 +539,8 @@ export const Home: React.FC = () => {
                   <img
                     src={president.photo?.url || president.photoUrl}
                     alt={president.name}
+                    loading="lazy"
+                    decoding="async"
                     className="w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-500"
                   />
                 ) : (
