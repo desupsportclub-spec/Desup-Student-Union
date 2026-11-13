@@ -1,0 +1,156 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Default deny catch-all
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Helper functions
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isVerified() {
+      return isSignedIn() && request.auth.token.email_verified == true;
+    }
+
+    function currentUserEmail() {
+      return request.auth.token.email.lower();
+    }
+
+    function isBootstrapAdmin() {
+      return isVerified() && currentUserEmail() == 'desupsportclub@gmail.com';
+    }
+
+    function hasAdminDoc() {
+      return isVerified() && exists(/databases/$(database)/documents/admins/$(currentUserEmail()));
+    }
+
+    function adminData() {
+      return get(/databases/$(database)/documents/admins/$(currentUserEmail())).data;
+    }
+
+    function isAdmin() {
+      return isBootstrapAdmin() || (hasAdminDoc() && adminData().active == true);
+    }
+
+    function isSuperAdmin() {
+      return isBootstrapAdmin() || (hasAdminDoc() && adminData().active == true && adminData().role == 'super_admin');
+    }
+
+    // Admins collection
+    match /admins/{email} {
+      allow read: if isAdmin();
+      // Allow bootstrap admin to initialize their own doc
+      allow create: if (isBootstrapAdmin() && email == currentUserEmail()) ||
+                       (isSuperAdmin() && request.resource.data.role in ['super_admin', 'admin', 'editor']) ||
+                       (isAdmin() && request.resource.data.role == 'editor');
+      allow update: if (isSuperAdmin() && email != currentUserEmail()) ||
+                       (isAdmin() && resource.data.role == 'editor' && request.resource.data.role == 'editor' && email != currentUserEmail());
+      allow delete: if isSuperAdmin() && email != currentUserEmail();
+    }
+
+    // Audit logs
+    match /auditLogs/{id} {
+      allow read: if isSuperAdmin();
+      allow create: if isAdmin();
+      allow update, delete: if false;
+    }
+
+    // News
+    match /news/{id} {
+      allow read: if resource.data.published == true || isAdmin();
+      allow create, delete: if isAdmin();
+      allow update: if isAdmin() || (
+        // Allow public reader view count increment
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['views']) &&
+        request.resource.data.views == resource.data.views + 1
+      );
+    }
+
+    // Banners (Homepage Slider)
+    match /banners/{id} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Events
+    match /events/{id} {
+      allow read: if resource.data.published == true || isAdmin();
+      allow write: if isAdmin();
+    }
+
+    // Downloads
+    match /downloads/{id} {
+      allow read: if true;
+      allow create, delete: if isAdmin();
+      allow update: if isAdmin() || (
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['downloads']) &&
+        request.resource.data.downloads == resource.data.downloads + 1
+      );
+
+      // Chunked binary/base64 payloads for large PDF/document uploads
+      match /chunks/{chunkId} {
+        allow read: if true;
+        allow write: if isAdmin();
+      }
+    }
+
+    // People (Board, Advisors, Presidents)
+    match /people/{id} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Budgets
+    match /budgets/{yearTH} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Settings (Site config, ticker, contact info, visit counter)
+    match /settings/{docId} {
+      allow read: if true;
+      allow create, delete: if isAdmin();
+      allow update: if isAdmin() || (
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['totalVisits']) &&
+        request.resource.data.totalVisits == resource.data.totalVisits + 1
+      );
+    }
+
+    // Complaints
+    match /complaints/{trackingCode} {
+      // Direct get by tracking code allowed for anyone; listing forbidden to non-admins
+      allow get: if true;
+      allow list: if isAdmin();
+      allow create: if request.resource.data.status == 'received' &&
+                       request.resource.data.title is string &&
+                       request.resource.data.title.size() >= 3 &&
+                       request.resource.data.body is string &&
+                       request.resource.data.body.size() >= 10;
+      allow update, delete: if isAdmin();
+
+      // Private subcollection for contact info (only admins can read)
+      match /private/contact {
+        allow create: if true;
+        allow read, update, delete: if isAdmin();
+      }
+
+      // Private subcollection for attachments (only admins can read)
+      match /private/attachments {
+        allow create: if true;
+        allow read, update, delete: if isAdmin();
+      }
+    }
+
+    // Messages (Contact form)
+    match /messages/{id} {
+      allow create: if request.resource.data.name is string &&
+                       request.resource.data.email is string &&
+                       request.resource.data.message is string;
+      allow read, update, delete: if isAdmin();
+    }
+  }
+}

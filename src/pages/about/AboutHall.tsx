@@ -1,0 +1,152 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+import React, { useState, useEffect } from 'react';
+import { collection, getDocs } from 'firebase/firestore';
+import { db } from '../../lib/firebase';
+import { PersonItem } from '../../types';
+import { SectionEyebrow, CornerBracket } from '../../components/common/Ornament';
+import { Emblem } from '../../components/common/Emblem';
+
+export const AboutHall: React.FC = () => {
+  const [presidents, setPresidents] = useState<PersonItem[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchPresidents() {
+      setLoading(true);
+      try {
+        const snap = await getDocs(collection(db, 'people'));
+        const list: PersonItem[] = [];
+        snap.forEach((d) => {
+          const item = { id: d.id, ...d.data() } as PersonItem;
+          const pos = (item.position || '').trim();
+          const isVice = pos.includes('อุปนายก') || pos.includes('รองนายก') || pos.includes('รองประธาน');
+          const isPresidentTitle = (pos.includes('นายก') || pos.includes('ประธาน')) && !isVice;
+          if (item.role === 'president' || isPresidentTitle) {
+            list.push(item);
+          }
+        });
+        list.sort((a, b) => {
+          const yrDiff = (b.yearTH || '').localeCompare(a.yearTH || '');
+          if (yrDiff !== 0) return yrDiff;
+          return (b.updatedAt || b.createdAt || '').localeCompare(a.updatedAt || a.createdAt || '');
+        });
+        setPresidents(list);
+      } catch (err) {
+        console.warn("Could not load presidents:", err);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchPresidents();
+  }, []);
+
+  return (
+    <div className="max-w-[1000px] mx-auto px-6 py-10 space-y-12">
+      {/* Header */}
+      <div className="border-b border-[#B8923A]/30 pb-6 text-center max-w-xl mx-auto space-y-2">
+        <SectionEyebrow enText="HALL OF PRESIDENTS" thText="ทำเนียบนายกองค์การนักเรียน" />
+        <h1 className="font-serif text-3xl md:text-4xl font-semibold text-[#1B1226]">
+          ทำเนียบนายกองค์การนักเรียน
+        </h1>
+        <p className="text-xs md:text-sm text-[#1B1226]/70">
+          ผู้แทนนักเรียนผู้ขับเคลื่อนและสร้างสรรค์คุณประโยชน์ให้แก่โรงเรียนสาธิตมหาวิทยาลัยพะเยา
+        </p>
+      </div>
+
+      {/* Alternating Vertical Timeline */}
+      {loading ? (
+        <div className="animate-pulse space-y-8">
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="h-44 bg-stone-200/60 rounded-sm" />
+          ))}
+        </div>
+      ) : presidents.length > 0 ? (
+        <div className="relative">
+          {/* Central Gold Timeline Line */}
+          <div className="hidden md:block absolute left-1/2 top-0 bottom-0 w-[1.5px] bg-[#B8923A]/40 -translate-x-1/2" />
+
+          <div className="space-y-12">
+            {presidents.map((pres, index) => {
+              const isEven = index % 2 === 0;
+
+              return (
+                <div
+                  key={pres.id}
+                  className={`relative flex flex-col md:flex-row items-center gap-8 ${
+                    isEven ? 'md:flex-row' : 'md:flex-row-reverse'
+                  }`}
+                >
+                  {/* Central Year Node on Timeline */}
+                  <div className="hidden md:flex absolute left-1/2 -translate-x-1/2 w-10 h-10 rounded-full bg-[#2A1245] border-2 border-[#B8923A] items-center justify-center text-[10px] text-[#D9B867] font-serif font-bold z-10 shadow-editorial">
+                    {pres.yearTH ? pres.yearTH.slice(-2) : '•'}
+                  </div>
+
+                  {/* Card Content (half width) */}
+                  <div className="w-full md:w-[45%]">
+                    <div className="bg-[#FAF7F0] border border-[#4B1F7A]/15 p-6 rounded-sm shadow-editorial relative space-y-3 hover:border-[#B8923A] transition-colors">
+                      <CornerBracket position="top-left" />
+                      <CornerBracket position="top-right" />
+                      <CornerBracket position="bottom-left" />
+                      <CornerBracket position="bottom-right" />
+
+                      <div className="flex gap-4 items-center">
+                        <div className="w-20 h-24 bg-stone-100 rounded-sm shrink-0 overflow-hidden border border-stone-200">
+                          {pres.photo?.url || pres.photoUrl ? (
+                            <img
+                              src={pres.photo?.url || pres.photoUrl}
+                              alt={pres.name}
+                              className="w-full h-full object-cover"
+                            />
+                          ) : (
+                            <div className="w-full h-full bg-[#EDE6F5] flex items-center justify-center">
+                              <Emblem size={28} />
+                            </div>
+                          )}
+                        </div>
+
+                        <div>
+                          <span className="text-[10px] uppercase tracking-wider text-[#9C7A2B] font-semibold">
+                            ปีการศึกษา {pres.yearTH}
+                          </span>
+                          <h3 className="font-serif text-lg font-semibold text-[#1B1226]">
+                            {pres.name}
+                          </h3>
+                          <p className="text-xs text-[#4B1F7A] font-medium">
+                            {pres.position || 'นายกองค์การนักเรียน'}
+                          </p>
+                        </div>
+                      </div>
+
+                      {pres.quote && (
+                        <p className="text-xs text-[#1B1226]/80 italic pt-2 border-t border-[#4B1F7A]/10 font-serif leading-relaxed">
+                          "{pres.quote}"
+                        </p>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Empty counterpart for balance on desktop */}
+                  <div className="hidden md:block w-[45%]" />
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      ) : (
+        <div className="p-16 text-center border border-dashed border-[#4B1F7A]/25 rounded-sm bg-white/40 space-y-2">
+          <p className="font-serif text-lg text-[#2A1245]">
+            ยังไม่มีข้อมูลทำเนียบนายกองค์การนักเรียน
+          </p>
+          <p className="text-xs text-[#1B1226]/60">
+            สามารถบันทึกข้อมูลทำเนียบนายกองค์การนักเรียนในแต่ละปีการศึกษาได้ผ่านระบบจัดการหลังบ้าน
+          </p>
+        </div>
+      )}
+    </div>
+  );
+};

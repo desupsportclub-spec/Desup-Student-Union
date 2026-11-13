@@ -1,0 +1,204 @@
+{
+  "entities": {
+    "News": {
+      "title": "News",
+      "description": "News announcements, regulations, orders, knowledge, and activity reports",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string", "maxLength": 300 },
+        "slug": { "type": "string", "maxLength": 300 },
+        "category": { "type": "string", "enum": ["pr", "activity", "regulation", "order", "knowledge", "video"] },
+        "excerpt": { "type": "string", "maxLength": 1000 },
+        "content": { "type": "string", "maxLength": 50000 },
+        "coverUrl": { "type": "string", "maxLength": 2000000 },
+        "galleryUrls": { "type": "array" },
+        "attachments": { "type": "array" },
+        "videoUrl": { "type": "string", "maxLength": 1000 },
+        "socialLinks": { "type": "array" },
+        "published": { "type": "boolean" },
+        "pinned": { "type": "boolean" },
+        "views": { "type": "number" },
+        "createdAt": { "type": "string" },
+        "updatedAt": { "type": "string" }
+      },
+      "required": ["title", "category", "published"]
+    },
+    "Banner": {
+      "title": "Banner",
+      "description": "Homepage hero slider banners",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string", "maxLength": 300 },
+        "subtitle": { "type": "string", "maxLength": 500 },
+        "imageUrl": { "type": "string", "maxLength": 2000000 },
+        "linkUrl": { "type": "string", "maxLength": 1000 },
+        "order": { "type": "number" },
+        "active": { "type": "boolean" },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["title", "imageUrl", "order", "active"]
+    },
+    "Event": {
+      "title": "Event",
+      "description": "School and student council calendar events",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string", "maxLength": 300 },
+        "description": { "type": "string", "maxLength": 3000 },
+        "type": { "type": "string", "enum": ["sport", "academic", "art", "volunteer", "meeting"] },
+        "location": { "type": "string", "maxLength": 300 },
+        "startAt": { "type": "string" },
+        "endAt": { "type": "string" },
+        "allDay": { "type": "boolean" },
+        "coverUrl": { "type": "string", "maxLength": 2000000 },
+        "published": { "type": "boolean" }
+      },
+      "required": ["title", "type", "startAt", "published"]
+    },
+    "Download": {
+      "title": "Download",
+      "description": "Official downloadable forms, regulations, and reports",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string", "maxLength": 300 },
+        "category": { "type": "string", "enum": ["order", "announcement", "regulation", "official_letter", "meeting_report", "project_report", "finance", "form", "manual", "other"] },
+        "fileType": { "type": "string", "enum": ["pdf", "docx", "xlsx"] },
+        "fileUrl": { "type": "string", "maxLength": 2000000 },
+        "fileName": { "type": "string", "maxLength": 300 },
+        "fileSize": { "type": "number" },
+        "isChunked": { "type": "boolean" },
+        "chunkCount": { "type": "number" },
+        "downloads": { "type": "number" },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["title", "category", "fileType"]
+    },
+    "DownloadChunk": {
+      "title": "DownloadChunk",
+      "description": "Base64 chunk of a large downloadable file stored in Firestore subcollection",
+      "type": "object",
+      "properties": {
+        "index": { "type": "number" },
+        "data": { "type": "string", "maxLength": 900000 }
+      },
+      "required": ["index", "data"]
+    },
+    "Person": {
+      "title": "Person",
+      "description": "Student council board members, teachers/advisors, and past presidents",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string", "maxLength": 200 },
+        "role": { "type": "string", "enum": ["board", "advisor", "president"] },
+        "position": { "type": "string", "maxLength": 200 },
+        "grade": { "type": "string", "maxLength": 50 },
+        "yearTH": { "type": "string", "maxLength": 10 },
+        "photoUrl": { "type": "string", "maxLength": 2000000 },
+        "quote": { "type": "string", "maxLength": 1000 },
+        "order": { "type": "number" },
+        "createdAt": { "type": "string" },
+        "updatedAt": { "type": "string" }
+      },
+      "required": ["name", "role", "position"]
+    },
+    "Complaint": {
+      "title": "Complaint",
+      "description": "Student feedback, complaints, reports, and inquiries with tracking code",
+      "type": "object",
+      "properties": {
+        "type": { "type": "string", "enum": ["complaint", "corruption", "inquiry", "suggestion", "compliment", "other"] },
+        "title": { "type": "string", "maxLength": 300 },
+        "body": { "type": "string", "maxLength": 10000 },
+        "location": { "type": "string", "maxLength": 300 },
+        "anonymous": { "type": "boolean" },
+        "status": { "type": "string", "enum": ["received", "considering", "in_progress", "resolved"] },
+        "publicReplies": { "type": "array" },
+        "createdAt": { "type": "string" },
+        "updatedAt": { "type": "string" }
+      },
+      "required": ["type", "title", "body", "status", "createdAt"]
+    },
+    "Budget": {
+      "title": "Budget",
+      "description": "Student council activity budget for fiscal/academic year",
+      "type": "object",
+      "properties": {
+        "yearTH": { "type": "string", "maxLength": 10 },
+        "totalBudget": { "type": "number" },
+        "items": { "type": "array" }
+      },
+      "required": ["yearTH", "totalBudget"]
+    },
+    "Setting": {
+      "title": "Setting",
+      "description": "Global website settings, academic year, president message, ticker, external service links, and contacts",
+      "type": "object",
+      "properties": {
+        "academicYearTH": { "type": "string", "maxLength": 10 },
+        "presidentHeadline": { "type": "string", "maxLength": 500 },
+        "presidentMessage": { "type": "string", "maxLength": 3000 },
+        "ticker": { "type": "array" },
+        "links": { "type": "array" },
+        "contactInfo": { "type": "object" },
+        "statsOverride": { "type": "object" },
+        "totalVisits": { "type": "number" }
+      }
+    },
+    "Admin": {
+      "title": "Admin",
+      "description": "Authorized administrators and editors for the student council website",
+      "type": "object",
+      "properties": {
+        "role": { "type": "string", "enum": ["super_admin", "admin", "editor"] },
+        "displayName": { "type": "string", "maxLength": 200 },
+        "active": { "type": "boolean" },
+        "addedBy": { "type": "string", "maxLength": 200 },
+        "addedAt": { "type": "string" }
+      },
+      "required": ["role", "active"]
+    },
+    "AuditLog": {
+      "title": "AuditLog",
+      "description": "Log of admin permission grants, role changes, and revocations",
+      "type": "object",
+      "properties": {
+        "action": { "type": "string", "enum": ["grant", "change_role", "revoke"] },
+        "targetEmail": { "type": "string", "maxLength": 200 },
+        "fromRole": { "type": "string", "maxLength": 50 },
+        "toRole": { "type": "string", "maxLength": 50 },
+        "byEmail": { "type": "string", "maxLength": 200 },
+        "at": { "type": "string" }
+      },
+      "required": ["action", "targetEmail", "byEmail", "at"]
+    },
+    "Message": {
+      "title": "Message",
+      "description": "Contact form submissions from general visitors",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string", "maxLength": 200 },
+        "email": { "type": "string", "maxLength": 200 },
+        "subject": { "type": "string", "maxLength": 300 },
+        "message": { "type": "string", "maxLength": 5000 },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["name", "email", "message", "createdAt"]
+    }
+  },
+  "firestore": {
+    "/news/{id}": { "schema": "News", "description": "News articles and announcements" },
+    "/banners/{id}": { "schema": "Banner", "description": "Homepage hero slider banners" },
+    "/events/{id}": { "schema": "Event", "description": "School activities and calendar items" },
+    "/downloads/{id}": { "schema": "Download", "description": "Downloadable forms and regulations" },
+    "/downloads/{id}/chunks/{chunkId}": { "schema": "DownloadChunk", "description": "Chunked file payload for large PDFs/documents" },
+    "/people/{id}": { "schema": "Person", "description": "Council board, advisors, and presidents" },
+    "/complaints/{trackingCode}": { "schema": "Complaint", "description": "Public complaint records indexed by tracking code" },
+    "/complaints/{trackingCode}/private/contact": { "schema": { "$ref": "object" }, "description": "Private contact info for complaint, viewable only by admins" },
+    "/complaints/{trackingCode}/private/attachments": { "schema": { "$ref": "object" }, "description": "Private uploaded photos for complaint, viewable only by admins" },
+    "/budgets/{yearTH}": { "schema": "Budget", "description": "Yearly budget and expense transparency" },
+    "/settings/{docId}": { "schema": "Setting", "description": "Site-wide configuration and stats" },
+    "/admins/{email}": { "schema": "Admin", "description": "Role-based admin access indexed by lowercase Google email" },
+    "/auditLogs/{id}": { "schema": "AuditLog", "description": "Security audit logs" },
+    "/messages/{id}": { "schema": "Message", "description": "Contact form submissions" }
+  }
+}

@@ -1,0 +1,148 @@
+@import "tailwindcss";
+
+@theme {
+  --color-ink: #1B1226;
+  --color-violet-900: #2A1245;
+  --color-violet-700: #4B1F7A;
+  --color-violet-500: #6B3FA0;
+  --color-violet-100: #EDE6F5;
+  --color-gold-600: #9C7A2B;
+  --color-gold-500: #B8923A;
+  --color-gold-300: #D9B867;
+  --color-champagne: #F3E9D0;
+  --color-paper: #FAF7F0;
+
+  --font-serif: 'Cormorant Garamond', 'Noto Serif Thai', Georgia, serif;
+  --font-sans: 'IBM Plex Sans Thai', system-ui, -apple-system, sans-serif;
+}
+
+:root {
+  --color-ink: #1B1226;
+  --color-violet-900: #2A1245;
+  --color-violet-700: #4B1F7A;
+  --color-violet-500: #6B3FA0;
+  --color-violet-100: #EDE6F5;
+  --color-gold-600: #9C7A2B;
+  --color-gold-500: #B8923A;
+  --color-gold-300: #D9B867;
+  --color-champagne: #F3E9D0;
+  --color-paper: #FAF7F0;
+  color-scheme: light;
+}
+
+html {
+  font-family: var(--font-sans);
+  background-color: var(--color-paper);
+  color: var(--color-ink);
+  scroll-behavior: smooth;
+  font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+@media (min-width: 1024px) {
+  html {
+    font-size: 17px;
+  }
+}
+
+body {
+  margin: 0;
+  background-color: var(--color-paper);
+  color: var(--color-ink);
+  line-height: 1.75;
+  position: relative;
+  min-height: 100vh;
+}
+
+/* Paper Grain Texture (SVG feTurbulence data URI, opacity 0.035, pointer-events none) */
+.paper-grain {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 9999;
+  opacity: 0.035;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+}
+
+/* Custom Text Selection */
+::selection {
+  background-color: #EDE6F5;
+  color: #2A1245;
+}
+
+/* Editorial Headings Line-height */
+h1, h2, h3, h4, h5, h6, .font-serif {
+  font-family: 'Cormorant Garamond', 'Noto Serif Thai', serif;
+  line-height: 1.25;
+}
+
+/* Foil Gold Text Effect for Header Logo only */
+.gold-foil-text {
+  background: linear-gradient(135deg, #9C7A2B 0%, #D9B867 50%, #9C7A2B 100%);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  transition: background-position 0.8s ease;
+}
+
+.gold-foil-text:hover {
+  background-position: right center;
+}
+
+/* Crisp Editorial Shadows & Borders */
+.shadow-editorial {
+  box-shadow: 0 1px 0 rgba(42, 18, 69, 0.08), 0 12px 24px -12px rgba(42, 18, 69, 0.16);
+}
+
+.shadow-editorial-sm {
+  box-shadow: 0 1px 0 rgba(42, 18, 69, 0.06), 0 4px 8px -4px rgba(42, 18, 69, 0.12);
+}
+
+/* Underline Input Style */
+.input-underline {
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid rgba(42, 18, 69, 0.25);
+  border-radius: 0;
+  outline: none;
+  padding: 0.75rem 0;
+  transition: border-color 0.2s cubic-bezier(0.22, 1, 0.36, 1), border-width 0.2s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.input-underline:focus {
+  border-bottom: 2px solid #B8923A;
+  padding-bottom: calc(0.75rem - 1px);
+}
+
+/* Secondary Button Underline Expand */
+.btn-secondary-link {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.btn-secondary-link::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: -2px;
+  width: 100%;
+  height: 1px;
+  background-color: #B8923A;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.btn-secondary-link:hover::after {
+  transform: scaleX(1);
+}
+
+/* Tabular numbers for financial and stats */
+.tabular-numbers {
+  font-variant-numeric: tabular-nums;
+}
