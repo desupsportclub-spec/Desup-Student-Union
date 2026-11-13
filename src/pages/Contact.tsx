@@ -51,9 +51,9 @@ export const Contact: React.FC = () => {
   };
 
   return (
-    <div className="max-w-[1240px] mx-auto px-6 md:px-12 py-10 space-y-12">
+    <div className="max-w-[1240px] mx-auto px-4 sm:px-6 md:px-12 py-6 sm:py-10 space-y-8 sm:space-y-12">
       {/* Header */}
-      <div className="border-b border-[#B8923A]/30 pb-6 text-center max-w-xl mx-auto space-y-2">
+      <div className="border-b border-[#B8923A]/30 pb-5 sm:pb-6 text-center max-w-xl mx-auto space-y-2">
         <SectionEyebrow enText="GET IN TOUCH" thText="ติดต่อองค์การนักเรียน" />
         <h1 className="font-serif text-3xl md:text-4xl font-semibold text-[#1B1226]">
           ติดต่อและที่ทำการ
@@ -63,10 +63,10 @@ export const Contact: React.FC = () => {
         </p>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12">
         {/* Left 5 Cols: Contact Information */}
-        <div className="lg:col-span-5 space-y-6">
-          <div className="bg-[#FAF7F0] border border-[#B8923A]/30 p-6 rounded-sm shadow-editorial space-y-4">
+        <div className="lg:col-span-5 space-y-5 sm:space-y-6">
+          <div className="bg-[#FAF7F0] border border-[#B8923A]/30 p-5 sm:p-6 rounded-sm shadow-editorial space-y-4">
             <h2 className="font-serif text-xl font-semibold text-[#2A1245]">
               ข้อมูลการติดต่อ
             </h2>
@@ -110,7 +110,7 @@ export const Contact: React.FC = () => {
 
         {/* Right 7 Cols: Quick Message Form */}
         <div className="lg:col-span-7">
-          <div className="bg-[#FAF7F0] border border-[#4B1F7A]/15 p-6 md:p-8 rounded-sm shadow-editorial relative">
+          <div className="bg-[#FAF7F0] border border-[#4B1F7A]/15 p-5 sm:p-6 md:p-8 rounded-sm shadow-editorial relative">
             <CornerBracket position="top-left" />
             <CornerBracket position="top-right" />
             <CornerBracket position="bottom-left" />
@@ -230,7 +230,7 @@ export const Contact: React.FC = () => {
         <h3 className="font-serif text-lg font-semibold text-[#2A1245]">
           แผนที่โรงเรียนสาธิตมหาวิทยาลัยพะเยา
         </h3>
-        <div className="w-full h-80 rounded-sm overflow-hidden border border-[#B8923A]/30 shadow-editorial">
+        <div className="w-full h-64 sm:h-80 rounded-sm overflow-hidden border border-[#B8923A]/30 shadow-editorial">
           <iframe
             src={SITE_CONFIG.contact.mapIframeUrl}
             width="100%"

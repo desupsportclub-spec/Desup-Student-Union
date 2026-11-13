@@ -128,7 +128,7 @@ export const CalendarPage: React.FC = () => {
   };
 
   return (
-    <div className="max-w-[1240px] mx-auto px-6 md:px-12 py-10 space-y-10">
+    <div className="max-w-[1240px] mx-auto px-4 sm:px-6 md:px-12 py-6 sm:py-10 space-y-6 sm:space-y-10">
       {/* Page Header */}
       <div className="border-b border-[#B8923A]/30 pb-6 flex flex-col md:flex-row md:items-end justify-between gap-4">
         <div>
@@ -160,31 +160,31 @@ export const CalendarPage: React.FC = () => {
       </div>
 
       {/* Desktop Split View: Month Grid (Left 8 cols) + Selected Day Panel (Right 4 cols) */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8">
         {/* Month Calendar Grid (8 cols) */}
-        <div className="lg:col-span-8 bg-[#FAF7F0] border border-[#B8923A]/30 p-6 rounded-sm shadow-editorial">
+        <div className="lg:col-span-8 bg-[#FAF7F0] border border-[#B8923A]/30 p-3.5 sm:p-6 rounded-sm shadow-editorial">
           {/* Month Header Controller */}
-          <div className="flex items-center justify-between pb-6 mb-6 border-b border-[#4B1F7A]/15">
-            <h2 className="font-serif text-2xl font-semibold text-[#2A1245]">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 sm:pb-6 mb-4 sm:mb-6 border-b border-[#4B1F7A]/15">
+            <h2 className="font-serif text-xl sm:text-2xl font-semibold text-[#2A1245]">
               {thaiDateParts.monthFull} พ.ศ. {thaiDateParts.yearBE}
             </h2>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1.5 sm:gap-2">
               <button
                 onClick={handlePrevMonth}
-                className="p-2 border border-[#4B1F7A]/20 hover:border-[#B8923A] rounded-sm text-xs"
+                className="flex-1 sm:flex-none px-2.5 sm:px-3 py-1.5 sm:py-2 border border-[#4B1F7A]/20 hover:border-[#B8923A] rounded-sm text-xs whitespace-nowrap"
                 title="เดือนก่อนหน้า"
               >
                 ← เดือนก่อน
               </button>
               <button
                 onClick={() => setCurrentDate(new Date())}
-                className="px-3 py-2 border border-[#4B1F7A]/20 hover:border-[#B8923A] rounded-sm text-xs text-[#4B1F7A] font-medium"
+                className="px-3 py-1.5 sm:py-2 border border-[#4B1F7A]/20 hover:border-[#B8923A] rounded-sm text-xs text-[#4B1F7A] font-medium whitespace-nowrap"
               >
                 วันนี้
               </button>
               <button
                 onClick={handleNextMonth}
-                className="p-2 border border-[#4B1F7A]/20 hover:border-[#B8923A] rounded-sm text-xs"
+                className="flex-1 sm:flex-none px-2.5 sm:px-3 py-1.5 sm:py-2 border border-[#4B1F7A]/20 hover:border-[#B8923A] rounded-sm text-xs whitespace-nowrap"
                 title="เดือนถัดไป"
               >
                 เดือนถัดไป →
@@ -193,7 +193,7 @@ export const CalendarPage: React.FC = () => {
           </div>
 
           {/* Days of Week Header (Starts Sunday) */}
-          <div className="grid grid-cols-7 text-center font-medium text-xs text-[#9C7A2B] pb-3 border-b border-[#4B1F7A]/10">
+          <div className="grid grid-cols-7 text-center font-medium text-[11px] sm:text-xs text-[#9C7A2B] pb-2 sm:pb-3 border-b border-[#4B1F7A]/10">
             <div>อา.</div>
             <div>จ.</div>
             <div>อ.</div>
@@ -207,7 +207,7 @@ export const CalendarPage: React.FC = () => {
           <div className="grid grid-cols-7 gap-1 pt-2">
             {/* Empty slots for days before 1st of month */}
             {Array.from({ length: firstDayIndex }).map((_, i) => (
-              <div key={`empty-${i}`} className="h-20 sm:h-24 p-1 bg-stone-50/50 rounded-sm" />
+              <div key={`empty-${i}`} className="h-12 sm:h-20 md:h-24 p-1 bg-stone-50/50 rounded-sm" />
             ))}
 
             {/* Days in Month */}
@@ -221,7 +221,7 @@ export const CalendarPage: React.FC = () => {
                 <div
                   key={`day-${dayNum}`}
                   onClick={() => handleSelectDay(dayNum)}
-                  className={`h-20 sm:h-24 p-2 border rounded-sm cursor-pointer transition-all flex flex-col justify-between ${
+                  className={`h-12 sm:h-20 md:h-24 p-1 sm:p-2 border rounded-sm cursor-pointer transition-all flex flex-col justify-between ${
                     isSelected
                       ? 'border-[#B8923A] bg-[#EDE6F5]/50 ring-1 ring-[#B8923A]'
                       : isToday(dayNum)
@@ -231,21 +231,21 @@ export const CalendarPage: React.FC = () => {
                 >
                   <div className="flex items-center justify-between">
                     <span
-                      className={`text-xs font-serif ${
+                      className={`text-[11px] sm:text-xs font-serif ${
                         isToday(dayNum)
-                          ? 'w-6 h-6 rounded-full bg-[#4B1F7A] text-white flex items-center justify-center font-bold'
+                          ? 'w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-[#4B1F7A] text-white flex items-center justify-center font-bold'
                           : 'text-[#1B1226]'
                       }`}
                     >
                       {dayNum}
                     </span>
                     {dayEvents.length > 0 && (
-                      <span className="w-2 h-2 rounded-full bg-[#B8923A]" />
+                      <span className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-[#B8923A]" />
                     )}
                   </div>
 
                   {dayEvents.length > 0 && (
-                    <div className="space-y-1 overflow-hidden">
+                    <div className="hidden sm:block space-y-1 overflow-hidden">
                       {dayEvents.slice(0, 2).map((ev) => (
                         <div
                           key={ev.id}

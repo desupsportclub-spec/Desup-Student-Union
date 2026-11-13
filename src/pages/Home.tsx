@@ -3,9 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { motion, useScroll, useTransform, animate } from 'motion/react';
 import useEmblaCarousel from 'embla-carousel-react';
 import Lightbox from 'yet-another-react-lightbox';
 import 'yet-another-react-lightbox/styles.css';
@@ -14,7 +13,7 @@ import { collection, query, where, getDocs, doc, getDoc } from 'firebase/firesto
 import { db } from '../lib/firebase';
 import { NewsItem, EventItem, PersonItem, BannerItem } from '../types';
 import { formatThaiDate, getThaiDateParts, formatNumber } from '../lib/format';
-import { SectionEyebrow, SectionDivider, CornerBracket } from '../components/common/Ornament';
+import { SectionEyebrow, CornerBracket } from '../components/common/Ornament';
 import { NewsCategoryBadge } from '../components/common/StatusBadge';
 import { Emblem } from '../components/common/Emblem';
 import { HeroBannerSlider } from '../components/home/HeroBannerSlider';
@@ -42,28 +41,6 @@ export const Home: React.FC = () => {
 
   // Embla Carousel for upcoming events
   const [emblaRef] = useEmblaCarousel({ align: 'start', loop: false, dragFree: true });
-
-  // Hero Parallax on subtle gold background lines
-  const { scrollY } = useScroll();
-  const heroParallaxY = useTransform(scrollY, [0, 600], [0, 80]);
-
-  // Magnetic button on desktop
-  const magneticBtnRef = useRef<HTMLAnchorElement>(null);
-  const [btnOffset, setBtnOffset] = useState({ x: 0, y: 0 });
-
-  const handleMagneticMove = (e: React.MouseEvent<HTMLAnchorElement>) => {
-    if (!magneticBtnRef.current) return;
-    const rect = magneticBtnRef.current.getBoundingClientRect();
-    const centerX = rect.left + rect.width / 2;
-    const centerY = rect.top + rect.height / 2;
-    const deltaX = (e.clientX - centerX) * 0.25;
-    const deltaY = (e.clientY - centerY) * 0.25;
-    setBtnOffset({ x: Math.max(-8, Math.min(8, deltaX)), y: Math.max(-8, Math.min(8, deltaY)) });
-  };
-
-  const handleMagneticLeave = () => {
-    setBtnOffset({ x: 0, y: 0 });
-  };
 
   // Load live data from Firestore (without composite-index queries)
   useEffect(() => {
@@ -193,165 +170,43 @@ export const Home: React.FC = () => {
   }, []);
 
   return (
-    <div className="space-y-16 md:space-y-24">
+    <div className={`space-y-12 sm:space-y-16 md:space-y-24 ${banners.length === 0 ? 'pt-8 sm:pt-10' : ''}`}>
       {/* ========================================================
           00. HERO BANNER SLIDER (Full Width Prominent Carousel)
          ======================================================== */}
       <HeroBannerSlider banners={banners} />
 
       {/* ========================================================
-          HERO EDITORIAL SECTION (Asymmetric 12-column grid: 7 cols left / 5 cols right)
-         ======================================================== */}
-      <section className="relative pt-2 md:pt-6 overflow-hidden">
-        {/* Subtle decorative Thai line art background with gentle parallax */}
-        <motion.div
-          style={{ y: heroParallaxY }}
-          className="absolute inset-0 pointer-events-none opacity-[0.05] z-0 flex items-center justify-center"
-        >
-          <svg width="800" height="800" viewBox="0 0 400 400" fill="none">
-            <circle cx="200" cy="200" r="190" stroke="#B8923A" strokeWidth="1" strokeDasharray="4 4" />
-            <circle cx="200" cy="200" r="140" stroke="#B8923A" strokeWidth="1" />
-            <rect x="100" y="100" width="200" height="200" stroke="#B8923A" strokeWidth="1" transform="rotate(45 200 200)" />
-          </svg>
-        </motion.div>
-
-        <div className="max-w-[1240px] mx-auto px-6 md:px-12 relative z-10">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center">
-            {/* Left 7 Columns: Editorial Headline + Mask Reveal */}
-            <div className="lg:col-span-7 space-y-6">
-              <SectionEyebrow thText="องค์การนักเรียน โรงเรียนสาธิตมหาวิทยาลัยพะเยา" enText="STUDENT COUNCIL" />
-
-              <div className="space-y-2">
-                <div className="overflow-hidden">
-                  <motion.h1
-                    initial={{ y: '100%' }}
-                    animate={{ y: 0 }}
-                    transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
-                    className="font-serif text-3xl sm:text-4xl md:text-5xl lg:text-[3.25rem] font-semibold text-[#1B1226] leading-[1.25]"
-                  >
-                    เสียงของนักเรียน
-                  </motion.h1>
-                </div>
-                <div className="overflow-hidden">
-                  <motion.div
-                    initial={{ y: '100%' }}
-                    animate={{ y: 0 }}
-                    transition={{ delay: 0.1, duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
-                    className="font-serif text-3xl sm:text-4xl md:text-5xl lg:text-[3.25rem] font-semibold text-[#1B1226] leading-[1.25]"
-                  >
-                    สร้างโรงเรียนที่เรา <span className="italic text-[#9C7A2B] font-serif">ภาคภูมิใจ</span>
-                  </motion.div>
-                </div>
-              </div>
-
-              <p className="text-base md:text-lg text-[#1B1226]/80 leading-relaxed max-w-xl">
-                องค์การนักเรียน ภายใต้การกำกับดูแลของงานกิจการนักเรียน มุ่งมั่นรักษาผลประโยชน์และสิทธิอันชอบธรรมของนักเรียน ขับเคลื่อนกิจกรรมตามอัตลักษณ์ และรับฟังทุกเสียงของนักเรียนสาธิต มพ.
-              </p>
-
-              <div className="flex flex-wrap items-center gap-6 pt-4">
-                {/* Primary CTA with magnetic offset */}
-                <motion.div
-                  style={{ x: btnOffset.x, y: btnOffset.y }}
-                  className="inline-block"
-                >
-                  <Link
-                    ref={magneticBtnRef}
-                    onMouseMove={handleMagneticMove}
-                    onMouseLeave={handleMagneticLeave}
-                    to="/complaint"
-                    className="relative inline-flex items-center gap-3 px-8 py-3.5 rounded-full bg-[#4B1F7A] text-[#FAF7F0] text-sm font-medium tracking-wide shadow-editorial group overflow-hidden border border-[#D9B867]/40 hover:bg-[#2A1245] transition-all duration-300"
-                  >
-                    <span className="absolute inset-[3px] rounded-full border border-[#D9B867]/25 pointer-events-none" />
-                    <span>ส่งเสียงถึงองค์การ</span>
-                    <span className="transition-transform duration-300 group-hover:translate-x-1 text-[#D9B867]">→</span>
-                  </Link>
-                </motion.div>
-
-                {/* Secondary link with expanding gold underline */}
-                <Link
-                  to="/news"
-                  className="btn-secondary-link text-sm font-medium text-[#2A1245] hover:text-[#4B1F7A] transition-colors"
-                >
-                  <span>ดูข่าวล่าสุด</span>
-                  <span className="text-[#B8923A]">→</span>
-                </Link>
-              </div>
-            </div>
-
-            {/* Right 5 Columns: 4:5 Visual Frame with offset gold border */}
-            <div className="lg:col-span-5 relative">
-              <div className="relative mx-auto max-w-md">
-                {/* Offset gold frame behind the image (offset by 8px) */}
-                <div
-                  aria-hidden="true"
-                  className="absolute inset-0 translate-x-3 translate-y-3 border border-[#B8923A]/60 rounded-sm pointer-events-none z-0"
-                />
-
-                {/* Main 4:5 image container */}
-                <div className="relative aspect-[4/5] bg-stone-200 border border-[#4B1F7A]/20 rounded-sm overflow-hidden z-10 shadow-editorial">
-                  {featuredNews?.coverImage?.url || featuredNews?.coverUrl ? (
-                    <img
-                      src={featuredNews?.coverImage?.url || featuredNews?.coverUrl}
-                      alt={featuredNews.title}
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <div className="w-full h-full bg-[#2A1245] text-[#FAF7F0] p-8 flex flex-col justify-between relative overflow-hidden">
-                      <div className="absolute inset-0 opacity-10 flex items-center justify-center">
-                        <Emblem size={240} />
-                      </div>
-                      <div className="relative z-10 space-y-2">
-                        <span className="text-[11px] uppercase tracking-widest text-[#D9B867]">
-                          DEMONSTRATION SCHOOL OF UNIVERSITY OF PHAYAO
-                        </span>
-                        <h2 className="font-serif text-2xl text-[#FAF7F0] leading-snug">
-                          มุ่งมั่นพัฒนาวิชาการ ควบคู่กิจกรรมสร้างสรรค์คุณธรรม
-                        </h2>
-                      </div>
-                      <div className="relative z-10 border-t border-[#B8923A]/30 pt-4 flex items-center justify-between text-xs text-[#FAF7F0]/70">
-                        <span>สธ.มพ</span>
-                        <span>โรงเรียนสาธิตมหาวิทยาลัยพะเยา</span>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ========================================================
           01. ข่าวเด่น & ข่าวรอง (Lead story left + 4 vertical items right)
          ======================================================== */}
-      <section className="max-w-[1240px] mx-auto px-6 md:px-12">
-        <div className="flex flex-col md:flex-row md:items-end justify-between mb-10 pb-4 border-b border-[#B8923A]/30">
+      <section className="max-w-[1240px] mx-auto px-4 sm:px-6 md:px-12">
+        <div className="flex flex-col md:flex-row md:items-end justify-between mb-6 sm:mb-10 pb-4 border-b border-[#B8923A]/30">
           <div>
             <SectionEyebrow number="01" enText="NEWS" thText="ข่าวประชาสัมพันธ์" />
             <h2 className="font-serif text-2xl md:text-3xl text-[#1B1226] font-semibold mt-2">
               ข่าวสารและความเคลื่อนไหว
             </h2>
           </div>
-          <Link to="/news" className="btn-secondary-link text-xs font-medium text-[#4B1F7A] mt-4 md:mt-0">
+          <Link to="/news" className="btn-secondary-link text-xs font-medium text-[#4B1F7A] mt-3 md:mt-0 self-start md:self-auto">
             <span>ข่าวทั้งหมด</span>
             <span className="text-[#B8923A]">→</span>
           </Link>
         </div>
 
         {featuredNews ? (
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8">
             {/* Left 7 cols: Large Featured Card */}
             <div className="lg:col-span-7">
               <Link
                 to={`/news/read/${featuredNews.id}`}
-                className="group block relative border border-[#4B1F7A]/15 bg-[#FAF7F0] p-6 rounded-sm shadow-editorial transition-all duration-300 hover:border-[#B8923A]/70"
+                className="group block relative border border-[#4B1F7A]/15 bg-[#FAF7F0] p-4 sm:p-6 rounded-sm shadow-editorial transition-all duration-300 hover:border-[#B8923A]/70"
               >
                 <CornerBracket position="top-left" />
                 <CornerBracket position="top-right" />
                 <CornerBracket position="bottom-left" />
                 <CornerBracket position="bottom-right" />
 
-                <div className="aspect-[16/9] bg-stone-100 overflow-hidden mb-5 rounded-sm relative">
+                <div className="aspect-[16/9] bg-stone-100 overflow-hidden mb-4 sm:mb-5 rounded-sm relative">
                   {featuredNews.coverImage?.url || featuredNews.coverUrl ? (
                     <img
                       src={featuredNews.coverImage?.url || featuredNews.coverUrl}
@@ -366,7 +221,7 @@ export const Home: React.FC = () => {
                 </div>
 
                 <div className="space-y-2">
-                  <div className="flex items-center gap-2 text-xs text-[#1B1226]/60">
+                  <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-[#1B1226]/60">
                     <NewsCategoryBadge category={featuredNews.category} />
                     <span aria-hidden="true">·</span>
                     <span>{formatThaiDate(featuredNews.createdAt)}</span>
@@ -374,7 +229,7 @@ export const Home: React.FC = () => {
                     <span>อ่าน {formatNumber(featuredNews.views)} ครั้ง</span>
                   </div>
 
-                  <h3 className="font-serif text-xl md:text-2xl font-semibold text-[#1B1226] group-hover:text-[#4B1F7A] transition-colors line-clamp-2">
+                  <h3 className="font-serif text-lg sm:text-xl md:text-2xl font-semibold text-[#1B1226] group-hover:text-[#4B1F7A] transition-colors line-clamp-2">
                     {featuredNews.title}
                   </h3>
 
@@ -386,15 +241,15 @@ export const Home: React.FC = () => {
             </div>
 
             {/* Right 5 cols: 4 Vertical Secondary List Items */}
-            <div className="lg:col-span-5 flex flex-col justify-between space-y-4">
+            <div className="lg:col-span-5 flex flex-col justify-between space-y-3 sm:space-y-4">
               {recentNews.length > 0 ? (
                 recentNews.map((item) => (
                   <Link
                     key={item.id}
                     to={`/news/read/${item.id}`}
-                    className="group flex gap-4 p-3.5 border border-[#4B1F7A]/10 hover:border-[#B8923A]/50 bg-[#FAF7F0] rounded-sm transition-all duration-300"
+                    className="group flex gap-3 sm:gap-4 p-3 sm:p-3.5 border border-[#4B1F7A]/10 hover:border-[#B8923A]/50 bg-[#FAF7F0] rounded-sm transition-all duration-300"
                   >
-                    <div className="w-24 h-20 bg-stone-100 rounded-sm shrink-0 overflow-hidden">
+                    <div className="w-20 h-16 sm:w-24 sm:h-20 bg-stone-100 rounded-sm shrink-0 overflow-hidden">
                       {item.coverImage?.url || item.coverUrl ? (
                         <img
                           src={item.coverImage?.url || item.coverUrl}
@@ -407,8 +262,8 @@ export const Home: React.FC = () => {
                         </div>
                       )}
                     </div>
-                    <div className="flex flex-col justify-center space-y-1">
-                      <div className="flex items-center gap-2 text-[11px] text-[#1B1226]/60">
+                    <div className="flex flex-col justify-center space-y-1 min-w-0">
+                      <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[11px] text-[#1B1226]/60">
                         <NewsCategoryBadge category={item.category} />
                         <span aria-hidden="true">·</span>
                         <span>{formatThaiDate(item.createdAt, true)}</span>
@@ -437,46 +292,46 @@ export const Home: React.FC = () => {
       {/* ========================================================
           02. สถิติความโปร่งใส (Dark violet-900 section with count-up)
          ======================================================== */}
-      <section className="bg-[#2A1245] text-[#FAF7F0] py-20 relative overflow-hidden border-y border-[#B8923A]/30">
-        <div className="max-w-[1240px] mx-auto px-6 md:px-12 relative z-10">
-          <div className="mb-12 text-center max-w-xl mx-auto space-y-2">
+      <section className="bg-[#2A1245] text-[#FAF7F0] py-14 sm:py-20 relative overflow-hidden border-y border-[#B8923A]/30">
+        <div className="max-w-[1240px] mx-auto px-4 sm:px-6 md:px-12 relative z-10">
+          <div className="mb-8 sm:mb-12 text-center max-w-xl mx-auto space-y-2">
             <SectionEyebrow number="02" enText="TRANSPARENCY & IMPACT" thText="สถิติและการดำเนินงาน" light />
             <h2 className="font-serif text-2xl md:text-3xl font-semibold text-[#FAF7F0]">
               เปิดเผย โปร่งใส มุ่งมั่นเพื่อนักเรียน
             </h2>
           </div>
 
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-8 md:gap-12 text-center">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8 md:gap-12 text-center">
             {/* Stat 1: Visits */}
-            <div className="space-y-2 border-r border-[#B8923A]/20 last:border-none">
-              <div className="font-serif text-4xl md:text-5xl lg:text-6xl text-[#D9B867] tabular-numbers font-medium">
+            <div className="space-y-1.5 sm:space-y-2 border-r border-b lg:border-b-0 border-[#B8923A]/20 pb-5 lg:pb-0 pr-2 lg:pr-0">
+              <div className="font-serif text-3xl sm:text-4xl md:text-5xl lg:text-6xl text-[#D9B867] tabular-numbers font-medium">
                 {formatNumber(stats.visits)}
               </div>
-              <div className="text-xs tracking-wider text-[#FAF7F0]/80 uppercase">ผู้เข้าชมสะสม</div>
+              <div className="text-[11px] sm:text-xs tracking-wider text-[#FAF7F0]/80 uppercase">ผู้เข้าชมสะสม</div>
             </div>
 
             {/* Stat 2: Total Complaints */}
-            <div className="space-y-2 border-r border-[#B8923A]/20 last:border-none">
-              <div className="font-serif text-4xl md:text-5xl lg:text-6xl text-[#FAF7F0] tabular-numbers font-medium">
+            <div className="space-y-1.5 sm:space-y-2 border-b lg:border-b-0 lg:border-r border-[#B8923A]/20 pb-5 lg:pb-0 pl-2 lg:pl-0">
+              <div className="font-serif text-3xl sm:text-4xl md:text-5xl lg:text-6xl text-[#FAF7F0] tabular-numbers font-medium">
                 {formatNumber(stats.complaintsTotal)}
               </div>
-              <div className="text-xs tracking-wider text-[#FAF7F0]/80 uppercase">เรื่องร้องเรียนทั้งหมด</div>
+              <div className="text-[11px] sm:text-xs tracking-wider text-[#FAF7F0]/80 uppercase">เรื่องร้องเรียนทั้งหมด</div>
             </div>
 
             {/* Stat 3: Resolved percentage */}
-            <div className="space-y-2 border-r border-[#B8923A]/20 last:border-none">
-              <div className="font-serif text-4xl md:text-5xl lg:text-6xl text-[#D9B867] tabular-numbers font-medium">
+            <div className="space-y-1.5 sm:space-y-2 border-r border-[#B8923A]/20 pt-1 lg:pt-0 pr-2 lg:pr-0">
+              <div className="font-serif text-3xl sm:text-4xl md:text-5xl lg:text-6xl text-[#D9B867] tabular-numbers font-medium">
                 {stats.resolvedPercent}%
               </div>
-              <div className="text-xs tracking-wider text-[#FAF7F0]/80 uppercase">ดำเนินการเสร็จสิ้น</div>
+              <div className="text-[11px] sm:text-xs tracking-wider text-[#FAF7F0]/80 uppercase">ดำเนินการเสร็จสิ้น</div>
             </div>
 
             {/* Stat 4: Activities this year */}
-            <div className="space-y-2">
-              <div className="font-serif text-4xl md:text-5xl lg:text-6xl text-[#FAF7F0] tabular-numbers font-medium">
+            <div className="space-y-1.5 sm:space-y-2 pt-1 lg:pt-0 pl-2 lg:pl-0">
+              <div className="font-serif text-3xl sm:text-4xl md:text-5xl lg:text-6xl text-[#FAF7F0] tabular-numbers font-medium">
                 {formatNumber(stats.eventsCount)}
               </div>
-              <div className="text-xs tracking-wider text-[#FAF7F0]/80 uppercase">
+              <div className="text-[11px] sm:text-xs tracking-wider text-[#FAF7F0]/80 uppercase">
                 กิจกรรมส่งเสริมนักเรียนตลอดปี
               </div>
             </div>
@@ -487,15 +342,15 @@ export const Home: React.FC = () => {
       {/* ========================================================
           03. กิจกรรมที่กำลังจะมาถึง (Upcoming Events carousel)
          ======================================================== */}
-      <section className="max-w-[1240px] mx-auto px-6 md:px-12">
-        <div className="flex flex-col md:flex-row md:items-end justify-between mb-10 pb-4 border-b border-[#B8923A]/30">
+      <section className="max-w-[1240px] mx-auto px-4 sm:px-6 md:px-12">
+        <div className="flex flex-col md:flex-row md:items-end justify-between mb-6 sm:mb-10 pb-4 border-b border-[#B8923A]/30">
           <div>
             <SectionEyebrow number="03" enText="SCHEDULE" thText="ปฏิทินกิจกรรม" />
             <h2 className="font-serif text-2xl md:text-3xl text-[#1B1226] font-semibold mt-2">
               กิจกรรมที่กำลังจะมาถึง
             </h2>
           </div>
-          <Link to="/calendar" className="btn-secondary-link text-xs font-medium text-[#4B1F7A] mt-4 md:mt-0">
+          <Link to="/calendar" className="btn-secondary-link text-xs font-medium text-[#4B1F7A] mt-3 md:mt-0 self-start md:self-auto">
             <span>ดูปฏิทินทั้งหมด</span>
             <span className="text-[#B8923A]">→</span>
           </Link>
@@ -503,13 +358,13 @@ export const Home: React.FC = () => {
 
         {upcomingEvents.length > 0 ? (
           <div className="overflow-hidden" ref={emblaRef}>
-            <div className="flex gap-6">
+            <div className="flex gap-4 sm:gap-6">
               {upcomingEvents.map((evt) => {
                 const dateParts = getThaiDateParts(evt.startAt);
                 return (
                   <div
                     key={evt.id}
-                    className="flex-[0_0_88%] sm:flex-[0_0_46%] lg:flex-[0_0_32%] min-w-0 border border-[#4B1F7A]/15 bg-[#FAF7F0] p-6 rounded-sm shadow-editorial flex flex-col justify-between"
+                    className="flex-[0_0_86%] sm:flex-[0_0_46%] lg:flex-[0_0_32%] min-w-0 border border-[#4B1F7A]/15 bg-[#FAF7F0] p-5 sm:p-6 rounded-sm shadow-editorial flex flex-col justify-between"
                   >
                     <div>
                       <div className="flex items-start gap-4 mb-4">
@@ -555,8 +410,8 @@ export const Home: React.FC = () => {
       {/* ========================================================
           04. ทางลัดบริการ (Editorial Book Index Style)
          ======================================================== */}
-      <section className="max-w-[1240px] mx-auto px-6 md:px-12">
-        <div className="mb-10 pb-4 border-b border-[#B8923A]/30">
+      <section className="max-w-[1240px] mx-auto px-4 sm:px-6 md:px-12">
+        <div className="mb-6 sm:mb-10 pb-4 border-b border-[#B8923A]/30">
           <SectionEyebrow number="04" enText="SERVICES" thText="ทางลัดบริการนักเรียน" />
           <h2 className="font-serif text-2xl md:text-3xl text-[#1B1226] font-semibold mt-2">
             สารบัญบริการและช่องทางติดต่อ
@@ -575,13 +430,13 @@ export const Home: React.FC = () => {
             <Link
               key={item.num}
               to={item.link}
-              className="group py-5 px-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:bg-[#EDE6F5]/50 transition-colors duration-200"
+              className="group py-4 sm:py-5 px-2 sm:px-4 flex items-center justify-between gap-3 sm:gap-4 hover:bg-[#EDE6F5]/50 transition-colors duration-200"
             >
-              <div className="flex items-start sm:items-center gap-6">
-                <span className="font-serif text-lg text-[#9C7A2B] font-medium w-8">
+              <div className="flex items-start sm:items-center gap-3.5 sm:gap-6 min-w-0">
+                <span className="font-serif text-base sm:text-lg text-[#9C7A2B] font-medium w-6 sm:w-8 shrink-0">
                   {item.num}
                 </span>
-                <div>
+                <div className="min-w-0">
                   <h3 className="font-serif text-base md:text-lg font-semibold text-[#1B1226] group-hover:text-[#4B1F7A] transition-colors">
                     {item.title}
                   </h3>
@@ -590,7 +445,7 @@ export const Home: React.FC = () => {
                   </p>
                 </div>
               </div>
-              <span className="text-[#9C7A2B] group-hover:translate-x-2 transition-transform duration-200 self-end sm:self-center font-serif">
+              <span className="text-[#9C7A2B] group-hover:translate-x-2 transition-transform duration-200 font-serif shrink-0">
                 →
               </span>
             </Link>
@@ -602,21 +457,21 @@ export const Home: React.FC = () => {
           05. แกลเลอรีภาพกิจกรรม (Masonry preview with lightbox)
          ======================================================== */}
       {galleryPhotos.length > 0 && (
-        <section className="max-w-[1240px] mx-auto px-6 md:px-12">
-          <div className="flex flex-col md:flex-row md:items-end justify-between mb-10 pb-4 border-b border-[#B8923A]/30">
+        <section className="max-w-[1240px] mx-auto px-4 sm:px-6 md:px-12">
+          <div className="flex flex-col md:flex-row md:items-end justify-between mb-6 sm:mb-10 pb-4 border-b border-[#B8923A]/30">
             <div>
               <SectionEyebrow number="05" enText="GALLERY" thText="ภาพข่าวกิจกรรม" />
               <h2 className="font-serif text-2xl md:text-3xl text-[#1B1226] font-semibold mt-2">
                 ประมวลภาพบรรยากาศ
               </h2>
             </div>
-            <Link to="/news/activity" className="btn-secondary-link text-xs font-medium text-[#4B1F7A] mt-4 md:mt-0">
+            <Link to="/news/activity" className="btn-secondary-link text-xs font-medium text-[#4B1F7A] mt-3 md:mt-0 self-start md:self-auto">
               <span>ภาพกิจกรรมทั้งหมด</span>
               <span className="text-[#B8923A]">→</span>
             </Link>
           </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4">
             {galleryPhotos.map((photo, index) => (
               <div
                 key={index}
@@ -631,7 +486,7 @@ export const Home: React.FC = () => {
                   alt={photo.title}
                   className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                 />
-                <div className="absolute inset-0 bg-[#2A1245]/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-4 text-white text-xs">
+                <div className="absolute inset-0 bg-[#2A1245]/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-3 sm:p-4 text-white text-xs">
                   <span className="line-clamp-2 font-medium">{photo.title}</span>
                 </div>
               </div>
@@ -650,17 +505,17 @@ export const Home: React.FC = () => {
       {/* ========================================================
           06. สารจากนายกองค์การนักเรียน (Editorial portrait overlap)
          ======================================================== */}
-      <section className="max-w-[1240px] mx-auto px-6 md:px-12 pb-12">
-        <div className="bg-[#FAF7F0] border border-[#B8923A]/40 p-8 md:p-14 rounded-sm shadow-editorial relative overflow-hidden">
+      <section className="max-w-[1240px] mx-auto px-4 sm:px-6 md:px-12 pb-8 sm:pb-12">
+        <div className="bg-[#FAF7F0] border border-[#B8923A]/40 p-5 sm:p-8 md:p-14 rounded-sm shadow-editorial relative overflow-hidden">
           <CornerBracket position="top-left" />
           <CornerBracket position="top-right" />
           <CornerBracket position="bottom-left" />
           <CornerBracket position="bottom-right" />
 
-          <div className="grid grid-cols-1 md:grid-cols-12 gap-8 md:gap-12 items-center">
+          <div className="grid grid-cols-1 md:grid-cols-12 gap-6 sm:gap-8 md:gap-12 items-center">
             {/* Left 4 cols: President photo with greyscale-to-color transition */}
             <div className="md:col-span-4 flex justify-center">
-              <div className="relative w-48 h-60 md:w-56 md:h-72 border border-[#B8923A] rounded-sm overflow-hidden shadow-editorial bg-stone-100">
+              <div className="relative w-36 h-44 sm:w-48 sm:h-60 md:w-56 md:h-72 border border-[#B8923A] rounded-sm overflow-hidden shadow-editorial bg-stone-100">
                 {president?.photo?.url || president?.photoUrl ? (
                   <img
                     src={president.photo?.url || president.photoUrl}
@@ -677,9 +532,9 @@ export const Home: React.FC = () => {
             </div>
 
             {/* Right 8 cols: Editorial Message */}
-            <div className="md:col-span-8 space-y-4">
+            <div className="md:col-span-8 space-y-3 sm:space-y-4">
               <SectionEyebrow number="06" enText="MESSAGE FROM THE PRESIDENT" thText="สารจากนายกองค์การนักเรียน" />
-              <h2 className="font-serif text-2xl md:text-3xl text-[#1B1226] font-semibold leading-snug">
+              <h2 className="font-serif text-xl sm:text-2xl md:text-3xl text-[#1B1226] font-semibold leading-snug">
                 {presidentHeadline}
               </h2>
               <p className="text-sm md:text-base text-[#1B1226]/80 leading-relaxed font-sans whitespace-pre-line">

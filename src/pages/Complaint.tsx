@@ -200,9 +200,9 @@ export const Complaint: React.FC = () => {
   };
 
   return (
-    <div className="max-w-[800px] mx-auto px-6 py-10 space-y-10">
+    <div className="max-w-[800px] mx-auto px-4 sm:px-6 py-6 sm:py-10 space-y-6 sm:space-y-10">
       {/* Header */}
-      <div className="border-b border-[#B8923A]/30 pb-6 text-center max-w-xl mx-auto space-y-2">
+      <div className="border-b border-[#B8923A]/30 pb-5 sm:pb-6 text-center max-w-xl mx-auto space-y-2">
         <SectionEyebrow enText="STUDENT VOICE" thText="รับเรื่องร้องเรียนและข้อเสนอแนะ" />
         <h1 className="font-serif text-3xl md:text-4xl font-semibold text-[#1B1226]">
           ส่งเสียงถึงองค์การนักเรียน
@@ -214,22 +214,22 @@ export const Complaint: React.FC = () => {
 
       {/* Stepper (Only show on steps 1-3) */}
       {step < 4 && (
-        <div className="flex items-center justify-between max-w-md mx-auto text-xs pb-4 border-b border-[#4B1F7A]/10">
-          <div className="flex items-center gap-2">
+        <div className="flex items-center justify-between max-w-md mx-auto text-[11px] sm:text-xs pb-4 border-b border-[#4B1F7A]/10 gap-1 sm:gap-2">
+          <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
             <span className={`w-6 h-6 rounded-full flex items-center justify-center font-bold ${step >= 1 ? 'bg-[#4B1F7A] text-[#FAF7F0]' : 'bg-stone-200 text-stone-600'}`}>
               1
             </span>
             <span className={step === 1 ? 'font-semibold text-[#2A1245]' : 'text-stone-500'}>ประเภทเรื่อง</span>
           </div>
-          <div className="h-[1px] w-12 bg-stone-300" />
-          <div className="flex items-center gap-2">
+          <div className="h-[1px] flex-1 mx-1 sm:mx-2 bg-stone-300" />
+          <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
             <span className={`w-6 h-6 rounded-full flex items-center justify-center font-bold ${step >= 2 ? 'bg-[#4B1F7A] text-[#FAF7F0]' : 'bg-stone-200 text-stone-600'}`}>
               2
             </span>
             <span className={step === 2 ? 'font-semibold text-[#2A1245]' : 'text-stone-500'}>รายละเอียด</span>
           </div>
-          <div className="h-[1px] w-12 bg-stone-300" />
-          <div className="flex items-center gap-2">
+          <div className="h-[1px] flex-1 mx-1 sm:mx-2 bg-stone-300" />
+          <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
             <span className={`w-6 h-6 rounded-full flex items-center justify-center font-bold ${step >= 3 ? 'bg-[#4B1F7A] text-[#FAF7F0]' : 'bg-stone-200 text-stone-600'}`}>
               3
             </span>
@@ -307,7 +307,7 @@ export const Complaint: React.FC = () => {
       {/* STEP 2: Details & Attachments */}
       {step === 2 && (
         <div className="space-y-6">
-          <div className="flex items-center justify-between border-b border-[#4B1F7A]/10 pb-2">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 border-b border-[#4B1F7A]/10 pb-2">
             <h2 className="font-serif text-xl font-semibold text-[#2A1245]">
               ขั้นตอนที่ ๒: กรอกรายละเอียดเรื่อง
             </h2>
@@ -561,7 +561,7 @@ export const Complaint: React.FC = () => {
 
       {/* STEP 4: Success View & Tracking Code */}
       {step === 4 && (
-        <div className="bg-[#FAF7F0] border border-[#B8923A]/50 p-8 md:p-12 rounded-sm shadow-editorial text-center space-y-6 relative">
+        <div className="bg-[#FAF7F0] border border-[#B8923A]/50 p-5 sm:p-8 md:p-12 rounded-sm shadow-editorial text-center space-y-6 relative">
           <CornerBracket position="top-left" />
           <CornerBracket position="top-right" />
           <CornerBracket position="bottom-left" />

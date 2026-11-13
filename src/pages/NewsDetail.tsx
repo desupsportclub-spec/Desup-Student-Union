@@ -138,10 +138,10 @@ export const NewsDetail: React.FC = () => {
   ];
 
   return (
-    <article className="py-12">
-      <div className="max-w-[760px] mx-auto px-6 space-y-8">
+    <article className="py-6 sm:py-12">
+      <div className="max-w-[760px] mx-auto px-4 sm:px-6 space-y-6 sm:space-y-8">
         {/* Navigation Breadcrumb */}
-        <div className="flex items-center gap-2 text-xs text-[#1B1226]/60">
+        <div className="flex flex-wrap items-center gap-2 text-xs text-[#1B1226]/60">
           <Link to="/" className="hover:text-[#4B1F7A]">หน้าหลัก</Link>
           <span>/</span>
           <Link to="/news" className="hover:text-[#4B1F7A]">ข่าวสาร</Link>
@@ -210,7 +210,7 @@ export const NewsDetail: React.FC = () => {
 
         {/* Rich HTML Content from Tiptap */}
         <div
-          className="text-[17px] md:text-[18px] text-[#1B1226] leading-[1.8] space-y-4 font-sans prose-custom"
+          className="text-[15px] sm:text-[17px] md:text-[18px] text-[#1B1226] leading-[1.8] space-y-4 font-sans prose-custom break-words"
           dangerouslySetInnerHTML={{ __html: sanitizedContent }}
         />
 

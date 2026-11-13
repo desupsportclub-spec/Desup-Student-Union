@@ -46,9 +46,9 @@ export const AboutHall: React.FC = () => {
   }, []);
 
   return (
-    <div className="max-w-[1000px] mx-auto px-6 py-10 space-y-12">
+    <div className="max-w-[1000px] mx-auto px-4 sm:px-6 py-6 sm:py-10 space-y-8 sm:space-y-12">
       {/* Header */}
-      <div className="border-b border-[#B8923A]/30 pb-6 text-center max-w-xl mx-auto space-y-2">
+      <div className="border-b border-[#B8923A]/30 pb-5 sm:pb-6 text-center max-w-xl mx-auto space-y-2">
         <SectionEyebrow enText="HALL OF PRESIDENTS" thText="ทำเนียบนายกองค์การนักเรียน" />
         <h1 className="font-serif text-3xl md:text-4xl font-semibold text-[#1B1226]">
           ทำเนียบนายกองค์การนักเรียน
@@ -70,14 +70,14 @@ export const AboutHall: React.FC = () => {
           {/* Central Gold Timeline Line */}
           <div className="hidden md:block absolute left-1/2 top-0 bottom-0 w-[1.5px] bg-[#B8923A]/40 -translate-x-1/2" />
 
-          <div className="space-y-12">
+          <div className="space-y-6 md:space-y-12">
             {presidents.map((pres, index) => {
               const isEven = index % 2 === 0;
 
               return (
                 <div
                   key={pres.id}
-                  className={`relative flex flex-col md:flex-row items-center gap-8 ${
+                  className={`relative flex flex-col md:flex-row items-center gap-6 md:gap-8 ${
                     isEven ? 'md:flex-row' : 'md:flex-row-reverse'
                   }`}
                 >
@@ -88,7 +88,7 @@ export const AboutHall: React.FC = () => {
 
                   {/* Card Content (half width) */}
                   <div className="w-full md:w-[45%]">
-                    <div className="bg-[#FAF7F0] border border-[#4B1F7A]/15 p-6 rounded-sm shadow-editorial relative space-y-3 hover:border-[#B8923A] transition-colors">
+                    <div className="bg-[#FAF7F0] border border-[#4B1F7A]/15 p-4 sm:p-6 rounded-sm shadow-editorial relative space-y-3 hover:border-[#B8923A] transition-colors">
                       <CornerBracket position="top-left" />
                       <CornerBracket position="top-right" />
                       <CornerBracket position="bottom-left" />

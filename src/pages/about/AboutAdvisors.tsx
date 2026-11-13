@@ -39,9 +39,9 @@ export const AboutAdvisors: React.FC = () => {
   }, []);
 
   return (
-    <div className="max-w-[1000px] mx-auto px-6 py-10 space-y-10">
+    <div className="max-w-[1000px] mx-auto px-4 sm:px-6 py-6 sm:py-10 space-y-6 sm:space-y-10">
       {/* Header */}
-      <div className="border-b border-[#B8923A]/30 pb-6 text-center max-w-xl mx-auto space-y-2">
+      <div className="border-b border-[#B8923A]/30 pb-5 sm:pb-6 text-center max-w-xl mx-auto space-y-2">
         <SectionEyebrow enText="FACULTY ADVISORS" thText="ครูที่ปรึกษาองค์การนักเรียน" />
         <h1 className="font-serif text-3xl md:text-4xl font-semibold text-[#1B1226]">
           คณะกรรมการที่ปรึกษาองค์การนักเรียน
@@ -53,7 +53,7 @@ export const AboutAdvisors: React.FC = () => {
 
       {/* Advisors Grid */}
       {loading ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5 sm:gap-8">
           {[1, 2, 3].map((i) => (
             <div key={i} className="animate-pulse space-y-3 p-4 border border-stone-200 rounded-sm">
               <div className="aspect-[4/5] bg-stone-200 rounded-sm" />
@@ -63,11 +63,11 @@ export const AboutAdvisors: React.FC = () => {
           ))}
         </div>
       ) : advisors.length > 0 ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5 sm:gap-8">
           {advisors.map((advisor) => (
             <div
               key={advisor.id}
-              className="bg-[#FAF7F0] border border-[#4B1F7A]/15 p-6 rounded-sm shadow-editorial text-center relative space-y-4 hover:border-[#B8923A] transition-colors"
+              className="bg-[#FAF7F0] border border-[#4B1F7A]/15 p-5 sm:p-6 rounded-sm shadow-editorial text-center relative space-y-4 hover:border-[#B8923A] transition-colors"
             >
               <CornerBracket position="top-left" />
               <CornerBracket position="top-right" />

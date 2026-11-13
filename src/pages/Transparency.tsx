@@ -118,7 +118,7 @@ export const Transparency: React.FC = () => {
   const remainingBudget = totalBudget - totalSpent;
 
   return (
-    <div className="max-w-[1240px] mx-auto px-6 md:px-12 py-10 space-y-16">
+    <div className="max-w-[1240px] mx-auto px-4 sm:px-6 md:px-12 py-6 sm:py-10 space-y-10 sm:space-y-16">
       {/* Header */}
       <div className="border-b border-[#B8923A]/30 pb-6 flex flex-col md:flex-row md:items-end justify-between gap-4">
         <div>
@@ -163,34 +163,34 @@ export const Transparency: React.FC = () => {
         </div>
 
         {/* 4 Summary Metric Boxes */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
-          <div className="bg-[#FAF7F0] border border-[#4B1F7A]/15 p-5 rounded-sm shadow-editorial-sm">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
+          <div className="bg-[#FAF7F0] border border-[#4B1F7A]/15 p-3.5 sm:p-5 rounded-sm shadow-editorial-sm">
             <span className="text-[11px] uppercase tracking-wider text-[#9C7A2B]">เรื่องทั้งหมด</span>
-            <div className="font-serif text-3xl font-medium text-[#2A1245] mt-1 tabular-numbers">
+            <div className="font-serif text-2xl sm:text-3xl font-medium text-[#2A1245] mt-1 tabular-numbers">
               {formatNumber(totalCount)}
             </div>
             <p className="text-[10px] text-[#1B1226]/60 mt-1">สะสมตลอดปีการศึกษา</p>
           </div>
 
-          <div className="bg-[#FAF7F0] border border-[#4B1F7A]/15 p-5 rounded-sm shadow-editorial-sm">
+          <div className="bg-[#FAF7F0] border border-[#4B1F7A]/15 p-3.5 sm:p-5 rounded-sm shadow-editorial-sm">
             <span className="text-[11px] uppercase tracking-wider text-emerald-800">เสร็จสิ้นแล้ว</span>
-            <div className="font-serif text-3xl font-medium text-[#2F6B4F] mt-1 tabular-numbers">
+            <div className="font-serif text-2xl sm:text-3xl font-medium text-[#2F6B4F] mt-1 tabular-numbers">
               {formatNumber(resolvedCount)}
             </div>
             <p className="text-[10px] text-[#1B1226]/60 mt-1">คิดเป็น {resolvedPercent}% ของเรื่องทั้งหมด</p>
           </div>
 
-          <div className="bg-[#FAF7F0] border border-[#4B1F7A]/15 p-5 rounded-sm shadow-editorial-sm">
+          <div className="bg-[#FAF7F0] border border-[#4B1F7A]/15 p-3.5 sm:p-5 rounded-sm shadow-editorial-sm">
             <span className="text-[11px] uppercase tracking-wider text-[#6B3FA0]">กำลังดำเนินการ</span>
-            <div className="font-serif text-3xl font-medium text-[#4B1F7A] mt-1 tabular-numbers">
+            <div className="font-serif text-2xl sm:text-3xl font-medium text-[#4B1F7A] mt-1 tabular-numbers">
               {formatNumber(inProgressCount)}
             </div>
             <p className="text-[10px] text-[#1B1226]/60 mt-1">อยู่ระหว่างตรวจสอบ/ประสานงาน</p>
           </div>
 
-          <div className="bg-[#FAF7F0] border border-[#4B1F7A]/15 p-5 rounded-sm shadow-editorial-sm">
+          <div className="bg-[#FAF7F0] border border-[#4B1F7A]/15 p-3.5 sm:p-5 rounded-sm shadow-editorial-sm">
             <span className="text-[11px] uppercase tracking-wider text-[#9C7A2B]">ระยะเวลาเฉลี่ย</span>
-            <div className="font-serif text-3xl font-medium text-[#9C7A2B] mt-1 tabular-numbers">
+            <div className="font-serif text-2xl sm:text-3xl font-medium text-[#9C7A2B] mt-1 tabular-numbers">
               3-5
             </div>
             <p className="text-[10px] text-[#1B1226]/60 mt-1">วันทำการในการตอบกลับ</p>
@@ -311,40 +311,73 @@ export const Transparency: React.FC = () => {
               กำลังโหลดข้อมูลงบประมาณ...
             </div>
           ) : budgetYear?.items && budgetYear.items.length > 0 ? (
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs">
-                <thead className="bg-[#EDE6F5]/20 border-b border-[#4B1F7A]/10 text-[#9C7A2B] uppercase tracking-wider font-medium">
-                  <tr>
-                    <th className="py-3 px-4">ชื่อโครงการ/กิจกรรม</th>
-                    <th className="py-3 px-4">ช่วงเวลาดำเนินการ</th>
-                    <th className="py-3 px-4 text-right">งบที่ขอเสนอ</th>
-                    <th className="py-3 px-4 text-right">งบที่อนุมัติ</th>
-                    <th className="py-3 px-4 text-right">งบที่ใช้จริง</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-[#4B1F7A]/10">
-                  {budgetYear.items.map((item, index) => (
-                    <tr key={index} className="hover:bg-[#EDE6F5]/20 transition-colors">
-                      <td className="py-3.5 px-4 font-serif text-sm font-semibold text-[#1B1226]">
+            <>
+              {/* Mobile Budget Item Cards */}
+              <div className="md:hidden divide-y divide-[#4B1F7A]/10">
+                {budgetYear.items.map((item, index) => (
+                  <div key={index} className="p-4 space-y-2.5">
+                    <div>
+                      <h4 className="font-serif text-sm font-semibold text-[#1B1226]">
                         {item.activity}
-                      </td>
-                      <td className="py-3.5 px-4 text-[#1B1226]/60">
-                        {item.date}
-                      </td>
-                      <td className="py-3.5 px-4 text-right font-mono tabular-numbers text-[#1B1226]/70">
-                        {formatBaht(item.requested)}
-                      </td>
-                      <td className="py-3.5 px-4 text-right font-mono tabular-numbers text-[#2A1245] font-medium">
-                        {formatBaht(item.approved)}
-                      </td>
-                      <td className="py-3.5 px-4 text-right font-mono tabular-numbers text-[#4B1F7A] font-semibold">
-                        {formatBaht(item.spent)}
-                      </td>
+                      </h4>
+                      {item.date && (
+                        <p className="text-[11px] text-[#1B1226]/60 mt-0.5">{item.date}</p>
+                      )}
+                    </div>
+                    <div className="grid grid-cols-3 gap-2 pt-2 border-t border-[#4B1F7A]/10 text-[11px]">
+                      <div>
+                        <span className="text-[#1B1226]/55 block">งบที่ขอเสนอ</span>
+                        <span className="font-mono tabular-numbers text-[#1B1226]/80">{formatBaht(item.requested)}</span>
+                      </div>
+                      <div>
+                        <span className="text-[#1B1226]/55 block">งบที่อนุมัติ</span>
+                        <span className="font-mono tabular-numbers text-[#2A1245] font-medium">{formatBaht(item.approved)}</span>
+                      </div>
+                      <div className="text-right">
+                        <span className="text-[#1B1226]/55 block">งบที่ใช้จริง</span>
+                        <span className="font-mono tabular-numbers text-[#4B1F7A] font-semibold">{formatBaht(item.spent)}</span>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Desktop Table */}
+              <div className="hidden md:block overflow-x-auto">
+                <table className="w-full text-left text-xs">
+                  <thead className="bg-[#EDE6F5]/20 border-b border-[#4B1F7A]/10 text-[#9C7A2B] uppercase tracking-wider font-medium">
+                    <tr>
+                      <th className="py-3 px-4">ชื่อโครงการ/กิจกรรม</th>
+                      <th className="py-3 px-4">ช่วงเวลาดำเนินการ</th>
+                      <th className="py-3 px-4 text-right">งบที่ขอเสนอ</th>
+                      <th className="py-3 px-4 text-right">งบที่อนุมัติ</th>
+                      <th className="py-3 px-4 text-right">งบที่ใช้จริง</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                  </thead>
+                  <tbody className="divide-y divide-[#4B1F7A]/10">
+                    {budgetYear.items.map((item, index) => (
+                      <tr key={index} className="hover:bg-[#EDE6F5]/20 transition-colors">
+                        <td className="py-3.5 px-4 font-serif text-sm font-semibold text-[#1B1226]">
+                          {item.activity}
+                        </td>
+                        <td className="py-3.5 px-4 text-[#1B1226]/60">
+                          {item.date}
+                        </td>
+                        <td className="py-3.5 px-4 text-right font-mono tabular-numbers text-[#1B1226]/70">
+                          {formatBaht(item.requested)}
+                        </td>
+                        <td className="py-3.5 px-4 text-right font-mono tabular-numbers text-[#2A1245] font-medium">
+                          {formatBaht(item.approved)}
+                        </td>
+                        <td className="py-3.5 px-4 text-right font-mono tabular-numbers text-[#4B1F7A] font-semibold">
+                          {formatBaht(item.spent)}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </>
           ) : (
             <div className="p-12 text-center text-xs text-[#1B1226]/60 space-y-1">
               <p className="font-serif text-base text-[#2A1245]">ยังไม่มีรายการงบประมาณที่บันทึกในปีการศึกษานี้</p>

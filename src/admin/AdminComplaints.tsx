@@ -24,6 +24,8 @@ export const AdminComplaints: React.FC = () => {
   const [privateAttachments, setPrivateAttachments] = useState<ComplaintPrivateAttachment | null>(null);
   const [replyText, setReplyText] = useState('');
   const [updating, setUpdating] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState<ComplaintItem | null>(null);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [successModalTitle, setSuccessModalTitle] = useState('');
 
   const fetchComplaints = async () => {
@@ -47,14 +49,18 @@ export const AdminComplaints: React.FC = () => {
     fetchComplaints();
   }, []);
 
+  const getComplaintDocId = (item: ComplaintItem) => item.id || item.trackingCode;
+
   const handleOpenDetail = async (item: ComplaintItem) => {
+    const docId = getComplaintDocId(item);
     setActiveComplaint(item);
     setPrivateContact(null);
     setPrivateAttachments(null);
     setReplyText('');
+    setErrorMsg(null);
 
     try {
-      const contactSnap = await getDoc(doc(db, 'complaints', item.trackingCode, 'private', 'contact'));
+      const contactSnap = await getDoc(doc(db, 'complaints', docId, 'private', 'contact'));
       if (contactSnap.exists()) {
         setPrivateContact(contactSnap.data() as ComplaintPrivateContact);
       }
@@ -63,7 +69,7 @@ export const AdminComplaints: React.FC = () => {
     }
 
     try {
-      const attachSnap = await getDoc(doc(db, 'complaints', item.trackingCode, 'private', 'attachments'));
+      const attachSnap = await getDoc(doc(db, 'complaints', docId, 'private', 'attachments'));
       if (attachSnap.exists()) {
         setPrivateAttachments(attachSnap.data() as ComplaintPrivateAttachment);
       }
@@ -74,9 +80,11 @@ export const AdminComplaints: React.FC = () => {
 
   const handleStatusChange = async (newStatus: ComplaintStatus) => {
     if (!activeComplaint) return;
+    const docId = getComplaintDocId(activeComplaint);
     setUpdating(true);
+    setErrorMsg(null);
     try {
-      const ref = doc(db, 'complaints', activeComplaint.trackingCode);
+      const ref = doc(db, 'complaints', docId);
       const now = new Date().toISOString();
       await updateDoc(ref, {
         status: newStatus,
@@ -84,10 +92,11 @@ export const AdminComplaints: React.FC = () => {
       });
 
       setActiveComplaint(prev => prev ? { ...prev, status: newStatus, updatedAt: now } : null);
-      setComplaints(prev => prev.map(c => c.trackingCode === activeComplaint.trackingCode ? { ...c, status: newStatus, updatedAt: now } : c));
+      setComplaints(prev => prev.map(c => getComplaintDocId(c) === docId ? { ...c, status: newStatus, updatedAt: now } : c));
       setSuccessModalTitle('ปรับปรุงสถานะเรื่องร้องเรียนเรียบร้อยแล้ว');
     } catch (err) {
       console.error("Status update error:", err);
+      setErrorMsg('ไม่สามารถอัปเดตสถานะเรื่องร้องเรียนได้ กรุณาตรวจสอบสิทธิ์ผู้ดูแลระบบ');
     } finally {
       setUpdating(false);
     }
@@ -96,10 +105,12 @@ export const AdminComplaints: React.FC = () => {
   const handleAddPublicReply = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!activeComplaint || !replyText.trim()) return;
+    const docId = getComplaintDocId(activeComplaint);
 
     setUpdating(true);
+    setErrorMsg(null);
     try {
-      const ref = doc(db, 'complaints', activeComplaint.trackingCode);
+      const ref = doc(db, 'complaints', docId);
       const now = new Date().toISOString();
       const newReply: PublicReply = {
         text: replyText.trim(),
@@ -114,43 +125,48 @@ export const AdminComplaints: React.FC = () => {
       });
 
       setActiveComplaint(prev => prev ? { ...prev, publicReplies: updatedReplies, updatedAt: now } : null);
-      setComplaints(prev => prev.map(c => c.trackingCode === activeComplaint.trackingCode ? { ...c, publicReplies: updatedReplies, updatedAt: now } : c));
+      setComplaints(prev => prev.map(c => getComplaintDocId(c) === docId ? { ...c, publicReplies: updatedReplies, updatedAt: now } : c));
       setReplyText('');
       setSuccessModalTitle('ส่งข้อความตอบกลับสาธารณะเรียบร้อยแล้ว');
     } catch (err) {
       console.error("Add reply error:", err);
+      setErrorMsg('ไม่สามารถส่งข้อความตอบกลับได้ กรุณาลองใหม่อีกครั้ง');
     } finally {
       setUpdating(false);
     }
   };
 
-  const handleDeleteComplaint = async (item: ComplaintItem) => {
-    if (!window.confirm(`คุณแน่ใจว่าต้องการลบเรื่องร้องเรียนรหัส "${item.trackingCode}" ถาวรหรือไม่? การลบไม่สามารถกู้คืนได้`)) {
-      return;
-    }
+  const confirmDeleteComplaint = async () => {
+    if (!deleteTarget) return;
+    const item = deleteTarget;
+    const docId = getComplaintDocId(item);
 
     setUpdating(true);
+    setErrorMsg(null);
     try {
       // Remove private subcollection docs first (ignore if they don't exist)
       try {
-        await deleteDoc(doc(db, 'complaints', item.trackingCode, 'private', 'contact'));
+        await deleteDoc(doc(db, 'complaints', docId, 'private', 'contact'));
       } catch {
         // Ignore
       }
       try {
-        await deleteDoc(doc(db, 'complaints', item.trackingCode, 'private', 'attachments'));
+        await deleteDoc(doc(db, 'complaints', docId, 'private', 'attachments'));
       } catch {
         // Ignore
       }
 
-      await deleteDoc(doc(db, 'complaints', item.trackingCode));
-      setComplaints(prev => prev.filter(c => c.trackingCode !== item.trackingCode));
-      if (activeComplaint?.trackingCode === item.trackingCode) {
+      await deleteDoc(doc(db, 'complaints', docId));
+      setComplaints(prev => prev.filter(c => getComplaintDocId(c) !== docId));
+      if (activeComplaint && getComplaintDocId(activeComplaint) === docId) {
         setActiveComplaint(null);
       }
-      setSuccessModalTitle(`ลบเรื่องร้องเรียนรหัส ${item.trackingCode} เรียบร้อยแล้ว`);
+      setDeleteTarget(null);
+      setSuccessModalTitle(`ลบเรื่องร้องเรียนรหัส ${item.trackingCode || docId} เรียบร้อยแล้ว`);
     } catch (err) {
       console.error("Delete complaint failed:", err);
+      setDeleteTarget(null);
+      setErrorMsg('ไม่สามารถลบเรื่องร้องเรียนได้ กรุณาตรวจสอบสิทธิ์ผู้ดูแลระบบหรือรีเฟรชหน้าแล้วลองใหม่');
     } finally {
       setUpdating(false);
     }
@@ -209,6 +225,13 @@ export const AdminComplaints: React.FC = () => {
           📥 ส่งออกเป็น CSV
         </button>
       </div>
+
+      {errorMsg && (
+        <div className="p-3 bg-red-50 border border-red-200 rounded-sm text-xs text-[#9B1C31] flex items-center justify-between">
+          <span>{errorMsg}</span>
+          <button type="button" onClick={() => setErrorMsg(null)} className="text-[#9B1C31] font-bold ml-4">✕</button>
+        </div>
+      )}
 
       {/* Filter and Search Bar */}
       <div className="flex flex-wrap items-center gap-4 bg-white p-4 border border-[#4B1F7A]/15 rounded-sm">
@@ -296,13 +319,15 @@ export const AdminComplaints: React.FC = () => {
                     </td>
                     <td className="py-3 px-4 text-center space-x-2 whitespace-nowrap">
                       <button
+                        type="button"
                         onClick={() => handleOpenDetail(item)}
                         className="px-3 py-1 bg-[#4B1F7A] text-[#FAF7F0] rounded-sm hover:bg-[#2A1245] text-xs"
                       >
                         เปิดดู
                       </button>
                       <button
-                        onClick={() => handleDeleteComplaint(item)}
+                        type="button"
+                        onClick={() => setDeleteTarget(item)}
                         disabled={updating}
                         className="px-2.5 py-1 bg-red-50 text-[#9B1C31] hover:bg-red-100 rounded-sm text-xs"
                       >
@@ -447,7 +472,7 @@ export const AdminComplaints: React.FC = () => {
                 <div className="flex items-center justify-between pt-2">
                   <button
                     type="button"
-                    onClick={() => handleDeleteComplaint(activeComplaint)}
+                    onClick={() => setDeleteTarget(activeComplaint)}
                     disabled={updating}
                     className="px-4 py-2 border border-red-200 text-[#9B1C31] hover:bg-red-50 text-xs font-medium rounded-sm transition-colors"
                   >
@@ -462,6 +487,42 @@ export const AdminComplaints: React.FC = () => {
                   </button>
                 </div>
               </form>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* In-App Delete Confirmation Modal (avoids sandboxed iframe window.confirm blocking) */}
+      {deleteTarget && (
+        <div className="fixed inset-0 z-[60] bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-[#FAF7F0] border border-[#B8923A]/50 rounded-sm max-w-md w-full p-6 space-y-4 shadow-2xl">
+            <h3 className="font-serif text-lg font-semibold text-[#2A1245]">
+              ยืนยันการลบเรื่องร้องเรียน
+            </h3>
+            <p className="text-xs text-[#1B1226]/80 leading-relaxed">
+              คุณต้องการลบเรื่องร้องเรียนรหัส{' '}
+              <span className="font-mono font-bold text-[#4B1F7A]">
+                {deleteTarget.trackingCode || deleteTarget.id}
+              </span>{' '}
+              ({deleteTarget.title}) ถาวรหรือไม่? การลบไม่สามารถกู้คืนได้
+            </p>
+            <div className="flex justify-end gap-3 pt-3 border-t border-[#4B1F7A]/15">
+              <button
+                type="button"
+                onClick={() => setDeleteTarget(null)}
+                disabled={updating}
+                className="px-4 py-2 border border-stone-300 bg-white text-xs text-[#1B1226] rounded-sm hover:bg-stone-50"
+              >
+                ยกเลิก
+              </button>
+              <button
+                type="button"
+                onClick={confirmDeleteComplaint}
+                disabled={updating}
+                className="px-5 py-2 bg-[#9B1C31] text-white text-xs font-medium rounded-sm hover:bg-red-900 disabled:opacity-60"
+              >
+                {updating ? 'กำลังลบ...' : 'ยืนยันการลบถาวร'}
+              </button>
             </div>
           </div>
         </div>

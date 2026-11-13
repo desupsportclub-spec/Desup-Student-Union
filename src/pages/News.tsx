@@ -87,9 +87,9 @@ export const News: React.FC = () => {
   const visibleNews = filteredNews.slice(0, displayCount);
 
   return (
-    <div className="max-w-[1240px] mx-auto px-6 md:px-12 py-10 space-y-10">
+    <div className="max-w-[1240px] mx-auto px-4 sm:px-6 md:px-12 py-6 sm:py-10 space-y-6 sm:space-y-10">
       {/* Page Header */}
-      <div className="border-b border-[#B8923A]/30 pb-6">
+      <div className="border-b border-[#B8923A]/30 pb-5 sm:pb-6">
         <SectionEyebrow enText="PRESS & UPDATES" thText="ข่าวสารและประกาศ" />
         <h1 className="font-serif text-3xl md:text-4xl font-semibold text-[#1B1226] mt-2">
           ข่าวสารองค์การนักเรียน
@@ -143,7 +143,7 @@ export const News: React.FC = () => {
 
       {/* News Grid */}
       {loading ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-8">
           {[1, 2, 3, 4, 5, 6].map((i) => (
             <div key={i} className="animate-pulse space-y-3 p-4 border border-stone-200 rounded-sm">
               <div className="aspect-[16/9] bg-stone-200 rounded-sm" />
@@ -154,12 +154,12 @@ export const News: React.FC = () => {
           ))}
         </div>
       ) : visibleNews.length > 0 ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-8">
           {visibleNews.map((item) => (
             <Link
               key={item.id}
               to={`/news/read/${item.id}`}
-              className="group block relative border border-[#4B1F7A]/15 bg-[#FAF7F0] p-5 rounded-sm shadow-editorial transition-all duration-300 hover:border-[#B8923A]/70 flex flex-col justify-between"
+              className="group block relative border border-[#4B1F7A]/15 bg-[#FAF7F0] p-4 sm:p-5 rounded-sm shadow-editorial transition-all duration-300 hover:border-[#B8923A]/70 flex flex-col justify-between"
             >
               <CornerBracket position="top-left" />
               <CornerBracket position="top-right" />

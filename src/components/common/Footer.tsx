@@ -25,8 +25,8 @@ export const Footer: React.FC = () => {
         <Emblem size={380} />
       </div>
 
-      <div className="max-w-[1240px] mx-auto px-6 md:px-12 py-16 relative z-10">
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-12 pb-14 border-b border-[#B8923A]/20">
+      <div className="max-w-[1240px] mx-auto px-4 sm:px-6 md:px-12 py-10 sm:py-16 relative z-10">
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-8 md:gap-12 pb-10 md:pb-14 border-b border-[#B8923A]/20">
           {/* Identity & School Info (4 columns) */}
           <div className="md:col-span-4 space-y-4">
             <div className="flex items-center gap-3.5">
@@ -165,11 +165,11 @@ export const Footer: React.FC = () => {
         </div>
 
         {/* Bottom copyright & attribution (Evergreen) */}
-        <div className="pt-8 flex flex-col md:flex-row items-center justify-between text-xs text-[#FAF7F0]/60 gap-4">
+        <div className="pt-6 sm:pt-8 flex flex-col md:flex-row items-center justify-between text-center md:text-left text-xs text-[#FAF7F0]/60 gap-3 md:gap-4">
           <p>© พ.ศ. {new Date().getFullYear() + 543} {SITE_CONFIG.name} {SITE_CONFIG.schoolName}</p>
-          <div className="flex items-center gap-6">
+          <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1">
             <span className="text-[#D9B867]">โรงเรียนสาธิตมหาวิทยาลัยพะเยา</span>
-            <span className="text-[#FAF7F0]/30">|</span>
+            <span className="text-[#FAF7F0]/30 hidden sm:inline">|</span>
             <span>Student Union Demonstration School of University of Phayao</span>
           </div>
         </div>

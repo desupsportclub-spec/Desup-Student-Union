@@ -169,9 +169,9 @@ export const Downloads: React.FC = () => {
   });
 
   return (
-    <div className="max-w-[1240px] mx-auto px-6 md:px-12 py-10 space-y-10">
+    <div className="max-w-[1240px] mx-auto px-4 sm:px-6 md:px-12 py-6 sm:py-10 space-y-6 sm:space-y-10">
       {/* Header */}
-      <div className="border-b border-[#B8923A]/30 pb-6 flex flex-col md:flex-row md:items-end justify-between gap-4">
+      <div className="border-b border-[#B8923A]/30 pb-5 sm:pb-6 flex flex-col md:flex-row md:items-end justify-between gap-4">
         <div>
           <SectionEyebrow enText="DOCUMENTS & FORMS" thText="ดาวน์โหลดเอกสารทางการ" />
           <h1 className="font-serif text-3xl md:text-4xl font-semibold text-[#1B1226] mt-2">
@@ -223,7 +223,47 @@ export const Downloads: React.FC = () => {
         </div>
       ) : filtered.length > 0 ? (
         <div className="border border-[#4B1F7A]/15 bg-[#FAF7F0] rounded-sm shadow-editorial overflow-hidden">
-          <div className="overflow-x-auto">
+          {/* Mobile Card List (no horizontal table scrolling) */}
+          <div className="md:hidden divide-y divide-[#4B1F7A]/10">
+            {filtered.map((item) => (
+              <div key={item.id} className="p-4 space-y-3">
+                <div className="flex items-start justify-between gap-2">
+                  <h3 className="font-serif text-base font-semibold text-[#1B1226] leading-snug">
+                    {item.title}
+                  </h3>
+                  <span className="font-mono text-[10px] tracking-wider px-2 py-0.5 border border-[#B8923A]/60 rounded-sm text-[#9C7A2B] uppercase font-bold shrink-0">
+                    {item.fileType}
+                  </span>
+                </div>
+                <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-[#1B1226]/65">
+                  <span>{getDownloadCategoryLabel(item.category)}</span>
+                  <span aria-hidden="true">·</span>
+                  <span>{formatThaiDate(item.createdAt, true)}</span>
+                </div>
+                <div className="grid grid-cols-2 gap-2 pt-1">
+                  <button
+                    type="button"
+                    onClick={() => openPreview(item)}
+                    className="w-full inline-flex items-center justify-center gap-1 px-3 py-2 border border-[#B8923A] text-[#9C7A2B] hover:bg-[#EDE6F5] rounded-sm text-xs font-medium transition-colors"
+                  >
+                    <span>เปิดดู</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => triggerDownload(item)}
+                    disabled={downloadingId === item.id}
+                    className="w-full inline-flex items-center justify-center gap-1.5 px-3 py-2 bg-[#4B1F7A] text-[#FAF7F0] hover:bg-[#2A1245] transition-colors rounded-sm text-xs font-medium shadow-editorial-sm disabled:opacity-60"
+                  >
+                    <span>{downloadingId === item.id ? 'กำลังเตรียม...' : 'ดาวน์โหลด'}</span>
+                    <span className="text-[10px] opacity-75">({formatNumber(item.downloads)})</span>
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Desktop Table */}
+          <div className="hidden md:block overflow-x-auto">
             <table className="w-full text-left text-xs">
               <thead className="bg-[#EDE6F5]/50 border-b border-[#4B1F7A]/15 text-[#9C7A2B] uppercase tracking-wider font-medium">
                 <tr>
@@ -356,18 +396,18 @@ export const Downloads: React.FC = () => {
             </div>
 
             {/* Modal Action Footer Toolbar */}
-            <div className="p-4 bg-white border-t border-[#4B1F7A]/15 flex flex-wrap items-center justify-between gap-3 text-xs">
+            <div className="p-3 sm:p-4 bg-white border-t border-[#4B1F7A]/15 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
               <div className="text-[11px] text-[#1B1226]/60">
                 เผยแพร่เมื่อ {formatThaiDate(previewItem.createdAt, true)} · ดาวน์โหลดแล้ว {previewItem.downloads} ครั้ง
               </div>
 
-              <div className="flex items-center gap-3">
+              <div className="flex flex-wrap items-center gap-2 sm:gap-3">
                 {/* Print Button */}
                 <button
                   type="button"
                   onClick={handlePrint}
                   disabled={!previewUrl}
-                  className="inline-flex items-center gap-1.5 px-4 py-2 border border-[#B8923A] text-[#2A1245] hover:bg-[#EDE6F5] rounded-sm font-medium transition-colors disabled:opacity-50"
+                  className="inline-flex items-center justify-center gap-1.5 px-3 sm:px-4 py-2 border border-[#B8923A] text-[#2A1245] hover:bg-[#EDE6F5] rounded-sm font-medium transition-colors disabled:opacity-50"
                 >
                   <span>🖨️</span>
                   <span>พิมพ์เอกสาร</span>
@@ -379,7 +419,7 @@ export const Downloads: React.FC = () => {
                     href={previewUrl}
                     target="_blank"
                     rel="noreferrer"
-                    className="inline-flex items-center gap-1 px-3 py-2 border border-stone-300 hover:bg-stone-50 rounded-sm text-stone-700 transition-colors"
+                    className="inline-flex items-center justify-center gap-1 px-3 py-2 border border-stone-300 hover:bg-stone-50 rounded-sm text-stone-700 transition-colors"
                   >
                     <span>↗ เปิดหน้าต่างใหม่</span>
                   </a>
@@ -390,7 +430,7 @@ export const Downloads: React.FC = () => {
                   type="button"
                   onClick={() => triggerDownload(previewItem, previewUrl)}
                   disabled={!previewUrl}
-                  className="inline-flex items-center gap-1.5 px-5 py-2 bg-[#4B1F7A] text-white hover:bg-[#2A1245] rounded-sm font-medium shadow-editorial transition-colors disabled:opacity-50"
+                  className="flex-1 sm:flex-none inline-flex items-center justify-center gap-1.5 px-4 sm:px-5 py-2 bg-[#4B1F7A] text-white hover:bg-[#2A1245] rounded-sm font-medium shadow-editorial transition-colors disabled:opacity-50"
                 >
                   <span>⬇ ดาวน์โหลดไฟล์</span>
                 </button>

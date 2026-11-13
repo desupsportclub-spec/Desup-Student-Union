@@ -79,9 +79,9 @@ export const TrackComplaint: React.FC = () => {
   const currentStageIndex = complaint ? getStageIndex(complaint.status) : 0;
 
   return (
-    <div className="max-w-[840px] mx-auto px-6 py-10 space-y-12">
+    <div className="max-w-[840px] mx-auto px-4 sm:px-6 py-6 sm:py-10 space-y-8 sm:space-y-12">
       {/* Header */}
-      <div className="border-b border-[#B8923A]/30 pb-6 text-center max-w-xl mx-auto space-y-2">
+      <div className="border-b border-[#B8923A]/30 pb-5 sm:pb-6 text-center max-w-xl mx-auto space-y-2">
         <SectionEyebrow enText="STATUS TRACKING" thText="ติดตามสถานะเรื่องร้องเรียน" />
         <h1 className="font-serif text-3xl md:text-4xl font-semibold text-[#1B1226]">
           ตรวจสอบความคืบหน้า
@@ -92,7 +92,7 @@ export const TrackComplaint: React.FC = () => {
       </div>
 
       {/* Code Input Box */}
-      <div className="bg-[#FAF7F0] border border-[#B8923A]/40 p-6 md:p-8 rounded-sm shadow-editorial">
+      <div className="bg-[#FAF7F0] border border-[#B8923A]/40 p-4 sm:p-6 md:p-8 rounded-sm shadow-editorial">
         <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-3">
           <input
             type="text"
@@ -125,14 +125,14 @@ export const TrackComplaint: React.FC = () => {
 
       {/* Complaint Status & Timeline Result */}
       {complaint && (
-        <div className="bg-[#FAF7F0] border border-[#4B1F7A]/20 p-6 md:p-10 rounded-sm shadow-editorial space-y-8 relative">
+        <div className="bg-[#FAF7F0] border border-[#4B1F7A]/20 p-5 sm:p-6 md:p-10 rounded-sm shadow-editorial space-y-6 sm:space-y-8 relative">
           <CornerBracket position="top-left" />
           <CornerBracket position="top-right" />
           <CornerBracket position="bottom-left" />
           <CornerBracket position="bottom-right" />
 
           {/* Title & Metadata */}
-          <div className="border-b border-[#4B1F7A]/15 pb-6 space-y-2">
+          <div className="border-b border-[#4B1F7A]/15 pb-5 sm:pb-6 space-y-2">
             <div className="flex flex-wrap items-center justify-between gap-2">
               <span className="font-mono text-xs font-bold text-[#9C7A2B] tracking-wider">
                 รหัส: {complaint.trackingCode}
@@ -140,11 +140,11 @@ export const TrackComplaint: React.FC = () => {
               <ComplaintStatusBadge status={complaint.status} />
             </div>
 
-            <h2 className="font-serif text-2xl font-semibold text-[#1B1226] pt-1">
+            <h2 className="font-serif text-xl sm:text-2xl font-semibold text-[#1B1226] pt-1">
               {complaint.title}
             </h2>
 
-            <div className="text-xs text-[#1B1226]/60 flex flex-wrap gap-4 pt-1">
+            <div className="text-xs text-[#1B1226]/60 flex flex-wrap gap-x-3 gap-y-1 pt-1">
               <span>สถานที่: {complaint.location || 'ไม่ระบุ'}</span>
               <span>·</span>
               <span>ส่งเมื่อ: {formatThaiDateTime(complaint.createdAt)}</span>

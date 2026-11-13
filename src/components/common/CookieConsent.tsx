@@ -98,7 +98,7 @@ export const CookieConsent: React.FC = () => {
           exit={{ opacity: 0, y: 40, scale: 0.96 }}
           transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
           aria-label="การตั้งค่าคุกกี้และความเป็นส่วนตัว"
-          className="fixed bottom-4 left-4 right-4 md:left-auto md:right-8 md:max-w-lg z-50 bg-[#2A1245] text-[#FAF7F0] border-2 border-[#B8923A] p-5 sm:p-6 rounded-sm shadow-2xl"
+          className="fixed bottom-3 left-3 right-3 sm:bottom-4 sm:left-4 sm:right-4 md:left-auto md:right-8 md:max-w-lg z-50 bg-[#2A1245] text-[#FAF7F0] border-2 border-[#B8923A] p-4 sm:p-6 rounded-sm shadow-2xl"
         >
           <CornerBracket position="top-left" />
           <CornerBracket position="top-right" />
@@ -156,16 +156,16 @@ export const CookieConsent: React.FC = () => {
               </div>
             )}
 
-            <div className="pt-2 flex flex-wrap items-center justify-between gap-3">
+            <div className="pt-2 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <button
                 type="button"
                 onClick={() => setShowDetails(!showDetails)}
-                className="text-[11px] text-[#D9B867] hover:underline"
+                className="text-[11px] text-[#D9B867] hover:underline text-left"
               >
                 {showDetails ? 'ซ่อนรายละเอียด' : 'ตั้งค่า / ดูรายละเอียดคุกกี้'}
               </button>
 
-              <div className="flex items-center gap-2">
+              <div className="flex flex-wrap items-center justify-end gap-2">
                 {showDetails ? (
                   <button
                     type="button"

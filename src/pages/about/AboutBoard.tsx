@@ -62,9 +62,9 @@ export const AboutBoard: React.FC = () => {
   const boardMembers = allBoard.filter((m) => m.yearTH === selectedYear);
 
   return (
-    <div className="max-w-[1240px] mx-auto px-6 md:px-12 py-10 space-y-10">
+    <div className="max-w-[1240px] mx-auto px-4 sm:px-6 md:px-12 py-6 sm:py-10 space-y-6 sm:space-y-10">
       {/* Header */}
-      <div className="border-b border-[#B8923A]/30 pb-6 flex flex-col md:flex-row md:items-end justify-between gap-4">
+      <div className="border-b border-[#B8923A]/30 pb-5 sm:pb-6 flex flex-col md:flex-row md:items-end justify-between gap-4">
         <div>
           <SectionEyebrow enText="BOARD & LEADERSHIP" thText="คณะกรรมการองค์การนักเรียน" />
           <h1 className="font-serif text-3xl md:text-4xl font-semibold text-[#1B1226] mt-2">
@@ -99,9 +99,9 @@ export const AboutBoard: React.FC = () => {
 
       {/* Board Members Grid */}
       {loading ? (
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-6">
           {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
-            <div key={i} className="animate-pulse space-y-3 p-4 border border-stone-200 rounded-sm">
+            <div key={i} className="animate-pulse space-y-3 p-3 sm:p-4 border border-stone-200 rounded-sm">
               <div className="aspect-[4/5] bg-stone-200 rounded-sm" />
               <div className="h-4 bg-stone-200 rounded w-2/3" />
               <div className="h-3 bg-stone-200 rounded w-1/2" />
@@ -109,11 +109,11 @@ export const AboutBoard: React.FC = () => {
           ))}
         </div>
       ) : boardMembers.length > 0 ? (
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-6">
           {boardMembers.map((member) => (
             <div
               key={member.id}
-              className="group relative bg-[#FAF7F0] border border-[#4B1F7A]/15 p-4 rounded-sm shadow-editorial transition-all duration-300 hover:border-[#B8923A]/70 text-center flex flex-col justify-between"
+              className="group relative bg-[#FAF7F0] border border-[#4B1F7A]/15 p-3 sm:p-4 rounded-sm shadow-editorial transition-all duration-300 hover:border-[#B8923A]/70 text-center flex flex-col justify-between"
             >
               <CornerBracket position="top-left" />
               <CornerBracket position="top-right" />
@@ -121,7 +121,7 @@ export const AboutBoard: React.FC = () => {
               <CornerBracket position="bottom-right" />
 
               <div>
-                <div className="aspect-[4/5] bg-stone-100 rounded-sm overflow-hidden mb-4 border border-stone-200">
+                <div className="aspect-[4/5] bg-stone-100 rounded-sm overflow-hidden mb-3 sm:mb-4 border border-stone-200">
                   {member.photo?.url || member.photoUrl ? (
                     <img
                       src={member.photo?.url || member.photoUrl}

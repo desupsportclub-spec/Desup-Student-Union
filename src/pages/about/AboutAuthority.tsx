@@ -188,9 +188,9 @@ export const AboutAuthority: React.FC = () => {
   const [openIndex, setOpenIndex] = useState<number | null>(0);
 
   return (
-    <div className="max-w-[960px] mx-auto px-6 py-10 space-y-12">
+    <div className="max-w-[960px] mx-auto px-4 sm:px-6 py-6 sm:py-10 space-y-8 sm:space-y-12">
       {/* Header */}
-      <div className="border-b border-[#B8923A]/30 pb-8 text-center max-w-2xl mx-auto space-y-2.5">
+      <div className="border-b border-[#B8923A]/30 pb-6 sm:pb-8 text-center max-w-2xl mx-auto space-y-2.5">
         <SectionEyebrow enText="CHARTER & POWERS" thText="อำนาจหน้าที่และธรรมนูญ" />
         <h1 className="font-serif text-3xl md:text-4xl font-semibold text-[#1B1226]">
           อำนาจหน้าที่และประกาศองค์การนักเรียน
@@ -205,19 +205,19 @@ export const AboutAuthority: React.FC = () => {
         {CHAPTERS.map((chapter, index) => {
           const isOpen = openIndex === index;
           return (
-            <div key={chapter.number} className="py-5">
+            <div key={chapter.number} className="py-4 sm:py-5">
               <button
                 type="button"
                 onClick={() => setOpenIndex(isOpen ? null : index)}
-                className="w-full flex items-center justify-between gap-4 text-left py-1.5 group focus:outline-none"
+                className="w-full flex items-center justify-between gap-3 sm:gap-4 text-left py-1.5 group focus:outline-none"
                 aria-expanded={isOpen}
               >
                 <div className="flex flex-col sm:flex-row sm:items-baseline gap-1 sm:gap-5 min-w-0">
-                  <span className="font-serif text-sm text-[#9C7A2B] font-semibold shrink-0 w-24">
+                  <span className="font-serif text-xs sm:text-sm text-[#9C7A2B] font-semibold shrink-0 sm:w-24">
                     {chapter.number}
                   </span>
                   <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-                    <h2 className="font-serif text-lg md:text-xl font-semibold text-[#1B1226] group-hover:text-[#4B1F7A] transition-colors">
+                    <h2 className="font-serif text-base sm:text-lg md:text-xl font-semibold text-[#1B1226] group-hover:text-[#4B1F7A] transition-colors">
                       {chapter.title}
                     </h2>
                     <span className="text-xs text-[#1B1226]/50 font-sans">
