@@ -59,11 +59,6 @@ export const AdminLogin: React.FC = () => {
               </svg>
               <span>{loading ? 'กำลังเข้าสู่ระบบ...' : 'เข้าสู่ระบบด้วย Google Account'}</span>
             </button>
-
-            <div className="p-3 bg-stone-50 border border-stone-200 rounded-sm text-[11px] text-[#1B1226]/60 leading-relaxed text-left">
-              🔒 <strong>สิทธิ์ผู้ดูแลระบบ:</strong> เฉพาะบัญชี Google ที่ได้รับการแต่งตั้งจากองค์การนักเรียนเท่านั้น
-              (อีเมลเริ่มต้นที่ได้รับสิทธิ์อัตโนมัติ: <code className="text-[#4B1F7A]">{SITE_CONFIG.bootstrapAdmins[0]}</code>)
-            </div>
           </div>
         )}
 
