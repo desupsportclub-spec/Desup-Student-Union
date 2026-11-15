@@ -13,7 +13,14 @@ import { formatThaiDate, formatNumber } from '../lib/format';
 import { NewsCategoryBadge } from '../components/common/StatusBadge';
 import { SectionEyebrow, SectionDivider } from '../components/common/Ornament';
 import { Emblem } from '../components/common/Emblem';
-import { SocialMediaList, detectSocialPlatform } from '../components/news/SocialMediaEmbed';
+import {
+  SocialMediaEmbed,
+  SocialMediaList,
+  detectSocialPlatform,
+  getNewsCoverUrl,
+  getNewsYouTubeUrl,
+  isYouTubeThumbnailUrl,
+} from '../components/news/SocialMediaEmbed';
 import Lightbox from 'yet-another-react-lightbox';
 import 'yet-another-react-lightbox/styles.css';
 
@@ -157,6 +164,14 @@ export const NewsDetail: React.FC = () => {
       .map((u) => ({ platform: detectSocialPlatform(u), url: u })),
   ];
 
+  const primaryYouTubeUrl = getNewsYouTubeUrl({
+    videoUrl: news.videoUrl,
+    socialLinks: combinedSocialLinks,
+  });
+  const explicitCover = news.coverImage?.url || news.coverUrl || '';
+  const hasCustomCover = Boolean(explicitCover && !isYouTubeThumbnailUrl(explicitCover));
+  const showHeroYouTube = Boolean(primaryYouTubeUrl && (news.category === 'video' || !hasCustomCover));
+
   return (
     <article className="py-6 sm:py-12">
       <div className="max-w-[760px] mx-auto px-4 sm:px-6 space-y-6 sm:space-y-8">
@@ -210,18 +225,20 @@ export const NewsDetail: React.FC = () => {
           </div>
         </div>
 
-        {/* Cover Photo */}
-        {(news.coverImage?.url || news.coverUrl) && (
+        {/* Hero Media: Live YouTube Player (when video post or no custom cover) OR Cover Photo */}
+        {showHeroYouTube && primaryYouTubeUrl ? (
+          <SocialMediaEmbed url={primaryYouTubeUrl} title={news.title} eagerYouTube />
+        ) : explicitCover ? (
           <div className="aspect-[16/9] overflow-hidden rounded-sm border border-[#4B1F7A]/20 shadow-editorial bg-stone-100">
             <img
-              src={news.coverImage?.url || news.coverUrl}
+              src={explicitCover}
               alt={news.coverImage?.alt || news.title}
               decoding="async"
               fetchPriority="high"
               className="w-full h-full object-cover"
             />
           </div>
-        )}
+        ) : null}
 
         {/* Excerpt if present */}
         {news.excerpt && (
@@ -243,6 +260,7 @@ export const NewsDetail: React.FC = () => {
               videoUrl={news.videoUrl}
               socialLinks={combinedSocialLinks}
               title={news.title}
+              excludeUrl={showHeroYouTube ? primaryYouTubeUrl || undefined : undefined}
             />
           </div>
         )}
@@ -320,9 +338,9 @@ export const NewsDetail: React.FC = () => {
                   className="group block border border-[#4B1F7A]/15 p-3 rounded-sm hover:border-[#B8923A] transition-colors"
                 >
                   <div className="aspect-[16/9] bg-stone-100 rounded-sm overflow-hidden mb-2">
-                    {item.coverImage?.url || item.coverUrl ? (
+                    {getNewsCoverUrl(item) ? (
                       <img
-                        src={item.coverImage?.url || item.coverUrl}
+                        src={getNewsCoverUrl(item) || ''}
                         alt={item.title}
                         loading="lazy"
                         decoding="async"

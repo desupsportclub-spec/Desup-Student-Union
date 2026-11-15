@@ -11,6 +11,7 @@ import { formatThaiDate, formatNumber } from '../lib/format';
 import { NewsCategoryBadge } from '../components/common/StatusBadge';
 import { SectionEyebrow, CornerBracket } from '../components/common/Ornament';
 import { Emblem } from '../components/common/Emblem';
+import { getNewsCoverUrl, getNewsYouTubeUrl } from '../components/news/SocialMediaEmbed';
 
 const CATEGORIES: { id: string; label: string; en: string }[] = [
   { id: 'all', label: 'ทั้งหมด', en: 'ALL' },
@@ -171,9 +172,9 @@ export const News: React.FC = () => {
 
               <div>
                 <div className="aspect-[16/9] bg-stone-100 overflow-hidden mb-4 rounded-sm relative">
-                  {item.coverImage?.url || item.coverUrl ? (
+                  {getNewsCoverUrl(item) ? (
                     <img
-                      src={item.coverImage?.url || item.coverUrl}
+                      src={getNewsCoverUrl(item) || ''}
                       alt={item.title}
                       className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.04]"
                       loading={idx < 3 ? 'eager' : 'lazy'}
@@ -185,8 +186,8 @@ export const News: React.FC = () => {
                     </div>
                   )}
 
-                  {item.category === 'video' && (
-                    <div className="absolute inset-0 bg-black/30 flex items-center justify-center">
+                  {(item.category === 'video' || getNewsYouTubeUrl(item)) && (
+                    <div className="absolute inset-0 bg-black/25 flex items-center justify-center">
                       <div className="w-10 h-10 rounded-full bg-[#B8923A] text-white flex items-center justify-center shadow-lg">
                         ▶
                       </div>
@@ -195,7 +196,12 @@ export const News: React.FC = () => {
                 </div>
 
                 <div className="space-y-2">
-                  <div className="flex items-center gap-2 text-[11px] text-[#1B1226]/60">
+                  <div className="flex flex-wrap items-center gap-2 text-[11px] text-[#1B1226]/60">
+                    {item.pinned && (
+                      <span className="px-1.5 py-0.5 rounded-sm bg-[#4B1F7A] text-[#FAF7F0] text-[10px] font-medium">
+                        📌 ปักหมุด
+                      </span>
+                    )}
                     <NewsCategoryBadge category={item.category} />
                     <span aria-hidden="true">·</span>
                     <span>{formatThaiDate(item.createdAt, true)}</span>

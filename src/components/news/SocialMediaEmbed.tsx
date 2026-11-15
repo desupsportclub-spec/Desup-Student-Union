@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import { SocialMediaLink, SocialPlatform } from '../../types';
 
 export function detectSocialPlatform(url: string): SocialPlatform {
@@ -15,24 +15,120 @@ export function detectSocialPlatform(url: string): SocialPlatform {
   return 'other';
 }
 
-function getYouTubeEmbedUrl(url: string): string | null {
+export function extractYouTubeVideoId(url?: string): string | null {
+  if (!url) return null;
+  const trimmed = url.trim();
+  if (!trimmed) return null;
+
   try {
-    const u = new URL(url);
-    if (u.hostname.includes('youtu.be')) {
+    const u = new URL(trimmed);
+    const host = u.hostname.toLowerCase();
+    if (host.includes('youtu.be')) {
       const id = u.pathname.replace(/^\//, '').split('/')[0];
-      return id ? `https://www.youtube.com/embed/${id}` : null;
+      return id && /^[a-zA-Z0-9_-]{6,}$/.test(id) ? id : null;
     }
-    if (u.pathname.includes('/shorts/')) {
-      const id = u.pathname.split('/shorts/')[1]?.split('/')[0];
-      return id ? `https://www.youtube.com/embed/${id}` : null;
+    if (host.includes('youtube.com') || host.includes('youtube-nocookie.com')) {
+      if (u.pathname.includes('/shorts/')) {
+        const id = u.pathname.split('/shorts/')[1]?.split('/')[0];
+        return id && /^[a-zA-Z0-9_-]{6,}$/.test(id) ? id : null;
+      }
+      if (u.pathname.includes('/live/')) {
+        const id = u.pathname.split('/live/')[1]?.split('/')[0];
+        return id && /^[a-zA-Z0-9_-]{6,}$/.test(id) ? id : null;
+      }
+      if (u.pathname.includes('/embed/')) {
+        const id = u.pathname.split('/embed/')[1]?.split('/')[0];
+        return id && /^[a-zA-Z0-9_-]{6,}$/.test(id) ? id : null;
+      }
+      const v = u.searchParams.get('v');
+      return v && /^[a-zA-Z0-9_-]{6,}$/.test(v) ? v : null;
     }
-    if (u.pathname.includes('/embed/')) {
-      return url;
-    }
-    const v = u.searchParams.get('v');
-    return v ? `https://www.youtube.com/embed/${v}` : null;
+    return null;
+  } catch {
+    const match = trimmed.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|shorts\/|embed\/|live\/))([a-zA-Z0-9_-]{6,})/i);
+    return match?.[1] || null;
+  }
+}
+
+export function getYouTubeEmbedUrl(url: string, autoplay = false): string | null {
+  const id = extractYouTubeVideoId(url);
+  if (!id) return null;
+  return `https://www.youtube.com/embed/${id}?rel=0${autoplay ? '&autoplay=1' : ''}`;
+}
+
+export function getYouTubeThumbnailUrl(
+  url?: string,
+  quality: 'hqdefault' | 'mqdefault' | 'sddefault' | 'maxresdefault' = 'hqdefault'
+): string | null {
+  const id = extractYouTubeVideoId(url);
+  if (!id) return null;
+  return `https://i.ytimg.com/vi/${id}/${quality}.jpg`;
+}
+
+export function getNewsYouTubeUrl(item: {
+  videoUrl?: string;
+  socialLinks?: SocialMediaLink[];
+}): string | null {
+  if (item.videoUrl && detectSocialPlatform(item.videoUrl) === 'youtube' && extractYouTubeVideoId(item.videoUrl)) {
+    return item.videoUrl.trim();
+  }
+  const ytLink = item.socialLinks?.find(
+    (s) => s.url && detectSocialPlatform(s.url) === 'youtube' && extractYouTubeVideoId(s.url)
+  );
+  return ytLink?.url?.trim() || null;
+}
+
+export function getNewsCoverUrl(item: {
+  coverImage?: { url?: string };
+  coverUrl?: string;
+  videoUrl?: string;
+  socialLinks?: SocialMediaLink[];
+}): string | null {
+  const explicit = item.coverImage?.url || item.coverUrl;
+  if (explicit && explicit.trim()) return explicit.trim();
+  const ytUrl = getNewsYouTubeUrl(item);
+  return ytUrl ? getYouTubeThumbnailUrl(ytUrl, 'hqdefault') : null;
+}
+
+export function isYouTubeThumbnailUrl(url?: string): boolean {
+  if (!url) return false;
+  return url.includes('i.ytimg.com/vi/') || url.includes('img.youtube.com/vi/');
+}
+
+export interface YouTubeOEmbedMeta {
+  title: string;
+  authorName: string;
+  thumbnailUrl: string;
+}
+
+export async function fetchYouTubeOEmbed(url: string): Promise<YouTubeOEmbedMeta | null> {
+  const id = extractYouTubeVideoId(url);
+  if (!id) return null;
+
+  const canonical = `https://www.youtube.com/watch?v=${id}`;
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 5000);
+
+  try {
+    const res = await fetch(
+      `https://www.youtube.com/oembed?url=${encodeURIComponent(canonical)}&format=json`,
+      { signal: controller.signal }
+    );
+    if (!res.ok) return null;
+    const data = (await res.json()) as {
+      title?: string;
+      author_name?: string;
+      thumbnail_url?: string;
+    };
+    return {
+      title: data.title || '',
+      authorName: data.author_name || '',
+      thumbnailUrl: data.thumbnail_url || `https://i.ytimg.com/vi/${id}/hqdefault.jpg`,
+    };
   } catch {
     return null;
+  } finally {
+    clearTimeout(timeoutId);
   }
 }
 
@@ -126,11 +222,66 @@ const PlatformIcon: React.FC<{ platform: SocialPlatform }> = ({ platform }) => {
   }
 };
 
+export const YouTubeLitePlayer: React.FC<{
+  url: string;
+  title?: string;
+  eagerEmbed?: boolean;
+  className?: string;
+}> = ({ url, title = 'วิดีโอ YouTube', eagerEmbed = false, className = '' }) => {
+  const [playing, setPlaying] = useState(eagerEmbed);
+  const videoId = extractYouTubeVideoId(url);
+  if (!videoId) return null;
+
+  const thumbUrl = `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`;
+  const embedSrc = getYouTubeEmbedUrl(url, !eagerEmbed && playing);
+
+  return (
+    <div className={`aspect-video w-full rounded-sm overflow-hidden border border-[#B8923A]/40 shadow-editorial bg-black relative ${className}`}>
+      {playing && embedSrc ? (
+        <iframe
+          src={embedSrc}
+          title={title}
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+          allowFullScreen
+          className="w-full h-full border-0"
+        />
+      ) : (
+        <button
+          type="button"
+          onClick={() => setPlaying(true)}
+          aria-label={`เล่นวิดีโอ: ${title}`}
+          className="group relative w-full h-full block text-left focus:outline-none cursor-pointer"
+        >
+          <img
+            src={thumbUrl}
+            alt={title}
+            loading="lazy"
+            decoding="async"
+            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-black/15 to-black/10 group-hover:bg-black/30 transition-colors flex items-center justify-center">
+            <div className="w-14 h-10 sm:w-16 sm:h-11 rounded-xl bg-[#FF0000]/95 group-hover:bg-[#FF0000] group-hover:scale-105 transition-all flex items-center justify-center shadow-xl border border-white/25">
+              <svg viewBox="0 0 24 24" className="w-6 h-6 text-white fill-current ml-0.5" aria-hidden="true">
+                <path d="M8 5v14l11-7z" />
+              </svg>
+            </div>
+          </div>
+          <span className="absolute top-2.5 left-2.5 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-sm bg-black/75 text-white text-[10px] font-medium tracking-wide border border-white/15">
+            <span className="w-1.5 h-1.5 rounded-full bg-red-500" />
+            YouTube
+          </span>
+        </button>
+      )}
+    </div>
+  );
+};
+
 interface SocialMediaEmbedProps {
   url: string;
   platform?: SocialPlatform;
   title?: string;
   label?: string;
+  eagerYouTube?: boolean;
 }
 
 export const SocialMediaEmbed: React.FC<SocialMediaEmbedProps> = ({
@@ -138,6 +289,7 @@ export const SocialMediaEmbed: React.FC<SocialMediaEmbedProps> = ({
   platform,
   title = 'สื่อประชาสัมพันธ์',
   label,
+  eagerYouTube = true,
 }) => {
   if (!url || !url.trim()) return null;
 
@@ -151,15 +303,7 @@ export const SocialMediaEmbed: React.FC<SocialMediaEmbedProps> = ({
     if (embedSrc) {
       return (
         <div className="space-y-2">
-          <div className="aspect-video w-full rounded-sm overflow-hidden border border-[#B8923A]/40 shadow-editorial bg-black">
-            <iframe
-              src={embedSrc}
-              title={title}
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-              allowFullScreen
-              className="w-full h-full"
-            />
-          </div>
+          <YouTubeLitePlayer url={cleanUrl} title={title} eagerEmbed={eagerYouTube} />
           <div className="flex justify-end">
             <a
               href={cleanUrl}
@@ -280,20 +424,30 @@ export const SocialMediaList: React.FC<{
   videoUrl?: string;
   socialLinks?: SocialMediaLink[];
   title?: string;
-}> = ({ videoUrl, socialLinks, title }) => {
+  excludeUrl?: string;
+}> = ({ videoUrl, socialLinks, title, excludeUrl }) => {
   const combined: SocialMediaLink[] = [];
   const seen = new Set<string>();
+  const excludedId = excludeUrl ? extractYouTubeVideoId(excludeUrl) : null;
+
+  const shouldSkip = (raw: string): boolean => {
+    if (excludeUrl && raw === excludeUrl.trim()) return true;
+    if (excludedId && extractYouTubeVideoId(raw) === excludedId) return true;
+    return false;
+  };
 
   if (videoUrl && videoUrl.trim()) {
     const clean = videoUrl.trim();
-    seen.add(clean);
-    combined.push({ platform: detectSocialPlatform(clean), url: clean });
+    if (!shouldSkip(clean)) {
+      seen.add(clean);
+      combined.push({ platform: detectSocialPlatform(clean), url: clean });
+    }
   }
 
   if (Array.isArray(socialLinks)) {
     for (const item of socialLinks) {
       const clean = item.url?.trim();
-      if (clean && !seen.has(clean)) {
+      if (clean && !seen.has(clean) && !shouldSkip(clean)) {
         seen.add(clean);
         combined.push({
           platform: item.platform || detectSocialPlatform(clean),

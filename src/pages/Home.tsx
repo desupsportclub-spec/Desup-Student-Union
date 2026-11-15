@@ -28,24 +28,36 @@ import { NewsCategoryBadge } from '../components/common/StatusBadge';
 import { Emblem } from '../components/common/Emblem';
 import { HeroBannerSlider } from '../components/home/HeroBannerSlider';
 import { useSiteSettings } from '../context/SiteSettingsContext';
+import {
+  getNewsCoverUrl,
+  getNewsYouTubeUrl,
+  YouTubeLitePlayer,
+} from '../components/news/SocialMediaEmbed';
 
-function pickFeaturedAndRecent(newsList: NewsItem[]) {
+function splitHomeNews(newsList: NewsItem[]) {
   if (newsList.length === 0) {
-    return { featured: null, recent: [], photos: [] };
+    return { featured: null, recent: [], pinnedList: [], photos: [] };
   }
-  const pinned = newsList.find((n) => n.pinned) || newsList[0];
-  const recent = newsList.filter((n) => n.id !== pinned.id).slice(0, 4);
+
+  const pinnedList = newsList.filter((n) => n.pinned);
+  const unpinned = newsList.filter((n) => !n.pinned);
+  // Keep latest non-pinned post(s) in top area when available; otherwise fall back to full list
+  const topPool = unpinned.length > 0 ? unpinned : newsList;
+  const featured = topPool[0] || null;
+  const recent = featured ? topPool.filter((n) => n.id !== featured.id).slice(0, 4) : [];
+
   const photos: { src: string; title: string }[] = [];
   newsList
     .filter((n) => n.category === 'activity')
     .slice(0, 6)
     .forEach((item) => {
-      const src = item.coverImage?.url || item.coverUrl;
+      const src = getNewsCoverUrl(item);
       if (src) {
         photos.push({ src, title: item.title });
       }
     });
-  return { featured: pinned, recent, photos };
+
+  return { featured, recent, pinnedList, photos };
 }
 
 function resolvePresident(peopleList: PersonItem[]): PersonItem | null {
@@ -70,13 +82,14 @@ export const Home: React.FC = () => {
   const { academicYearTH, presidentHeadline, presidentMessage, totalVisits } = useSiteSettings();
 
   const initialNews = getCachedNewsSync();
-  const initialNewsSplit = initialNews ? pickFeaturedAndRecent(initialNews) : null;
+  const initialNewsSplit = initialNews ? splitHomeNews(initialNews) : null;
   const initialEvents = getCachedEventsSync();
   const initialPeople = getCachedPeopleSync();
 
   const [banners, setBanners] = useState<BannerItem[]>(() => getCachedBannersSync() || []);
   const [featuredNews, setFeaturedNews] = useState<NewsItem | null>(() => initialNewsSplit?.featured || null);
   const [recentNews, setRecentNews] = useState<NewsItem[]>(() => initialNewsSplit?.recent || []);
+  const [pinnedNews, setPinnedNews] = useState<NewsItem[]>(() => initialNewsSplit?.pinnedList || []);
   const [newsLoading, setNewsLoading] = useState<boolean>(() => !initialNews);
   const [upcomingEvents, setUpcomingEvents] = useState<EventItem[]>(() => (initialEvents ? initialEvents.slice(0, 6) : []));
   const [president, setPresident] = useState<PersonItem | null>(() => (initialPeople ? resolvePresident(initialPeople) : null));
@@ -96,9 +109,10 @@ export const Home: React.FC = () => {
   const [emblaRef] = useEmblaCarousel({ align: 'start', loop: false, dragFree: true });
 
   const applyNewsList = useCallback((newsList: NewsItem[]) => {
-    const { featured, recent, photos } = pickFeaturedAndRecent(newsList);
+    const { featured, recent, pinnedList, photos } = splitHomeNews(newsList);
     setFeaturedNews(featured);
     setRecentNews(recent);
+    setPinnedNews(pinnedList);
     setGalleryPhotos(photos);
     setNewsLoading(false);
   }, []);
@@ -220,9 +234,9 @@ export const Home: React.FC = () => {
                 <CornerBracket position="bottom-right" />
 
                 <div className="aspect-[16/9] bg-stone-100 overflow-hidden mb-4 sm:mb-5 rounded-sm relative">
-                  {featuredNews.coverImage?.url || featuredNews.coverUrl ? (
+                  {getNewsCoverUrl(featuredNews) ? (
                     <img
-                      src={featuredNews.coverImage?.url || featuredNews.coverUrl}
+                      src={getNewsCoverUrl(featuredNews) || ''}
                       alt={featuredNews.title}
                       decoding="async"
                       fetchPriority="high"
@@ -231,6 +245,14 @@ export const Home: React.FC = () => {
                   ) : (
                     <div className="w-full h-full bg-[#EDE6F5] flex items-center justify-center text-[#4B1F7A]">
                       <Emblem size={64} />
+                    </div>
+                  )}
+
+                  {(featuredNews.category === 'video' || getNewsYouTubeUrl(featuredNews)) && (
+                    <div className="absolute inset-0 bg-black/20 flex items-center justify-center">
+                      <div className="w-12 h-12 rounded-full bg-[#B8923A] text-white flex items-center justify-center shadow-lg">
+                        ▶
+                      </div>
                     </div>
                   )}
                 </div>
@@ -258,39 +280,50 @@ export const Home: React.FC = () => {
             {/* Right 5 cols: 4 Vertical Secondary List Items */}
             <div className="lg:col-span-5 flex flex-col justify-between space-y-3 sm:space-y-4">
               {recentNews.length > 0 ? (
-                recentNews.map((item) => (
-                  <Link
-                    key={item.id}
-                    to={`/news/read/${item.id}`}
-                    className="group flex gap-3 sm:gap-4 p-3 sm:p-3.5 border border-[#4B1F7A]/10 hover:border-[#B8923A]/50 bg-[#FAF7F0] rounded-sm transition-all duration-300"
-                  >
-                    <div className="w-20 h-16 sm:w-24 sm:h-20 bg-stone-100 rounded-sm shrink-0 overflow-hidden">
-                      {item.coverImage?.url || item.coverUrl ? (
-                        <img
-                          src={item.coverImage?.url || item.coverUrl}
-                          alt={item.title}
-                          loading="lazy"
-                          decoding="async"
-                          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                        />
-                      ) : (
-                        <div className="w-full h-full bg-[#EDE6F5] flex items-center justify-center text-[#4B1F7A]/50">
-                          <Emblem size={28} />
-                        </div>
-                      )}
-                    </div>
-                    <div className="flex flex-col justify-center space-y-1 min-w-0">
-                      <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[11px] text-[#1B1226]/60">
-                        <NewsCategoryBadge category={item.category} />
-                        <span aria-hidden="true">·</span>
-                        <span>{formatThaiDate(item.createdAt, true)}</span>
+                recentNews.map((item) => {
+                  const thumb = getNewsCoverUrl(item);
+                  const hasVideo = item.category === 'video' || Boolean(getNewsYouTubeUrl(item));
+                  return (
+                    <Link
+                      key={item.id}
+                      to={`/news/read/${item.id}`}
+                      className="group flex gap-3 sm:gap-4 p-3 sm:p-3.5 border border-[#4B1F7A]/10 hover:border-[#B8923A]/50 bg-[#FAF7F0] rounded-sm transition-all duration-300"
+                    >
+                      <div className="w-20 h-16 sm:w-24 sm:h-20 bg-stone-100 rounded-sm shrink-0 overflow-hidden relative">
+                        {thumb ? (
+                          <img
+                            src={thumb}
+                            alt={item.title}
+                            loading="lazy"
+                            decoding="async"
+                            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                          />
+                        ) : (
+                          <div className="w-full h-full bg-[#EDE6F5] flex items-center justify-center text-[#4B1F7A]/50">
+                            <Emblem size={28} />
+                          </div>
+                        )}
+                        {hasVideo && (
+                          <div className="absolute inset-0 bg-black/25 flex items-center justify-center">
+                            <span className="w-6 h-6 rounded-full bg-[#B8923A] text-white text-[10px] flex items-center justify-center">
+                              ▶
+                            </span>
+                          </div>
+                        )}
                       </div>
-                      <h4 className="font-serif text-sm font-semibold text-[#1B1226] group-hover:text-[#4B1F7A] transition-colors line-clamp-2">
-                        {item.title}
-                      </h4>
-                    </div>
-                  </Link>
-                ))
+                      <div className="flex flex-col justify-center space-y-1 min-w-0">
+                        <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[11px] text-[#1B1226]/60">
+                          <NewsCategoryBadge category={item.category} />
+                          <span aria-hidden="true">·</span>
+                          <span>{formatThaiDate(item.createdAt, true)}</span>
+                        </div>
+                        <h4 className="font-serif text-sm font-semibold text-[#1B1226] group-hover:text-[#4B1F7A] transition-colors line-clamp-2">
+                          {item.title}
+                        </h4>
+                      </div>
+                    </Link>
+                  );
+                })
               ) : (
                 <div className="p-8 text-center border border-dashed border-[#4B1F7A]/20 rounded-sm text-xs text-[#1B1226]/60">
                   กำลังรอการเผยแพร่ข่าวสารเพิ่มเติม
@@ -302,6 +335,176 @@ export const Home: React.FC = () => {
           <div className="p-12 text-center border border-dashed border-[#4B1F7A]/25 rounded-sm bg-white/40">
             <p className="font-serif text-lg text-[#2A1245] mb-2">ยังไม่มีข่าวประชาสัมพันธ์ในขณะนี้</p>
             <p className="text-xs text-[#1B1226]/60">สามารถติดตามข่าวสารและการประกาศกิจกรรมที่จะอัปเดตผ่านหน้านี้เร็ว ๆ นี้</p>
+          </div>
+        )}
+
+        {/* ========================================================
+            ปักหมุดหน้าแรก (แสดงด้านล่างโพสต์ในข่าวสารและความเคลื่อนไหว ก่อน 02 TRANSPARENCY & IMPACT)
+           ======================================================== */}
+        {pinnedNews.length > 0 && (
+          <div className="mt-8 sm:mt-10 pt-7 sm:pt-9 border-t border-[#B8923A]/30 space-y-5">
+            <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-2">
+              <div className="space-y-1">
+                <div className="inline-flex items-center gap-2 text-[11px] tracking-[0.18em] uppercase font-semibold text-[#9C7A2B]">
+                  <span>📌 PINNED HIGHLIGHTS</span>
+                  <span>·</span>
+                  <span>ปักหมุดแนะนำบนหน้าแรก</span>
+                </div>
+                <h3 className="font-serif text-xl sm:text-2xl font-semibold text-[#2A1245]">
+                  เรื่องเด่นและวิดีโอปักหมุด
+                </h3>
+              </div>
+              <span className="text-xs text-[#1B1226]/60">
+                ปักหมุดทั้งหมด {pinnedNews.length} รายการ
+              </span>
+            </div>
+
+            {pinnedNews.length === 1 ? (
+              (() => {
+                const item = pinnedNews[0];
+                const ytUrl = getNewsYouTubeUrl(item);
+                const coverUrl = getNewsCoverUrl(item);
+                return (
+                  <div className="relative border border-[#B8923A]/45 bg-[#FAF7F0] p-4 sm:p-6 rounded-sm shadow-editorial">
+                    <CornerBracket position="top-left" />
+                    <CornerBracket position="top-right" />
+                    <CornerBracket position="bottom-left" />
+                    <CornerBracket position="bottom-right" />
+
+                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 sm:gap-6 items-center">
+                      <div className="lg:col-span-7">
+                        {ytUrl ? (
+                          <YouTubeLitePlayer url={ytUrl} title={item.title} />
+                        ) : coverUrl ? (
+                          <Link to={`/news/read/${item.id}`} className="block aspect-[16/9] bg-stone-100 rounded-sm overflow-hidden">
+                            <img
+                              src={coverUrl}
+                              alt={item.title}
+                              loading="lazy"
+                              decoding="async"
+                              className="w-full h-full object-cover hover:scale-[1.03] transition-transform duration-500"
+                            />
+                          </Link>
+                        ) : (
+                          <Link to={`/news/read/${item.id}`} className="aspect-[16/9] bg-[#EDE6F5] rounded-sm flex items-center justify-center text-[#4B1F7A]">
+                            <Emblem size={56} />
+                          </Link>
+                        )}
+                      </div>
+
+                      <div className="lg:col-span-5 space-y-3">
+                        <div className="flex flex-wrap items-center gap-2 text-xs text-[#1B1226]/65">
+                          <span className="px-2 py-0.5 rounded-sm bg-[#4B1F7A] text-[#FAF7F0] text-[10px] font-medium">
+                            📌 ปักหมุด
+                          </span>
+                          <NewsCategoryBadge category={item.category} />
+                          <span aria-hidden="true">·</span>
+                          <span>{formatThaiDate(item.createdAt, true)}</span>
+                        </div>
+
+                        <Link to={`/news/read/${item.id}`} className="block group">
+                          <h4 className="font-serif text-xl sm:text-2xl font-semibold text-[#1B1226] group-hover:text-[#4B1F7A] transition-colors leading-snug">
+                            {item.title}
+                          </h4>
+                        </Link>
+
+                        {item.excerpt && (
+                          <p className="text-xs sm:text-sm text-[#1B1226]/75 line-clamp-3 leading-relaxed">
+                            {item.excerpt}
+                          </p>
+                        )}
+
+                        <div className="pt-2 flex flex-wrap items-center justify-between gap-3 border-t border-[#4B1F7A]/10">
+                          <span className="text-xs text-[#1B1226]/55">
+                            อ่าน {formatNumber(item.views)} ครั้ง
+                          </span>
+                          <Link
+                            to={`/news/read/${item.id}`}
+                            className="inline-flex items-center gap-1.5 px-4 py-2 bg-[#4B1F7A] text-[#FAF7F0] hover:bg-[#2A1245] text-xs font-medium rounded-sm transition-colors"
+                          >
+                            <span>เปิดอ่านรายละเอียด</span>
+                            <span className="text-[#D9B867]">→</span>
+                          </Link>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })()
+            ) : (
+              <div
+                className={`grid grid-cols-1 gap-5 sm:gap-6 ${
+                  pinnedNews.length === 2 ? 'md:grid-cols-2' : 'md:grid-cols-2 lg:grid-cols-3'
+                }`}
+              >
+                {pinnedNews.map((item) => {
+                  const ytUrl = getNewsYouTubeUrl(item);
+                  const coverUrl = getNewsCoverUrl(item);
+                  return (
+                    <div
+                      key={item.id}
+                      className="relative border border-[#B8923A]/45 bg-[#FAF7F0] p-4 sm:p-5 rounded-sm shadow-editorial flex flex-col justify-between space-y-4"
+                    >
+                      <CornerBracket position="top-left" />
+                      <CornerBracket position="top-right" />
+                      <CornerBracket position="bottom-left" />
+                      <CornerBracket position="bottom-right" />
+
+                      <div className="space-y-3">
+                        {ytUrl ? (
+                          <YouTubeLitePlayer url={ytUrl} title={item.title} />
+                        ) : coverUrl ? (
+                          <Link to={`/news/read/${item.id}`} className="block aspect-[16/9] bg-stone-100 rounded-sm overflow-hidden">
+                            <img
+                              src={coverUrl}
+                              alt={item.title}
+                              loading="lazy"
+                              decoding="async"
+                              className="w-full h-full object-cover hover:scale-[1.03] transition-transform duration-500"
+                            />
+                          </Link>
+                        ) : (
+                          <Link to={`/news/read/${item.id}`} className="aspect-[16/9] bg-[#EDE6F5] rounded-sm flex items-center justify-center text-[#4B1F7A]">
+                            <Emblem size={44} />
+                          </Link>
+                        )}
+
+                        <div className="flex flex-wrap items-center gap-2 text-[11px] text-[#1B1226]/65">
+                          <span className="px-2 py-0.5 rounded-sm bg-[#4B1F7A] text-[#FAF7F0] text-[10px] font-medium">
+                            📌 ปักหมุด
+                          </span>
+                          <NewsCategoryBadge category={item.category} />
+                          <span aria-hidden="true">·</span>
+                          <span>{formatThaiDate(item.createdAt, true)}</span>
+                        </div>
+
+                        <Link to={`/news/read/${item.id}`} className="block group">
+                          <h4 className="font-serif text-base sm:text-lg font-semibold text-[#1B1226] group-hover:text-[#4B1F7A] transition-colors line-clamp-2 leading-snug">
+                            {item.title}
+                          </h4>
+                        </Link>
+
+                        {item.excerpt && (
+                          <p className="text-xs text-[#1B1226]/70 line-clamp-2 leading-relaxed">
+                            {item.excerpt}
+                          </p>
+                        )}
+                      </div>
+
+                      <div className="pt-3 border-t border-[#4B1F7A]/10 flex items-center justify-between text-xs">
+                        <span className="text-[#1B1226]/55">อ่าน {formatNumber(item.views)} ครั้ง</span>
+                        <Link
+                          to={`/news/read/${item.id}`}
+                          className="text-[#4B1F7A] font-medium hover:text-[#9C7A2B] transition-colors"
+                        >
+                          เปิดอ่านรายละเอียด →
+                        </Link>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
           </div>
         )}
       </section>
