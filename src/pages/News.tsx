@@ -9,7 +9,7 @@ import { getCachedNewsSync, loadPublishedNews } from '../lib/publicDataService';
 import { NewsItem } from '../types';
 import { formatThaiDate, formatNumber } from '../lib/format';
 import { NewsCategoryBadge } from '../components/common/StatusBadge';
-import { SectionEyebrow, CornerBracket } from '../components/common/Ornament';
+import { SectionEyebrow, CornerBracket, PinIcon } from '../components/common/Ornament';
 import { Emblem } from '../components/common/Emblem';
 import { getNewsCoverUrl, getNewsYouTubeUrl } from '../components/news/SocialMediaEmbed';
 
@@ -198,8 +198,9 @@ export const News: React.FC = () => {
                 <div className="space-y-2">
                   <div className="flex flex-wrap items-center gap-2 text-[11px] text-[#1B1226]/60">
                     {item.pinned && (
-                      <span className="px-1.5 py-0.5 rounded-sm bg-[#4B1F7A] text-[#FAF7F0] text-[10px] font-medium">
-                        📌 ปักหมุด
+                      <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-sm bg-[#4B1F7A] text-[#FAF7F0] text-[10px] font-medium">
+                        <PinIcon className="w-3 h-3 text-[#D9B867]" />
+                        <span>ปักหมุด</span>
                       </span>
                     )}
                     <NewsCategoryBadge category={item.category} />

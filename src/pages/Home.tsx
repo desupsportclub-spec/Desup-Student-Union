@@ -23,7 +23,7 @@ import {
 } from '../lib/publicDataService';
 import { NewsItem, EventItem, PersonItem, BannerItem } from '../types';
 import { formatThaiDate, getThaiDateParts, formatNumber } from '../lib/format';
-import { SectionEyebrow, CornerBracket } from '../components/common/Ornament';
+import { SectionEyebrow, CornerBracket, PinIcon } from '../components/common/Ornament';
 import { NewsCategoryBadge } from '../components/common/StatusBadge';
 import { Emblem } from '../components/common/Emblem';
 import { HeroBannerSlider } from '../components/home/HeroBannerSlider';
@@ -184,6 +184,179 @@ export const Home: React.FC = () => {
       <HeroBannerSlider banners={banners} />
 
       {/* ========================================================
+          00.5 ปักหมุดหน้าแรก (แสดงด้านบนข่าวสารและความเคลื่อนไหว)
+         ======================================================== */}
+      {pinnedNews.length > 0 && (
+        <section className="max-w-[1240px] mx-auto px-4 sm:px-6 md:px-12">
+          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-2 mb-6 sm:mb-8 pb-4 border-b border-[#B8923A]/30">
+            <div className="space-y-1">
+              <div className="inline-flex items-center gap-2 text-[11px] tracking-[0.18em] uppercase font-semibold text-[#9C7A2B]">
+                <PinIcon className="w-3.5 h-3.5 text-[#9C7A2B]" />
+                <span>PINNED HIGHLIGHTS</span>
+                <span aria-hidden="true">·</span>
+                <span>ปักหมุดแนะนำบนหน้าแรก</span>
+              </div>
+              <h2 className="font-serif text-2xl md:text-3xl font-semibold text-[#2A1245]">
+                เรื่องเด่นและวิดีโอปักหมุด
+              </h2>
+            </div>
+            <span className="text-xs text-[#1B1226]/60">
+              ปักหมุดทั้งหมด {pinnedNews.length} รายการ
+            </span>
+          </div>
+
+          {pinnedNews.length === 1 ? (
+            (() => {
+              const item = pinnedNews[0];
+              const ytUrl = getNewsYouTubeUrl(item);
+              const coverUrl = getNewsCoverUrl(item);
+              return (
+                <div className="relative border border-[#B8923A]/45 bg-[#FAF7F0] p-4 sm:p-6 rounded-sm shadow-editorial">
+                  <CornerBracket position="top-left" />
+                  <CornerBracket position="top-right" />
+                  <CornerBracket position="bottom-left" />
+                  <CornerBracket position="bottom-right" />
+
+                  <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 sm:gap-6 items-center">
+                    <div className="lg:col-span-7">
+                      {ytUrl ? (
+                        <YouTubeLitePlayer url={ytUrl} title={item.title} />
+                      ) : coverUrl ? (
+                        <Link to={`/news/read/${item.id}`} className="block aspect-[16/9] bg-stone-100 rounded-sm overflow-hidden">
+                          <img
+                            src={coverUrl}
+                            alt={item.title}
+                            loading="eager"
+                            decoding="async"
+                            className="w-full h-full object-cover hover:scale-[1.03] transition-transform duration-500"
+                          />
+                        </Link>
+                      ) : (
+                        <Link to={`/news/read/${item.id}`} className="aspect-[16/9] bg-[#EDE6F5] rounded-sm flex items-center justify-center text-[#4B1F7A]">
+                          <Emblem size={56} />
+                        </Link>
+                      )}
+                    </div>
+
+                    <div className="lg:col-span-5 space-y-3">
+                      <div className="flex flex-wrap items-center gap-2 text-xs text-[#1B1226]/65">
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-sm bg-[#4B1F7A] text-[#FAF7F0] text-[10px] font-medium">
+                          <PinIcon className="w-3 h-3 text-[#D9B867]" />
+                          <span>ปักหมุด</span>
+                        </span>
+                        <NewsCategoryBadge category={item.category} />
+                        <span aria-hidden="true">·</span>
+                        <span>{formatThaiDate(item.createdAt, true)}</span>
+                      </div>
+
+                      <Link to={`/news/read/${item.id}`} className="block group">
+                        <h3 className="font-serif text-xl sm:text-2xl font-semibold text-[#1B1226] group-hover:text-[#4B1F7A] transition-colors leading-snug">
+                          {item.title}
+                        </h3>
+                      </Link>
+
+                      {item.excerpt && (
+                        <p className="text-xs sm:text-sm text-[#1B1226]/75 line-clamp-3 leading-relaxed">
+                          {item.excerpt}
+                        </p>
+                      )}
+
+                      <div className="pt-2 flex flex-wrap items-center justify-between gap-3 border-t border-[#4B1F7A]/10">
+                        <span className="text-xs text-[#1B1226]/55">
+                          อ่าน {formatNumber(item.views)} ครั้ง
+                        </span>
+                        <Link
+                          to={`/news/read/${item.id}`}
+                          className="inline-flex items-center gap-1.5 px-4 py-2 bg-[#4B1F7A] text-[#FAF7F0] hover:bg-[#2A1245] text-xs font-medium rounded-sm transition-colors"
+                        >
+                          <span>เปิดอ่านรายละเอียด</span>
+                          <span className="text-[#D9B867]">→</span>
+                        </Link>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              );
+            })()
+          ) : (
+            <div
+              className={`grid grid-cols-1 gap-5 sm:gap-6 ${
+                pinnedNews.length === 2 ? 'md:grid-cols-2' : 'md:grid-cols-2 lg:grid-cols-3'
+              }`}
+            >
+              {pinnedNews.map((item) => {
+                const ytUrl = getNewsYouTubeUrl(item);
+                const coverUrl = getNewsCoverUrl(item);
+                return (
+                  <div
+                    key={item.id}
+                    className="relative border border-[#B8923A]/45 bg-[#FAF7F0] p-4 sm:p-5 rounded-sm shadow-editorial flex flex-col justify-between space-y-4"
+                  >
+                    <CornerBracket position="top-left" />
+                    <CornerBracket position="top-right" />
+                    <CornerBracket position="bottom-left" />
+                    <CornerBracket position="bottom-right" />
+
+                    <div className="space-y-3">
+                      {ytUrl ? (
+                        <YouTubeLitePlayer url={ytUrl} title={item.title} />
+                      ) : coverUrl ? (
+                        <Link to={`/news/read/${item.id}`} className="block aspect-[16/9] bg-stone-100 rounded-sm overflow-hidden">
+                          <img
+                            src={coverUrl}
+                            alt={item.title}
+                            loading="lazy"
+                            decoding="async"
+                            className="w-full h-full object-cover hover:scale-[1.03] transition-transform duration-500"
+                          />
+                        </Link>
+                      ) : (
+                        <Link to={`/news/read/${item.id}`} className="aspect-[16/9] bg-[#EDE6F5] rounded-sm flex items-center justify-center text-[#4B1F7A]">
+                          <Emblem size={44} />
+                        </Link>
+                      )}
+
+                      <div className="flex flex-wrap items-center gap-2 text-[11px] text-[#1B1226]/65">
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-sm bg-[#4B1F7A] text-[#FAF7F0] text-[10px] font-medium">
+                          <PinIcon className="w-3 h-3 text-[#D9B867]" />
+                          <span>ปักหมุด</span>
+                        </span>
+                        <NewsCategoryBadge category={item.category} />
+                        <span aria-hidden="true">·</span>
+                        <span>{formatThaiDate(item.createdAt, true)}</span>
+                      </div>
+
+                      <Link to={`/news/read/${item.id}`} className="block group">
+                        <h3 className="font-serif text-base sm:text-lg font-semibold text-[#1B1226] group-hover:text-[#4B1F7A] transition-colors line-clamp-2 leading-snug">
+                          {item.title}
+                        </h3>
+                      </Link>
+
+                      {item.excerpt && (
+                        <p className="text-xs text-[#1B1226]/70 line-clamp-2 leading-relaxed">
+                          {item.excerpt}
+                        </p>
+                      )}
+                    </div>
+
+                    <div className="pt-3 border-t border-[#4B1F7A]/10 flex items-center justify-between text-xs">
+                      <span className="text-[#1B1226]/55">อ่าน {formatNumber(item.views)} ครั้ง</span>
+                      <Link
+                        to={`/news/read/${item.id}`}
+                        className="text-[#4B1F7A] font-medium hover:text-[#9C7A2B] transition-colors"
+                      >
+                        เปิดอ่านรายละเอียด →
+                      </Link>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </section>
+      )}
+
+      {/* ========================================================
           01. ข่าวเด่น & ข่าวรอง (Lead story left + 4 vertical items right)
          ======================================================== */}
       <section className="max-w-[1240px] mx-auto px-4 sm:px-6 md:px-12">
@@ -335,176 +508,6 @@ export const Home: React.FC = () => {
           <div className="p-12 text-center border border-dashed border-[#4B1F7A]/25 rounded-sm bg-white/40">
             <p className="font-serif text-lg text-[#2A1245] mb-2">ยังไม่มีข่าวประชาสัมพันธ์ในขณะนี้</p>
             <p className="text-xs text-[#1B1226]/60">สามารถติดตามข่าวสารและการประกาศกิจกรรมที่จะอัปเดตผ่านหน้านี้เร็ว ๆ นี้</p>
-          </div>
-        )}
-
-        {/* ========================================================
-            ปักหมุดหน้าแรก (แสดงด้านล่างโพสต์ในข่าวสารและความเคลื่อนไหว ก่อน 02 TRANSPARENCY & IMPACT)
-           ======================================================== */}
-        {pinnedNews.length > 0 && (
-          <div className="mt-8 sm:mt-10 pt-7 sm:pt-9 border-t border-[#B8923A]/30 space-y-5">
-            <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-2">
-              <div className="space-y-1">
-                <div className="inline-flex items-center gap-2 text-[11px] tracking-[0.18em] uppercase font-semibold text-[#9C7A2B]">
-                  <span>📌 PINNED HIGHLIGHTS</span>
-                  <span>·</span>
-                  <span>ปักหมุดแนะนำบนหน้าแรก</span>
-                </div>
-                <h3 className="font-serif text-xl sm:text-2xl font-semibold text-[#2A1245]">
-                  เรื่องเด่นและวิดีโอปักหมุด
-                </h3>
-              </div>
-              <span className="text-xs text-[#1B1226]/60">
-                ปักหมุดทั้งหมด {pinnedNews.length} รายการ
-              </span>
-            </div>
-
-            {pinnedNews.length === 1 ? (
-              (() => {
-                const item = pinnedNews[0];
-                const ytUrl = getNewsYouTubeUrl(item);
-                const coverUrl = getNewsCoverUrl(item);
-                return (
-                  <div className="relative border border-[#B8923A]/45 bg-[#FAF7F0] p-4 sm:p-6 rounded-sm shadow-editorial">
-                    <CornerBracket position="top-left" />
-                    <CornerBracket position="top-right" />
-                    <CornerBracket position="bottom-left" />
-                    <CornerBracket position="bottom-right" />
-
-                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 sm:gap-6 items-center">
-                      <div className="lg:col-span-7">
-                        {ytUrl ? (
-                          <YouTubeLitePlayer url={ytUrl} title={item.title} />
-                        ) : coverUrl ? (
-                          <Link to={`/news/read/${item.id}`} className="block aspect-[16/9] bg-stone-100 rounded-sm overflow-hidden">
-                            <img
-                              src={coverUrl}
-                              alt={item.title}
-                              loading="lazy"
-                              decoding="async"
-                              className="w-full h-full object-cover hover:scale-[1.03] transition-transform duration-500"
-                            />
-                          </Link>
-                        ) : (
-                          <Link to={`/news/read/${item.id}`} className="aspect-[16/9] bg-[#EDE6F5] rounded-sm flex items-center justify-center text-[#4B1F7A]">
-                            <Emblem size={56} />
-                          </Link>
-                        )}
-                      </div>
-
-                      <div className="lg:col-span-5 space-y-3">
-                        <div className="flex flex-wrap items-center gap-2 text-xs text-[#1B1226]/65">
-                          <span className="px-2 py-0.5 rounded-sm bg-[#4B1F7A] text-[#FAF7F0] text-[10px] font-medium">
-                            📌 ปักหมุด
-                          </span>
-                          <NewsCategoryBadge category={item.category} />
-                          <span aria-hidden="true">·</span>
-                          <span>{formatThaiDate(item.createdAt, true)}</span>
-                        </div>
-
-                        <Link to={`/news/read/${item.id}`} className="block group">
-                          <h4 className="font-serif text-xl sm:text-2xl font-semibold text-[#1B1226] group-hover:text-[#4B1F7A] transition-colors leading-snug">
-                            {item.title}
-                          </h4>
-                        </Link>
-
-                        {item.excerpt && (
-                          <p className="text-xs sm:text-sm text-[#1B1226]/75 line-clamp-3 leading-relaxed">
-                            {item.excerpt}
-                          </p>
-                        )}
-
-                        <div className="pt-2 flex flex-wrap items-center justify-between gap-3 border-t border-[#4B1F7A]/10">
-                          <span className="text-xs text-[#1B1226]/55">
-                            อ่าน {formatNumber(item.views)} ครั้ง
-                          </span>
-                          <Link
-                            to={`/news/read/${item.id}`}
-                            className="inline-flex items-center gap-1.5 px-4 py-2 bg-[#4B1F7A] text-[#FAF7F0] hover:bg-[#2A1245] text-xs font-medium rounded-sm transition-colors"
-                          >
-                            <span>เปิดอ่านรายละเอียด</span>
-                            <span className="text-[#D9B867]">→</span>
-                          </Link>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                );
-              })()
-            ) : (
-              <div
-                className={`grid grid-cols-1 gap-5 sm:gap-6 ${
-                  pinnedNews.length === 2 ? 'md:grid-cols-2' : 'md:grid-cols-2 lg:grid-cols-3'
-                }`}
-              >
-                {pinnedNews.map((item) => {
-                  const ytUrl = getNewsYouTubeUrl(item);
-                  const coverUrl = getNewsCoverUrl(item);
-                  return (
-                    <div
-                      key={item.id}
-                      className="relative border border-[#B8923A]/45 bg-[#FAF7F0] p-4 sm:p-5 rounded-sm shadow-editorial flex flex-col justify-between space-y-4"
-                    >
-                      <CornerBracket position="top-left" />
-                      <CornerBracket position="top-right" />
-                      <CornerBracket position="bottom-left" />
-                      <CornerBracket position="bottom-right" />
-
-                      <div className="space-y-3">
-                        {ytUrl ? (
-                          <YouTubeLitePlayer url={ytUrl} title={item.title} />
-                        ) : coverUrl ? (
-                          <Link to={`/news/read/${item.id}`} className="block aspect-[16/9] bg-stone-100 rounded-sm overflow-hidden">
-                            <img
-                              src={coverUrl}
-                              alt={item.title}
-                              loading="lazy"
-                              decoding="async"
-                              className="w-full h-full object-cover hover:scale-[1.03] transition-transform duration-500"
-                            />
-                          </Link>
-                        ) : (
-                          <Link to={`/news/read/${item.id}`} className="aspect-[16/9] bg-[#EDE6F5] rounded-sm flex items-center justify-center text-[#4B1F7A]">
-                            <Emblem size={44} />
-                          </Link>
-                        )}
-
-                        <div className="flex flex-wrap items-center gap-2 text-[11px] text-[#1B1226]/65">
-                          <span className="px-2 py-0.5 rounded-sm bg-[#4B1F7A] text-[#FAF7F0] text-[10px] font-medium">
-                            📌 ปักหมุด
-                          </span>
-                          <NewsCategoryBadge category={item.category} />
-                          <span aria-hidden="true">·</span>
-                          <span>{formatThaiDate(item.createdAt, true)}</span>
-                        </div>
-
-                        <Link to={`/news/read/${item.id}`} className="block group">
-                          <h4 className="font-serif text-base sm:text-lg font-semibold text-[#1B1226] group-hover:text-[#4B1F7A] transition-colors line-clamp-2 leading-snug">
-                            {item.title}
-                          </h4>
-                        </Link>
-
-                        {item.excerpt && (
-                          <p className="text-xs text-[#1B1226]/70 line-clamp-2 leading-relaxed">
-                            {item.excerpt}
-                          </p>
-                        )}
-                      </div>
-
-                      <div className="pt-3 border-t border-[#4B1F7A]/10 flex items-center justify-between text-xs">
-                        <span className="text-[#1B1226]/55">อ่าน {formatNumber(item.views)} ครั้ง</span>
-                        <Link
-                          to={`/news/read/${item.id}`}
-                          className="text-[#4B1F7A] font-medium hover:text-[#9C7A2B] transition-colors"
-                        >
-                          เปิดอ่านรายละเอียด →
-                        </Link>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            )}
           </div>
         )}
       </section>

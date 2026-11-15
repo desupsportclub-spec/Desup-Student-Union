@@ -20,6 +20,7 @@ import {
   YouTubeLitePlayer,
 } from '../components/news/SocialMediaEmbed';
 import { SuccessFeedbackModal } from '../components/common/SuccessFeedbackModal';
+import { PinIcon } from '../components/common/Ornament';
 import { invalidatePublicDataCache } from '../lib/publicDataService';
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
@@ -360,7 +361,10 @@ export const AdminNews: React.FC = () => {
       {/* Inline Pin Feedback */}
       {pinNotice && (
         <div className="p-3 bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-sm text-xs font-medium flex items-center justify-between">
-          <span>📌 {pinNotice}</span>
+          <span className="inline-flex items-center gap-1.5">
+            <PinIcon className="w-3.5 h-3.5 text-emerald-700" />
+            <span>{pinNotice}</span>
+          </span>
           <button
             type="button"
             onClick={() => setPinNotice('')}
@@ -432,7 +436,11 @@ export const AdminNews: React.FC = () => {
                           } disabled:opacity-50`}
                           title={item.pinned ? 'คลิกเพื่อยกเลิกปักหมุดหน้าแรก' : 'คลิกเพื่อปักหมุดแสดงบนหน้าแรก'}
                         >
-                          <span>📌</span>
+                          <PinIcon
+                            className={`w-3.5 h-3.5 ${
+                              item.pinned ? 'text-[#D9B867]' : 'text-[#4B1F7A]'
+                            }`}
+                          />
                           <span>
                             {togglingPinId === item.id
                               ? 'กำลังบันทึก...'
@@ -754,7 +762,10 @@ export const AdminNews: React.FC = () => {
                     onChange={(e) => setPinned(e.target.checked)}
                     className="accent-[#B8923A]"
                   />
-                  <span>📌 ปักหมุดขึ้นหน้าแรก (แสดงด้านล่างโพสต์ข่าว ก่อนส่วนสถิติ)</span>
+                  <span className="inline-flex items-center gap-1.5">
+                    <PinIcon className="w-3.5 h-3.5 text-[#9C7A2B]" />
+                    <span>ปักหมุดขึ้นหน้าแรก (แสดงด้านบนข่าวสารและความเคลื่อนไหว)</span>
+                  </span>
                 </label>
               </div>
 
