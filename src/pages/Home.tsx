@@ -642,59 +642,13 @@ export const Home: React.FC = () => {
       </section>
 
       {/* ========================================================
-          04. ทางลัดบริการ (Editorial Book Index Style)
-         ======================================================== */}
-      <section className="max-w-[1240px] mx-auto px-4 sm:px-6 md:px-12">
-        <div className="mb-6 sm:mb-10 pb-4 border-b border-[#B8923A]/30">
-          <SectionEyebrow number="04" enText="SERVICES" thText="ทางลัดบริการนักเรียน" />
-          <h2 className="font-serif text-2xl md:text-3xl text-[#1B1226] font-semibold mt-2">
-            สารบัญบริการและช่องทางติดต่อ
-          </h2>
-        </div>
-
-        <div className="divide-y divide-[#B8923A]/25 border-y border-[#B8923A]/25">
-          {[
-            { num: '01', title: 'ส่งเรื่องร้องเรียน / ข้อเสนอแนะ', desc: 'สะท้อนปัญหา ส่งเรื่องร้องเรียนแบบไม่ระบุตัวตน หรือเสนอแนวคิดพัฒนาโรงเรียน', link: '/complaint' },
-            { num: '02', title: 'ติดตามสถานะเรื่องร้องเรียน', desc: `ตรวจสอบความคืบหน้าการดำเนินงานของเรื่องร้องเรียนด้วยรหัสติดตาม (SC-${academicYearTH}-XXXXXX)`, link: '/track' },
-            { num: '03', title: 'ดาวน์โหลดแบบฟอร์มและเอกสาร', desc: 'แบบฟอร์มขอจัดกิจกรรม รายงานการประชุม และเอกสารทางการขององค์การ', link: '/downloads' },
-            { num: '04', title: 'ปฏิทินกิจกรรมตลอดปีการศึกษา', desc: 'ตารางกิจกรรมวิชาการ กีฬา ศิลปวัฒนธรรม และวันสำคัญของโรงเรียน', link: '/calendar' },
-            { num: '05', title: 'อำนาจหน้าที่และประกาศองค์การนักเรียน', desc: 'ประกาศโรงเรียนสาธิตมหาวิทยาลัยพะเยา เรื่อง องค์การนักเรียน พ.ศ. ๒๕๖๙ อำนาจหน้าที่ โครงสร้าง และคุณสมบัติคณะกรรมการ', link: '/about/authority' },
-            { num: '06', title: 'ติดต่อสอบถามองค์การนักเรียน', desc: 'สถานที่ตั้ง เบอร์โทรศัพท์ อีเมล และช่องทางโซเชียลมีเดีย', link: '/contact' },
-          ].map((item) => (
-            <Link
-              key={item.num}
-              to={item.link}
-              className="group py-4 sm:py-5 px-2 sm:px-4 flex items-center justify-between gap-3 sm:gap-4 hover:bg-[#EDE6F5]/50 transition-colors duration-200"
-            >
-              <div className="flex items-start sm:items-center gap-3.5 sm:gap-6 min-w-0">
-                <span className="font-serif text-base sm:text-lg text-[#9C7A2B] font-medium w-6 sm:w-8 shrink-0">
-                  {item.num}
-                </span>
-                <div className="min-w-0">
-                  <h3 className="font-serif text-base md:text-lg font-semibold text-[#1B1226] group-hover:text-[#4B1F7A] transition-colors">
-                    {item.title}
-                  </h3>
-                  <p className="text-xs text-[#1B1226]/60 mt-0.5 max-w-2xl">
-                    {item.desc}
-                  </p>
-                </div>
-              </div>
-              <span className="text-[#9C7A2B] group-hover:translate-x-2 transition-transform duration-200 font-serif shrink-0">
-                →
-              </span>
-            </Link>
-          ))}
-        </div>
-      </section>
-
-      {/* ========================================================
-          05. แกลเลอรีภาพกิจกรรม (Masonry preview with lightbox)
+          04. แกลเลอรีภาพกิจกรรม (Masonry preview with lightbox)
          ======================================================== */}
       {galleryPhotos.length > 0 && (
         <section className="max-w-[1240px] mx-auto px-4 sm:px-6 md:px-12">
           <div className="flex flex-col md:flex-row md:items-end justify-between mb-6 sm:mb-10 pb-4 border-b border-[#B8923A]/30">
             <div>
-              <SectionEyebrow number="05" enText="GALLERY" thText="ภาพข่าวกิจกรรม" />
+              <SectionEyebrow number="04" enText="GALLERY" thText="ภาพข่าวกิจกรรม" />
               <h2 className="font-serif text-2xl md:text-3xl text-[#1B1226] font-semibold mt-2">
                 ประมวลภาพบรรยากาศ
               </h2>
@@ -739,7 +693,7 @@ export const Home: React.FC = () => {
       )}
 
       {/* ========================================================
-          06. สารจากนายกองค์การนักเรียน (Editorial portrait overlap)
+          05. สารจากนายกองค์การนักเรียน (Editorial portrait overlap)
          ======================================================== */}
       <section className="max-w-[1240px] mx-auto px-4 sm:px-6 md:px-12 pb-8 sm:pb-12">
         <div className="bg-[#FAF7F0] border border-[#B8923A]/40 p-5 sm:p-8 md:p-14 rounded-sm shadow-editorial relative overflow-hidden">
@@ -771,7 +725,7 @@ export const Home: React.FC = () => {
 
             {/* Right 8 cols: Editorial Message */}
             <div className="md:col-span-8 space-y-3 sm:space-y-4">
-              <SectionEyebrow number="06" enText="MESSAGE FROM THE PRESIDENT" thText="สารจากนายกองค์การนักเรียน" />
+              <SectionEyebrow number="05" enText="MESSAGE FROM THE PRESIDENT" thText="สารจากนายกองค์การนักเรียน" />
               <h2 className="font-serif text-xl sm:text-2xl md:text-3xl text-[#1B1226] font-semibold leading-snug">
                 {presidentHeadline}
               </h2>
