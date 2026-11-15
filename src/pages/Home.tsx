@@ -188,17 +188,10 @@ export const Home: React.FC = () => {
          ======================================================== */}
       {pinnedNews.length > 0 && (
         <section className="max-w-[1240px] mx-auto px-4 sm:px-6 md:px-12">
-          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-2 mb-6 sm:mb-8 pb-4 border-b border-[#B8923A]/30">
-            <div className="space-y-1">
-              <div className="inline-flex items-center gap-2 text-[11px] tracking-[0.18em] uppercase font-semibold text-[#9C7A2B]">
-                <PinIcon className="w-3.5 h-3.5 text-[#9C7A2B]" />
-                <span>PINNED HIGHLIGHTS</span>
-                <span aria-hidden="true">·</span>
-                <span>ปักหมุดแนะนำบนหน้าแรก</span>
-              </div>
-              <h2 className="font-serif text-2xl md:text-3xl font-semibold text-[#2A1245]">
-                เรื่องเด่นและวิดีโอปักหมุด
-              </h2>
+          <div className="flex flex-wrap items-center justify-between gap-2 mb-5 sm:mb-6 pb-3 border-b border-[#B8923A]/30">
+            <div className="inline-flex items-center gap-2 text-[11px] tracking-[0.18em] uppercase font-semibold text-[#9C7A2B]">
+              <PinIcon className="w-3.5 h-3.5 text-[#9C7A2B]" />
+              <span>PINNED HIGHLIGHTS</span>
             </div>
             <span className="text-xs text-[#1B1226]/60">
               ปักหมุดทั้งหมด {pinnedNews.length} รายการ
