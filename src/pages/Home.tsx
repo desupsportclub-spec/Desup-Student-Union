@@ -22,7 +22,14 @@ import {
   loadPublishedNews,
 } from '../lib/publicDataService';
 import { NewsItem, EventItem, PersonItem, BannerItem } from '../types';
-import { formatThaiDate, getThaiDateParts, formatNumber } from '../lib/format';
+import {
+  formatThaiDate,
+  getThaiDateParts,
+  formatNumber,
+  isEventActiveOrUpcoming,
+  getEventScheduleStatus,
+  getEventDateKey,
+} from '../lib/format';
 import { SectionEyebrow, CornerBracket, PinIcon } from '../components/common/Ornament';
 import { NewsCategoryBadge } from '../components/common/StatusBadge';
 import { Emblem } from '../components/common/Emblem';
@@ -91,7 +98,9 @@ export const Home: React.FC = () => {
   const [recentNews, setRecentNews] = useState<NewsItem[]>(() => initialNewsSplit?.recent || []);
   const [pinnedNews, setPinnedNews] = useState<NewsItem[]>(() => initialNewsSplit?.pinnedList || []);
   const [newsLoading, setNewsLoading] = useState<boolean>(() => !initialNews);
-  const [upcomingEvents, setUpcomingEvents] = useState<EventItem[]>(() => (initialEvents ? initialEvents.slice(0, 6) : []));
+  const [upcomingEvents, setUpcomingEvents] = useState<EventItem[]>(() =>
+    initialEvents ? initialEvents.filter((e) => isEventActiveOrUpcoming(e)).slice(0, 6) : []
+  );
   const [president, setPresident] = useState<PersonItem | null>(() => (initialPeople ? resolvePresident(initialPeople) : null));
   const [galleryPhotos, setGalleryPhotos] = useState<{ src: string; title: string }[]>(() => initialNewsSplit?.photos || []);
 
@@ -133,7 +142,7 @@ export const Home: React.FC = () => {
 
     const loadEventsTask = loadPublishedEvents((list) => {
       if (!active) return;
-      setUpcomingEvents(list.slice(0, 6));
+      setUpcomingEvents(list.filter((e) => isEventActiveOrUpcoming(e)).slice(0, 6));
       setStats((prev) => ({ ...prev, eventsCount: list.length }));
     });
 
@@ -577,6 +586,10 @@ export const Home: React.FC = () => {
             <div className="flex gap-4 sm:gap-6">
               {upcomingEvents.map((evt) => {
                 const dateParts = getThaiDateParts(evt.startAt);
+                const scheduleStatus = getEventScheduleStatus(evt.startAt, evt.endAt);
+                const startKey = getEventDateKey(evt.startAt);
+                const endKey = getEventDateKey(evt.endAt);
+                const hasDateRange = Boolean(evt.endAt && endKey > startKey);
                 return (
                   <div
                     key={evt.id}
@@ -592,10 +605,17 @@ export const Home: React.FC = () => {
                             {dateParts.monthShort}
                           </div>
                         </div>
-                        <div>
-                          <span className="text-[10px] uppercase tracking-wider text-[#9C7A2B] font-medium">
-                            {evt.type === 'sport' ? 'กีฬา' : evt.type === 'academic' ? 'วิชาการ' : evt.type === 'art' ? 'ศิลปวัฒนธรรม' : evt.type === 'volunteer' ? 'จิตอาสา' : 'การประชุม'}
-                          </span>
+                        <div className="min-w-0 flex-1">
+                          <div className="flex flex-wrap items-center gap-1.5">
+                            <span className="text-[10px] uppercase tracking-wider text-[#9C7A2B] font-medium">
+                              {evt.type === 'sport' ? 'กีฬา' : evt.type === 'academic' ? 'วิชาการ' : evt.type === 'art' ? 'ศิลปวัฒนธรรม' : evt.type === 'volunteer' ? 'จิตอาสา' : 'การประชุม'}
+                            </span>
+                            {scheduleStatus === 'ongoing' && (
+                              <span className="px-1.5 py-0.5 rounded-sm bg-emerald-50 border border-emerald-200 text-emerald-800 text-[10px] font-medium">
+                                อยู่ในช่วงจัดกิจกรรม
+                              </span>
+                            )}
+                          </div>
                           <h3 className="font-serif text-lg font-semibold text-[#1B1226] line-clamp-2 mt-1">
                             {evt.title}
                           </h3>
@@ -606,9 +626,13 @@ export const Home: React.FC = () => {
                       </p>
                     </div>
 
-                    <div className="pt-3 border-t border-[#4B1F7A]/10 text-xs text-[#1B1226]/60 flex items-center justify-between">
-                      <span>📍 {evt.location || 'โรงเรียนสาธิต มพ.'}</span>
-                      <span className="text-[#9C7A2B]">พ.ศ. {dateParts.yearBE}</span>
+                    <div className="pt-3 border-t border-[#4B1F7A]/10 text-xs text-[#1B1226]/60 flex items-center justify-between gap-2">
+                      <span className="truncate">📍 {evt.location || 'โรงเรียนสาธิต มพ.'}</span>
+                      <span className="text-[#9C7A2B] shrink-0">
+                        {hasDateRange && evt.endAt
+                          ? `ถึง ${formatThaiDate(evt.endAt, true)}`
+                          : `พ.ศ. ${dateParts.yearBE}`}
+                      </span>
                     </div>
                   </div>
                 );

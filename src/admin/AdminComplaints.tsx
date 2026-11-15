@@ -3,15 +3,20 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { collection, getDocs, doc, getDoc, updateDoc, deleteDoc } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { ComplaintItem, ComplaintStatus, PublicReply, ComplaintPrivateContact, ComplaintPrivateAttachment } from '../types';
 import { formatThaiDateTime, formatThaiDate } from '../lib/format';
 import { ComplaintStatusBadge } from '../components/common/StatusBadge';
 import { SuccessFeedbackModal } from '../components/common/SuccessFeedbackModal';
+import { usePendingComplaints } from './ComplaintAlertsContext';
 
 export const AdminComplaints: React.FC = () => {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const { pendingCount } = usePendingComplaints();
+
   const [complaints, setComplaints] = useState<ComplaintItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedStatus, setSelectedStatus] = useState<string>('all');
@@ -28,8 +33,10 @@ export const AdminComplaints: React.FC = () => {
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [successModalTitle, setSuccessModalTitle] = useState('');
 
-  const fetchComplaints = async () => {
-    setLoading(true);
+  const getComplaintDocId = (item: ComplaintItem) => item.id || item.trackingCode;
+
+  const fetchComplaints = useCallback(async (silent = false) => {
+    if (!silent) setLoading(true);
     try {
       const snap = await getDocs(collection(db, 'complaints'));
       const list: ComplaintItem[] = [];
@@ -41,17 +48,22 @@ export const AdminComplaints: React.FC = () => {
     } catch (err) {
       console.warn("Could not load complaints:", err);
     } finally {
-      setLoading(false);
+      if (!silent) setLoading(false);
     }
-  };
-
-  useEffect(() => {
-    fetchComplaints();
   }, []);
 
-  const getComplaintDocId = (item: ComplaintItem) => item.id || item.trackingCode;
+  useEffect(() => {
+    void fetchComplaints(false);
+  }, [fetchComplaints]);
 
-  const handleOpenDetail = async (item: ComplaintItem) => {
+  // Silently refresh list if live pending count updates while viewing complaints page
+  useEffect(() => {
+    if (!loading) {
+      void fetchComplaints(true);
+    }
+  }, [pendingCount, fetchComplaints]);
+
+  const handleOpenDetail = useCallback(async (item: ComplaintItem) => {
     const docId = getComplaintDocId(item);
     setActiveComplaint(item);
     setPrivateContact(null);
@@ -76,7 +88,23 @@ export const AdminComplaints: React.FC = () => {
     } catch {
       // Ignore
     }
-  };
+  }, []);
+
+  // Open specific complaint automatically when coming from ?open=<id>
+  useEffect(() => {
+    const openTarget = searchParams.get('open');
+    if (!openTarget || complaints.length === 0) return;
+
+    const found = complaints.find(
+      (c) => c.id === openTarget || c.trackingCode === openTarget
+    );
+    if (found) {
+      void handleOpenDetail(found);
+      const next = new URLSearchParams(searchParams);
+      next.delete('open');
+      setSearchParams(next, { replace: true });
+    }
+  }, [searchParams, setSearchParams, complaints, handleOpenDetail]);
 
   const handleStatusChange = async (newStatus: ComplaintStatus) => {
     if (!activeComplaint) return;

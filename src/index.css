@@ -159,3 +159,122 @@ h1, h2, h3, h4, h5, h6, .font-serif {
 .tabular-numbers {
   font-variant-numeric: tabular-nums;
 }
+
+/* Chamfered double-border geometry for Admin First-Login Modal */
+.chamfered-frame-outer {
+  clip-path: polygon(
+    14px 0,
+    calc(100% - 14px) 0,
+    100% 14px,
+    100% calc(100% - 14px),
+    calc(100% - 14px) 100%,
+    14px 100%,
+    0 calc(100% - 14px),
+    0 14px
+  );
+}
+
+.chamfered-frame-mid {
+  clip-path: polygon(
+    13px 0,
+    calc(100% - 13px) 0,
+    100% 13px,
+    100% calc(100% - 13px),
+    calc(100% - 13px) 100%,
+    13px 100%,
+    0 calc(100% - 13px),
+    0 13px
+  );
+}
+
+.chamfered-frame-inner {
+  clip-path: polygon(
+    11px 0,
+    calc(100% - 11px) 0,
+    100% 11px,
+    100% calc(100% - 11px),
+    calc(100% - 11px) 100%,
+    11px 100%,
+    0 calc(100% - 11px),
+    0 11px
+  );
+}
+
+.chamfered-frame-body {
+  clip-path: polygon(
+    10px 0,
+    calc(100% - 10px) 0,
+    100% 10px,
+    100% calc(100% - 10px),
+    calc(100% - 10px) 100%,
+    10px 100%,
+    0 calc(100% - 10px),
+    0 10px
+  );
+}
+
+/* Admin Alert Animations */
+@keyframes badge-pop {
+  0% {
+    transform: scale(1);
+  }
+  45% {
+    transform: scale(1.2);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes badge-ring {
+  0% {
+    transform: scale(1);
+    opacity: 0.65;
+  }
+  100% {
+    transform: scale(1.95);
+    opacity: 0;
+  }
+}
+
+@keyframes bell-swing {
+  0% {
+    transform: rotate(0deg);
+  }
+  20% {
+    transform: rotate(14deg);
+  }
+  45% {
+    transform: rotate(-11deg);
+  }
+  70% {
+    transform: rotate(7deg);
+  }
+  88% {
+    transform: rotate(-3deg);
+  }
+  100% {
+    transform: rotate(0deg);
+  }
+}
+
+.animate-badge-pop {
+  animation: badge-pop 420ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.animate-badge-ring {
+  animation: badge-ring 650ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.animate-bell-swing {
+  animation: bell-swing 850ms ease-in-out 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-badge-pop,
+  .animate-badge-ring,
+  .animate-bell-swing {
+    animation: none;
+  }
+}
+

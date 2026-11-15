@@ -10,6 +10,9 @@ import { ServiceLink } from '../types';
 import { SITE_CONFIG, RELATED_SYSTEM_LINKS } from '../config/site';
 import { useSiteSettings } from '../context/SiteSettingsContext';
 import { SuccessFeedbackModal } from '../components/common/SuccessFeedbackModal';
+import { SpeakerHigh, SpeakerSlash } from '@phosphor-icons/react';
+import { playAlert } from '../lib/alertSound';
+import { usePendingComplaints } from './ComplaintAlertsContext';
 
 const DEFAULT_HEADLINE = '"พวกเราพร้อมเป็นตัวแทนและรับฟังทุกเสียงของเพื่อนนักเรียนสาธิต มพ."';
 const DEFAULT_MESSAGE =
@@ -17,6 +20,8 @@ const DEFAULT_MESSAGE =
 
 export const AdminSettings: React.FC = () => {
   const { refreshSettings } = useSiteSettings();
+  const { soundEnabled, toggleSound } = usePendingComplaints();
+  const [soundTestNote, setSoundTestNote] = useState<string | null>(null);
 
   const [academicYearTH, setAcademicYearTH] = useState(SITE_CONFIG.currentAcademicYearTH);
   const [presidentHeadline, setPresidentHeadline] = useState(DEFAULT_HEADLINE);
@@ -483,6 +488,58 @@ export const AdminSettings: React.FC = () => {
             />
           </div>
         </div>
+      </div>
+
+      {/* Part 5: Admin Notification Sound */}
+      <div className="bg-white p-6 border border-[#4B1F7A]/15 rounded-sm shadow-editorial-sm space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div>
+            <h2 className="font-serif text-base font-semibold text-[#2A1245]">
+              เสียงแจ้งเตือนเรื่องร้องเรียน (ผู้ดูแลระบบ)
+            </h2>
+            <p className="text-xs text-stone-500 mt-0.5">
+              เล่นเสียงแจ้งเตือนอัตโนมัติบนอุปกรณ์นี้เมื่อเข้าสู่ระบบครั้งแรกที่มีเรื่องค้าง หรือเมื่อมีเรื่องร้องเรียนใหม่เข้ามาแบบเรียลไทม์
+            </p>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-2">
+            <button
+              type="button"
+              onClick={() => {
+                toggleSound();
+                setSoundTestNote(null);
+              }}
+              className="inline-flex items-center gap-2 px-3.5 py-2 border border-[#4B1F7A]/25 bg-[#FAF7F0] hover:bg-[#EDE6F5] text-[#2A1245] text-xs font-medium rounded-sm transition-colors"
+            >
+              {soundEnabled ? (
+                <SpeakerHigh size={16} weight="light" className="text-[#4B1F7A]" />
+              ) : (
+                <SpeakerSlash size={16} weight="light" className="text-stone-400" />
+              )}
+              <span>{soundEnabled ? 'เสียงแจ้งเตือน: เปิดอยู่' : 'เสียงแจ้งเตือน: ปิดอยู่'}</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={async () => {
+                if (!soundEnabled) {
+                  setSoundTestNote('เสียงแจ้งเตือนถูกปิดอยู่ กรุณากดเปิดเสียงก่อนทดสอบ');
+                  return;
+                }
+                await playAlert({ urgent: false });
+                setSoundTestNote('เล่นเสียงแจ้งเตือนทดสอบแล้ว');
+                window.setTimeout(() => setSoundTestNote(null), 2500);
+              }}
+              className="px-4 py-2 bg-[#4B1F7A] hover:bg-[#2A1245] text-[#FAF7F0] text-xs font-medium rounded-sm transition-colors"
+            >
+              ทดสอบเสียง
+            </button>
+          </div>
+        </div>
+
+        {soundTestNote && (
+          <p className="text-xs text-[#4B1F7A] font-medium">{soundTestNote}</p>
+        )}
       </div>
 
       {/* Save Button */}

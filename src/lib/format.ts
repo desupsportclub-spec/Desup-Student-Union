@@ -64,6 +64,73 @@ export function getThaiDateParts(dateInput: string | number | Date) {
 }
 
 /**
+ * Local calendar date key (YYYY-MM-DD) in the viewer's timezone
+ */
+export function getLocalTodayDateKey(now: Date = new Date()): string {
+  const y = now.getFullYear();
+  const m = String(now.getMonth() + 1).padStart(2, '0');
+  const d = String(now.getDate()).padStart(2, '0');
+  return `${y}-${m}-${d}`;
+}
+
+/**
+ * Extract YYYY-MM-DD key from an ISO date or YYYY-MM-DD string
+ */
+export function getEventDateKey(dateInput?: string): string {
+  if (!dateInput) return '';
+  const isoPrefix = dateInput.match(/^(\d{4}-\d{2}-\d{2})/);
+  if (isoPrefix && (dateInput.length === 10 || dateInput.includes('T00:00:00'))) {
+    return isoPrefix[1];
+  }
+  const d = new Date(dateInput);
+  if (isNaN(d.getTime())) return isoPrefix ? isoPrefix[1] : '';
+  return getLocalTodayDateKey(d);
+}
+
+/**
+ * Determine whether an event is ongoing (within start..end date), upcoming, or already past
+ */
+export function getEventScheduleStatus(
+  startAt?: string,
+  endAt?: string,
+  now: Date = new Date()
+): 'ongoing' | 'upcoming' | 'past' {
+  const startKey = getEventDateKey(startAt);
+  if (!startKey) return 'past';
+  const rawEndKey = getEventDateKey(endAt);
+  const endKey = rawEndKey && rawEndKey >= startKey ? rawEndKey : startKey;
+  const todayKey = getLocalTodayDateKey(now);
+
+  if (todayKey > endKey) return 'past';
+  if (todayKey >= startKey && todayKey <= endKey) return 'ongoing';
+  return 'upcoming';
+}
+
+/**
+ * True if an event is currently within its date range or scheduled for a future date
+ */
+export function isEventActiveOrUpcoming(
+  evt: { startAt?: string; endAt?: string },
+  now: Date = new Date()
+): boolean {
+  return getEventScheduleStatus(evt.startAt, evt.endAt, now) !== 'past';
+}
+
+/**
+ * True if an event spans across the given YYYY-MM-DD date key
+ */
+export function isEventOnDateKey(
+  evt: { startAt?: string; endAt?: string },
+  dayKey: string
+): boolean {
+  const startKey = getEventDateKey(evt.startAt);
+  if (!startKey || !dayKey) return false;
+  const rawEndKey = getEventDateKey(evt.endAt);
+  const endKey = rawEndKey && rawEndKey >= startKey ? rawEndKey : startKey;
+  return dayKey >= startKey && dayKey <= endKey;
+}
+
+/**
  * Generate Tracking Code for Complaints
  * Format: SC-2569-XXXXXX (no 0, O, 1, I to prevent human transcription errors)
  */

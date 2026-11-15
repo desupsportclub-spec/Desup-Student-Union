@@ -57,7 +57,7 @@ function buildBannerSignature(items: BannerItem[]): string {
 }
 
 function buildEventSignature(items: EventItem[]): string {
-  return items.map((e) => `${e.id ?? ''}:${e.startAt ?? ''}:${e.title ?? ''}`).join('|');
+  return items.map((e) => `${e.id ?? ''}:${e.startAt ?? ''}:${e.endAt ?? ''}:${e.title ?? ''}`).join('|');
 }
 
 function buildPeopleSignature(items: PersonItem[]): string {

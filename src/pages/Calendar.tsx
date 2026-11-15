@@ -5,7 +5,14 @@
 
 import React, { useState, useEffect } from 'react';
 import { EventItem } from '../types';
-import { formatThaiDate, getThaiDateParts } from '../lib/format';
+import {
+  formatThaiDate,
+  getEventDateKey,
+  getLocalTodayDateKey,
+  getThaiDateParts,
+  isEventActiveOrUpcoming,
+  isEventOnDateKey,
+} from '../lib/format';
 import { SectionEyebrow } from '../components/common/Ornament';
 import { getCachedEventsSync, loadPublishedEvents } from '../lib/publicDataService';
 
@@ -20,13 +27,13 @@ const EVENT_TYPES: { id: string; label: string; color: string }[] = [
 
 export const CalendarPage: React.FC = () => {
   const initialEvents = getCachedEventsSync() || [];
-  const todayStr = new Date().toISOString().split('T')[0];
+  const todayStr = getLocalTodayDateKey();
 
   const [events, setEvents] = useState<EventItem[]>(initialEvents);
   const [selectedType, setSelectedType] = useState<string>('all');
   const [currentDate, setCurrentDate] = useState<Date>(new Date());
   const [selectedDayEvents, setSelectedDayEvents] = useState<EventItem[]>(() =>
-    initialEvents.filter((e) => e.startAt.startsWith(todayStr))
+    initialEvents.filter((e) => isEventOnDateKey(e, todayStr))
   );
   const [selectedDayStr, setSelectedDayStr] = useState<string>(todayStr);
 
@@ -36,7 +43,7 @@ export const CalendarPage: React.FC = () => {
       if (!active) return;
       setEvents(list);
       setSelectedDayEvents((prev) =>
-        prev.length > 0 ? prev : list.filter((e) => e.startAt.startsWith(todayStr))
+        prev.length > 0 ? prev : list.filter((e) => isEventOnDateKey(e, todayStr))
       );
     }).catch((err) => {
       console.warn('Could not fetch events:', err);
@@ -67,10 +74,12 @@ export const CalendarPage: React.FC = () => {
 
   const thaiDateParts = getThaiDateParts(currentDate);
 
+  const activeOrUpcomingEvents = filteredEvents.filter((e) => isEventActiveOrUpcoming(e));
+
   // Check events for a given day
   const getEventsForDay = (dayNum: number): EventItem[] => {
     const dayStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(dayNum).padStart(2, '0')}`;
-    return filteredEvents.filter((e) => e.startAt.startsWith(dayStr));
+    return filteredEvents.filter((e) => isEventOnDateKey(e, dayStr));
   };
 
   const handleSelectDay = (dayNum: number) => {
@@ -306,16 +315,17 @@ export const CalendarPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Mobile Agenda List View (Grouped chronologically) */}
+      {/* Mobile Agenda List View (Ongoing & upcoming chronologically) */}
       <div className="lg:hidden space-y-6 pt-4 border-t border-[#4B1F7A]/15">
         <h3 className="font-serif text-xl font-semibold text-[#2A1245]">
-          รายการกิจกรรมทั้งหมดตามลำดับ
+          กิจกรรมที่กำลังจัดและกำลังจะมาถึง
         </h3>
 
-        {filteredEvents.length > 0 ? (
+        {activeOrUpcomingEvents.length > 0 ? (
           <div className="space-y-4">
-            {filteredEvents.map((evt) => {
+            {activeOrUpcomingEvents.map((evt) => {
               const p = getThaiDateParts(evt.startAt);
+              const hasEnd = Boolean(evt.endAt && getEventDateKey(evt.endAt) > getEventDateKey(evt.startAt));
               return (
                 <div key={evt.id} className="p-4 bg-white border border-[#4B1F7A]/15 rounded-sm flex gap-4">
                   <div className="w-14 h-14 bg-[#EDE6F5] rounded-sm flex flex-col items-center justify-center shrink-0 border border-[#B8923A]/30">
@@ -324,6 +334,11 @@ export const CalendarPage: React.FC = () => {
                   </div>
                   <div className="space-y-1 flex-1">
                     <h4 className="font-serif text-sm font-semibold text-[#1B1226]">{evt.title}</h4>
+                    {hasEnd && evt.endAt && (
+                      <p className="text-[11px] text-[#9C7A2B] font-medium">
+                        ช่วงวันที่จัด: {formatThaiDate(evt.startAt, true)} – {formatThaiDate(evt.endAt, true)}
+                      </p>
+                    )}
                     <p className="text-xs text-[#1B1226]/70 line-clamp-2">{evt.description}</p>
                     <div className="text-[11px] text-[#1B1226]/60 pt-1 flex items-center justify-between">
                       <span>📍 {evt.location || 'โรงเรียนสาธิต มพ.'}</span>
@@ -340,7 +355,7 @@ export const CalendarPage: React.FC = () => {
             })}
           </div>
         ) : (
-          <p className="text-xs text-stone-500 py-6 text-center">ไม่มีข้อมูลกิจกรรม</p>
+          <p className="text-xs text-stone-500 py-6 text-center">ยังไม่มีกิจกรรมที่กำลังจัดหรือกำลังจะมาถึง</p>
         )}
       </div>
     </div>

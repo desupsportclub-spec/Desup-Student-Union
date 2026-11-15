@@ -3,11 +3,19 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link, Outlet, useLocation } from 'react-router-dom';
+import { SpeakerHigh, SpeakerSlash, List, X } from '@phosphor-icons/react';
 import { useAdminAuth } from './AdminAuthContext';
 import { AdminLogin } from './AdminLogin';
 import { Emblem } from '../components/common/Emblem';
+import {
+  ComplaintAlertsProvider,
+  usePendingComplaints,
+} from './ComplaintAlertsContext';
+import { FirstLoginAlertsModal } from '../components/admin/FirstLoginAlertsModal';
+import { NewComplaintToast } from '../components/admin/NewComplaintToast';
+import { installAudioUnlock } from '../lib/alertSound';
 import {
   DashboardIcon,
   NewsIcon,
@@ -21,23 +29,42 @@ import {
   SecurityIcon
 } from '../components/admin/AdminIcons';
 
-export const AdminLayout: React.FC = () => {
-  const { user, isAuthorized, role, logout, loading, isAdmin } = useAdminAuth();
+const PendingBadge: React.FC<{ count: number; pulseTick: number }> = ({ count, pulseTick }) => {
+  if (count <= 0) return null;
+  const display = count > 99 ? '99+' : String(count);
+
+  return (
+    <span className="relative ml-auto inline-flex items-center justify-center shrink-0">
+      {pulseTick > 0 && (
+        <span
+          key={`ring-${pulseTick}`}
+          aria-hidden="true"
+          className="absolute inset-0 rounded-full border-2 border-[#E5383B] pointer-events-none animate-badge-ring"
+        />
+      )}
+      <span
+        key={`badge-${pulseTick}`}
+        className={`h-5 min-w-[20px] px-1.5 rounded-full bg-[#E5383B] text-white text-[11px] font-bold leading-none inline-flex items-center justify-center tabular-nums ${
+          pulseTick > 0 ? 'animate-badge-pop' : ''
+        }`}
+      >
+        {display}
+      </span>
+    </span>
+  );
+};
+
+const AdminLayoutShell: React.FC = () => {
+  const { user, role, logout, isAdmin } = useAdminAuth();
+  const { pendingCount, pulseTick, soundEnabled, toggleSound, indexError } = usePendingComplaints();
   const location = useLocation();
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-[#FAF7F0] flex flex-col items-center justify-center">
-        <Emblem size={48} animate />
-        <p className="text-xs text-[#9C7A2B] mt-4 font-serif">กำลังตรวจสอบสิทธิ์ผู้ดูแลระบบ...</p>
-      </div>
-    );
-  }
+  useEffect(() => {
+    installAudioUnlock();
+  }, []);
 
-  if (!user || !isAuthorized) {
-    return <AdminLogin />;
-  }
+  if (!user) return null;
 
   const roleLabel =
     role === 'super_admin' ? 'Super Admin' :
@@ -55,7 +82,7 @@ export const AdminLayout: React.FC = () => {
     { path: '/admin/downloads', label: 'เอกสารดาวน์โหลด', icon: <DocumentIcon /> },
     { path: '/admin/people', label: 'บุคลากร/ทำเนียบ', icon: <UsersIcon /> },
     { path: '/admin/budgets', label: 'งบประมาณกิจกรรม', icon: <BudgetIcon /> },
-    { path: '/admin/complaints', label: 'เรื่องร้องเรียน/เสนอแนะ', icon: <ComplaintsIcon /> },
+    { path: '/admin/complaints', label: 'เรื่องร้องเรียน/เสนอแนะ', icon: <ComplaintsIcon />, showPendingBadge: true },
     ...(isAdmin ? [
       { path: '/admin/settings', label: 'ตั้งค่าเว็บไซต์', icon: <SettingsIcon /> },
       { path: '/admin/users', label: 'ผู้ดูแลระบบและสิทธิ์', icon: <SecurityIcon /> }
@@ -115,7 +142,10 @@ export const AdminLayout: React.FC = () => {
                   <span className={`${active ? 'text-[#4B1F7A]' : 'text-stone-400 group-hover:text-stone-600'}`}>
                     {item.icon}
                   </span>
-                  <span>{item.label}</span>
+                  <span className="truncate">{item.label}</span>
+                  {item.showPendingBadge && (
+                    <PendingBadge count={pendingCount} pulseTick={pulseTick} />
+                  )}
                 </Link>
               );
             })}
@@ -124,6 +154,29 @@ export const AdminLayout: React.FC = () => {
 
         {/* Footer Sidebar Actions */}
         <div className="p-4 border-t border-[#4B1F7A]/10 space-y-2">
+          <button
+            type="button"
+            onClick={toggleSound}
+            aria-pressed={soundEnabled}
+            className="w-full flex items-center justify-between px-3 py-1.5 text-xs border border-[#4B1F7A]/15 bg-[#FAF7F0] hover:bg-[#EDE6F5]/60 text-[#2A1245] rounded-sm transition-colors"
+            title={soundEnabled ? 'ปิดเสียงแจ้งเตือนเรื่องร้องเรียน' : 'เปิดเสียงแจ้งเตือนเรื่องร้องเรียน'}
+          >
+            <span className="inline-flex items-center gap-2">
+              {soundEnabled ? (
+                <SpeakerHigh size={15} weight="light" className="text-[#4B1F7A]" />
+              ) : (
+                <SpeakerSlash size={15} weight="light" className="text-stone-400" />
+              )}
+              <span>เสียงแจ้งเตือน</span>
+            </span>
+            <span
+              className={`text-[10px] font-semibold ${
+                soundEnabled ? 'text-emerald-700' : 'text-stone-400'
+              }`}
+            >
+              {soundEnabled ? 'เปิด' : 'ปิด'}
+            </span>
+          </button>
           <Link
             to="/"
             className="block text-center text-xs py-1.5 border border-stone-200 text-[#1B1226]/70 hover:text-[#4B1F7A] hover:bg-stone-50 rounded-sm transition-colors"
@@ -143,51 +196,130 @@ export const AdminLayout: React.FC = () => {
       <div className="flex-1 flex flex-col min-w-0">
         {/* Mobile Top Header */}
         <header className="md:hidden bg-white border-b border-[#4B1F7A]/15 px-4 py-3 flex items-center justify-between">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 min-w-0">
             <Emblem size={28} />
-            <span className="font-serif text-sm font-semibold text-[#2A1245]">ระบบจัดการหลังบ้าน</span>
+            <span className="font-serif text-sm font-semibold text-[#2A1245] truncate">
+              ระบบจัดการหลังบ้าน
+            </span>
           </div>
           <button
+            type="button"
             onClick={() => setMobileSidebarOpen(!mobileSidebarOpen)}
-            className="text-xs px-2.5 py-1 border border-stone-300 rounded"
+            aria-expanded={mobileSidebarOpen}
+            aria-label={
+              pendingCount > 0
+                ? `เปิดเมนูผู้ดูแลระบบ (มีเรื่องร้องเรียนค้าง ${pendingCount} เรื่อง)`
+                : 'เปิดเมนูผู้ดูแลระบบ'
+            }
+            className="relative inline-flex items-center gap-1.5 text-xs px-2.5 py-1.5 border border-stone-300 rounded-sm text-[#2A1245] bg-white hover:bg-stone-50"
           >
-            เมนู
+            {mobileSidebarOpen ? <X size={15} /> : <List size={15} />}
+            <span>เมนู</span>
+            {pendingCount > 0 && (
+              <span
+                aria-hidden="true"
+                className="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-[#E5383B] ring-2 ring-white"
+              />
+            )}
           </button>
         </header>
 
         {/* Mobile Sidebar Overlay */}
         {mobileSidebarOpen && (
           <div className="md:hidden bg-white border-b border-[#4B1F7A]/20 p-4 space-y-2">
-            {navItems.map((item) => (
-              <Link
-                key={item.path}
-                to={item.path}
-                onClick={() => setMobileSidebarOpen(false)}
-                className="flex items-center gap-3 text-xs py-2 px-3 hover:bg-[#EDE6F5] rounded"
-              >
-                <span>{item.icon}</span>
-                <span>{item.label}</span>
-              </Link>
-            ))}
-            <div className="pt-2 border-t flex gap-2">
-              <Link to="/" className="text-xs py-1.5 px-3 border rounded text-center flex-1">
-                ไปหน้าเว็บ
-              </Link>
+            {navItems.map((item) => {
+              const active = item.exact
+                ? location.pathname === item.path
+                : location.pathname.startsWith(item.path);
+
+              return (
+                <Link
+                  key={item.path}
+                  to={item.path}
+                  onClick={() => setMobileSidebarOpen(false)}
+                  className={`flex items-center gap-3 text-xs py-2 px-3 rounded-sm ${
+                    active ? 'bg-[#EDE6F5] text-[#4B1F7A] font-semibold' : 'hover:bg-[#EDE6F5]'
+                  }`}
+                >
+                  <span>{item.icon}</span>
+                  <span className="truncate">{item.label}</span>
+                  {item.showPendingBadge && (
+                    <PendingBadge count={pendingCount} pulseTick={pulseTick} />
+                  )}
+                </Link>
+              );
+            })}
+            <div className="pt-2 border-t space-y-2">
               <button
-                onClick={() => logout()}
-                className="text-xs py-1.5 px-3 bg-red-50 text-[#9B1C31] rounded text-center"
+                type="button"
+                onClick={toggleSound}
+                aria-pressed={soundEnabled}
+                className="w-full flex items-center justify-between px-3 py-2 text-xs border border-[#4B1F7A]/15 bg-[#FAF7F0] rounded-sm text-[#2A1245]"
               >
-                ออกจากระบบ
+                <span className="inline-flex items-center gap-2">
+                  {soundEnabled ? (
+                    <SpeakerHigh size={15} weight="light" className="text-[#4B1F7A]" />
+                  ) : (
+                    <SpeakerSlash size={15} weight="light" className="text-stone-400" />
+                  )}
+                  <span>เสียงแจ้งเตือน</span>
+                </span>
+                <span className={`text-[10px] font-semibold ${soundEnabled ? 'text-emerald-700' : 'text-stone-400'}`}>
+                  {soundEnabled ? 'เปิด' : 'ปิด'}
+                </span>
               </button>
+              <div className="flex gap-2">
+                <Link to="/" className="text-xs py-1.5 px-3 border rounded text-center flex-1">
+                  ไปหน้าเว็บ
+                </Link>
+                <button
+                  onClick={() => logout()}
+                  className="text-xs py-1.5 px-3 bg-red-50 text-[#9B1C31] rounded text-center"
+                >
+                  ออกจากระบบ
+                </button>
+              </div>
             </div>
           </div>
         )}
 
         {/* Content Outlet */}
-        <main className="p-6 md:p-10 flex-1 overflow-y-auto">
+        <main className="p-4 sm:p-6 md:p-10 flex-1 overflow-y-auto">
+          {indexError && (
+            <div className="mb-4 p-3 bg-amber-50 border-l-4 border-amber-500 text-xs text-amber-900 rounded-sm">
+              การแจ้งเตือนเรื่องร้องเรียนแบบเรียลไทม์ต้องสร้างดัชนี (Firestore Index) เพิ่มเติม: {indexError}
+            </div>
+          )}
           <Outlet />
         </main>
       </div>
+
+      {/* First-login summary modal & Live top-right toast */}
+      <FirstLoginAlertsModal />
+      <NewComplaintToast />
     </div>
+  );
+};
+
+export const AdminLayout: React.FC = () => {
+  const { user, isAuthorized, loading } = useAdminAuth();
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-[#FAF7F0] flex flex-col items-center justify-center">
+        <Emblem size={48} animate />
+        <p className="text-xs text-[#9C7A2B] mt-4 font-serif">กำลังตรวจสอบสิทธิ์ผู้ดูแลระบบ...</p>
+      </div>
+    );
+  }
+
+  if (!user || !isAuthorized) {
+    return <AdminLogin />;
+  }
+
+  return (
+    <ComplaintAlertsProvider>
+      <AdminLayoutShell />
+    </ComplaintAlertsProvider>
   );
 };

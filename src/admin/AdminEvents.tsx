@@ -7,7 +7,12 @@ import React, { useState, useEffect } from 'react';
 import { collection, getDocs, doc, setDoc, deleteDoc } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { EventItem, EventType } from '../types';
-import { formatThaiDate } from '../lib/format';
+import {
+  formatThaiDate,
+  getEventDateKey,
+  getEventScheduleStatus,
+  getLocalTodayDateKey,
+} from '../lib/format';
 import { SuccessFeedbackModal } from '../components/common/SuccessFeedbackModal';
 import { invalidatePublicDataCache } from '../lib/publicDataService';
 
@@ -24,6 +29,7 @@ export const AdminEvents: React.FC = () => {
   const [type, setType] = useState<EventType>('academic');
   const [location, setLocation] = useState('');
   const [startDate, setStartDate] = useState('');
+  const [endDate, setEndDate] = useState('');
   const [published, setPublished] = useState(true);
   const [saving, setSaving] = useState(false);
 
@@ -54,7 +60,8 @@ export const AdminEvents: React.FC = () => {
     setDescription('');
     setType('academic');
     setLocation('โรงเรียนสาธิต มพ.');
-    setStartDate(new Date().toISOString().split('T')[0]);
+    setStartDate(getLocalTodayDateKey());
+    setEndDate('');
     setPublished(true);
     setIsModalOpen(true);
   };
@@ -65,7 +72,8 @@ export const AdminEvents: React.FC = () => {
     setDescription(item.description || '');
     setType(item.type);
     setLocation(item.location || '');
-    setStartDate(item.startAt.split('T')[0]);
+    setStartDate(getEventDateKey(item.startAt));
+    setEndDate(item.endAt ? getEventDateKey(item.endAt) : '');
     setPublished(item.published);
     setIsModalOpen(true);
   };
@@ -77,12 +85,14 @@ export const AdminEvents: React.FC = () => {
     setSaving(true);
     try {
       const id = editingItem?.id || doc(collection(db, 'events')).id;
+      const hasValidEnd = Boolean(endDate && endDate > startDate);
       const eventDoc: EventItem = {
         title: title.trim(),
         description: description.trim(),
         type,
         location: location.trim(),
         startAt: new Date(startDate).toISOString(),
+        ...(hasValidEnd ? { endAt: new Date(endDate).toISOString() } : {}),
         allDay: true,
         published
       };
@@ -150,13 +160,36 @@ export const AdminEvents: React.FC = () => {
                 </tr>
               </thead>
               <tbody className="divide-y divide-stone-100">
-                {events.map((item) => (
+                {events.map((item) => {
+                  const scheduleStatus = getEventScheduleStatus(item.startAt, item.endAt);
+                  const hasEnd = Boolean(item.endAt && getEventDateKey(item.endAt) > getEventDateKey(item.startAt));
+                  return (
                   <tr key={item.id} className="hover:bg-stone-50">
-                    <td className="py-3 px-4 font-mono font-bold text-[#4B1F7A]">
-                      {formatThaiDate(item.startAt, true)}
+                    <td className="py-3 px-4 font-mono font-bold text-[#4B1F7A] whitespace-nowrap">
+                      <div>{formatThaiDate(item.startAt, true)}</div>
+                      {hasEnd && item.endAt && (
+                        <div className="text-[10px] font-normal text-[#9C7A2B]">
+                          ถึง {formatThaiDate(item.endAt, true)}
+                        </div>
+                      )}
                     </td>
                     <td className="py-3 px-4 font-medium text-[#1B1226]">
-                      {item.title}
+                      <div>{item.title}</div>
+                      <div className="mt-1">
+                        {scheduleStatus === 'ongoing' ? (
+                          <span className="inline-block px-1.5 py-0.5 text-[10px] rounded-sm bg-emerald-50 text-emerald-700 border border-emerald-200">
+                            อยู่ในช่วงจัดกิจกรรม
+                          </span>
+                        ) : scheduleStatus === 'upcoming' ? (
+                          <span className="inline-block px-1.5 py-0.5 text-[10px] rounded-sm bg-[#EDE6F5] text-[#4B1F7A]">
+                            ยังไม่จัด
+                          </span>
+                        ) : (
+                          <span className="inline-block px-1.5 py-0.5 text-[10px] rounded-sm bg-stone-100 text-stone-500">
+                            ผ่านไปแล้ว (ซ่อนจากหน้าแรก)
+                          </span>
+                        )}
+                      </div>
                     </td>
                     <td className="py-3 px-4 text-[#1B1226]/70">
                       {item.type === 'sport' ? 'กีฬา' : item.type === 'academic' ? 'วิชาการ' : item.type === 'art' ? 'ศิลปวัฒนธรรม' : item.type === 'volunteer' ? 'จิตอาสา' : 'การประชุม'}
@@ -186,7 +219,8 @@ export const AdminEvents: React.FC = () => {
                       </button>
                     </td>
                   </tr>
-                ))}
+                  );
+                })}
               </tbody>
             </table>
           </div>
@@ -223,30 +257,45 @@ export const AdminEvents: React.FC = () => {
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block font-semibold text-[#2A1245] mb-1">ประเภท *</label>
-                  <select
-                    value={type}
-                    onChange={(e) => setType(e.target.value as EventType)}
-                    className="w-full border p-2 rounded-sm"
-                  >
-                    <option value="academic">วิชาการ</option>
-                    <option value="sport">กีฬา</option>
-                    <option value="art">ศิลปวัฒนธรรม</option>
-                    <option value="volunteer">จิตอาสา</option>
-                    <option value="meeting">การประชุม</option>
-                  </select>
-                </div>
+              <div>
+                <label className="block font-semibold text-[#2A1245] mb-1">ประเภท *</label>
+                <select
+                  value={type}
+                  onChange={(e) => setType(e.target.value as EventType)}
+                  className="w-full border p-2 rounded-sm"
+                >
+                  <option value="academic">วิชาการ</option>
+                  <option value="sport">กีฬา</option>
+                  <option value="art">ศิลปวัฒนธรรม</option>
+                  <option value="volunteer">จิตอาสา</option>
+                  <option value="meeting">การประชุม</option>
+                </select>
+              </div>
 
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label className="block font-semibold text-[#2A1245] mb-1">วันที่จัดกิจกรรม *</label>
+                  <label className="block font-semibold text-[#2A1245] mb-1">วันที่เริ่มจัดกิจกรรม *</label>
                   <input
                     type="date"
                     value={startDate}
-                    onChange={(e) => setStartDate(e.target.value)}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      setStartDate(val);
+                      if (endDate && val > endDate) setEndDate('');
+                    }}
                     className="w-full border p-2 rounded-sm"
                     required
+                  />
+                </div>
+
+                <div>
+                  <label className="block font-semibold text-[#2A1245] mb-1">วันที่สิ้นสุด (ถ้าจัดหลายวัน)</label>
+                  <input
+                    type="date"
+                    value={endDate}
+                    min={startDate || undefined}
+                    onChange={(e) => setEndDate(e.target.value)}
+                    className="w-full border p-2 rounded-sm"
                   />
                 </div>
               </div>
