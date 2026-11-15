@@ -3,61 +3,62 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useEffect } from 'react';
-import { collection, getDocs } from 'firebase/firestore';
-import { db } from '../../lib/firebase';
+import React, { useState, useEffect, useMemo } from 'react';
 import { PersonItem } from '../../types';
 import { SectionEyebrow, CornerBracket } from '../../components/common/Ornament';
 import { Emblem } from '../../components/common/Emblem';
 import { useSiteSettings } from '../../context/SiteSettingsContext';
+import { getCachedPeopleSync, loadPeopleList } from '../../lib/publicDataService';
 
 export const AboutBoard: React.FC = () => {
   const { academicYearTH } = useSiteSettings();
-  const [allBoard, setAllBoard] = useState<PersonItem[]>([]);
-  const [availableYears, setAvailableYears] = useState<string[]>([academicYearTH]);
+  const initialPeople = getCachedPeopleSync();
+  const [people, setPeople] = useState<PersonItem[]>(initialPeople || []);
   const [selectedYear, setSelectedYear] = useState<string>(academicYearTH);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(!initialPeople);
 
   useEffect(() => {
     setSelectedYear((prev) => prev || academicYearTH);
   }, [academicYearTH]);
 
-  // Fetch all board members once (avoids composite index dependency)
   useEffect(() => {
-    async function fetchBoardData() {
-      setLoading(true);
-      try {
-        const snap = await getDocs(collection(db, 'people'));
-        const list: PersonItem[] = [];
-        const yearsSet = new Set<string>();
-        snap.forEach((d) => {
-          const data = { id: d.id, ...d.data() } as PersonItem;
-          if (data.role === 'board') {
-            list.push(data);
-            if (data.yearTH) yearsSet.add(data.yearTH);
-          }
-        });
+    let active = true;
+    loadPeopleList((list) => {
+      if (!active) return;
+      setPeople(list);
+      setLoading(false);
+    })
+      .catch((err) => {
+        console.warn('Could not load board members:', err);
+      })
+      .finally(() => {
+        if (active) setLoading(false);
+      });
+    return () => {
+      active = false;
+    };
+  }, []);
 
-        yearsSet.add(academicYearTH);
-        const sortedYears = Array.from(yearsSet).sort((a, b) => b.localeCompare(a));
-        setAvailableYears(sortedYears);
-
-        list.sort((a, b) => (a.order || 999) - (b.order || 999));
-        setAllBoard(list);
-
-        if (sortedYears.length > 0 && !yearsSet.has(selectedYear)) {
-          setSelectedYear(sortedYears[0]);
-        }
-      } catch (err) {
-        console.warn("Could not load board members:", err);
-        setAvailableYears([academicYearTH]);
-      } finally {
-        setLoading(false);
+  const { allBoard, availableYears } = useMemo(() => {
+    const yearsSet = new Set<string>();
+    const list: PersonItem[] = [];
+    people.forEach((data) => {
+      if (data.role === 'board') {
+        list.push(data);
+        if (data.yearTH) yearsSet.add(data.yearTH);
       }
-    }
+    });
+    yearsSet.add(academicYearTH);
+    const sortedYears = Array.from(yearsSet).sort((a, b) => b.localeCompare(a));
+    list.sort((a, b) => (a.order || 999) - (b.order || 999));
+    return { allBoard: list, availableYears: sortedYears };
+  }, [people, academicYearTH]);
 
-    fetchBoardData();
-  }, [academicYearTH]);
+  useEffect(() => {
+    if (availableYears.length > 0 && !availableYears.includes(selectedYear)) {
+      setSelectedYear(availableYears[0]);
+    }
+  }, [availableYears, selectedYear]);
 
   const boardMembers = allBoard.filter((m) => m.yearTH === selectedYear);
 

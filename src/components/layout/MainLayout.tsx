@@ -21,24 +21,26 @@ export const MainLayout: React.FC = () => {
   const location = useLocation();
   const { ticker: tickerItems } = useSiteSettings();
 
-  // Smooth scroll via Lenis, respecting reduced motion
+  // Smooth scroll via Lenis only on desktop pointers; let iPhone/iPad use native hardware momentum scrolling
   useEffect(() => {
     const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    if (prefersReducedMotion) return;
+    const isDesktopPointer = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+    if (prefersReducedMotion || !isDesktopPointer) return;
 
     const lenis = new Lenis({
-      duration: 1.2,
+      duration: 1.1,
       easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
       orientation: 'vertical',
       smoothWheel: true,
     });
 
+    let animId = 0;
     function raf(time: number) {
       lenis.raf(time);
-      requestAnimationFrame(raf);
+      animId = requestAnimationFrame(raf);
     }
 
-    const animId = requestAnimationFrame(raf);
+    animId = requestAnimationFrame(raf);
 
     return () => {
       cancelAnimationFrame(animId);
@@ -46,13 +48,29 @@ export const MainLayout: React.FC = () => {
     };
   }, []);
 
-  // Prefetch News routes & warm news cache on idle so navigating to /news or articles is instant
+  // Prefetch News & common public route chunks on idle so navigation on mobile/iPad feels instant
   useEffect(() => {
-    const timer = setTimeout(() => {
+    const prefetchAll = () => {
       prefetchNews();
       void import('../../pages/News');
       void import('../../pages/NewsDetail');
-    }, 600);
+      void import('../../pages/Calendar');
+      void import('../../pages/Downloads');
+      void import('../../pages/TrackComplaint');
+      void import('../../pages/Complaint');
+    };
+
+    const win = window as Window & {
+      requestIdleCallback?: (cb: () => void, opts?: { timeout: number }) => number;
+      cancelIdleCallback?: (id: number) => void;
+    };
+
+    if (typeof win.requestIdleCallback === 'function') {
+      const idleId = win.requestIdleCallback(prefetchAll, { timeout: 1500 });
+      return () => win.cancelIdleCallback?.(idleId);
+    }
+
+    const timer = setTimeout(prefetchAll, 800);
     return () => clearTimeout(timer);
   }, []);
 
@@ -81,9 +99,6 @@ export const MainLayout: React.FC = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-[#FAF7F0] text-[#1B1226] relative selection:bg-[#EDE6F5] selection:text-[#2A1245]">
-      {/* Paper grain subtle noise texture */}
-      <div className="paper-grain" aria-hidden="true" />
-
       {/* Top scroll progress */}
       <ScrollProgress />
 

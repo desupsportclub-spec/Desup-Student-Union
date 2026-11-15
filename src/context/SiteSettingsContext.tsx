@@ -4,7 +4,7 @@
  */
 
 import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
-import { doc, getDoc, onSnapshot } from 'firebase/firestore';
+import { doc, getDoc, getDocFromCache, onSnapshot } from 'firebase/firestore';
 import { db, testConnection } from '../lib/firebase';
 import { RELATED_SYSTEM_LINKS, SITE_CONFIG } from '../config/site';
 import { ServiceLink, SiteContactInfo } from '../types';
@@ -53,7 +53,7 @@ export const SiteSettingsProvider: React.FC<{ children: React.ReactNode }> = ({ 
   const [totalVisits, setTotalVisits] = useState<number>(0);
   const [loading, setLoading] = useState<boolean>(true);
 
-  const applyDocData = (data: Record<string, any> | undefined) => {
+  const applyDocData = useCallback((data: Record<string, any> | undefined) => {
     if (!data) return;
     if (data.academicYearTH && typeof data.academicYearTH === 'string') {
       setAcademicYearTH(data.academicYearTH.trim() || SITE_CONFIG.currentAcademicYearTH);
@@ -90,7 +90,7 @@ export const SiteSettingsProvider: React.FC<{ children: React.ReactNode }> = ({ 
     if (typeof data.totalVisits === 'number') {
       setTotalVisits(data.totalVisits);
     }
-  };
+  }, []);
 
   const refreshSettings = useCallback(async () => {
     try {
@@ -103,12 +103,24 @@ export const SiteSettingsProvider: React.FC<{ children: React.ReactNode }> = ({ 
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [applyDocData]);
 
   useEffect(() => {
-    testConnection();
+    void testConnection();
+    const settingsRef = doc(db, 'settings', 'site');
+
+    // Hydrate from IndexedDB cache immediately so ticker/links/year paint without waiting for network
+    getDocFromCache(settingsRef)
+      .then((snap) => {
+        if (snap.exists()) {
+          applyDocData(snap.data());
+          setLoading(false);
+        }
+      })
+      .catch(() => {});
+
     const unsub = onSnapshot(
-      doc(db, 'settings', 'site'),
+      settingsRef,
       (snap) => {
         if (snap.exists()) {
           applyDocData(snap.data());
@@ -122,7 +134,7 @@ export const SiteSettingsProvider: React.FC<{ children: React.ReactNode }> = ({ 
     );
 
     return () => unsub();
-  }, []);
+  }, [applyDocData]);
 
   return (
     <SiteSettingsContext.Provider

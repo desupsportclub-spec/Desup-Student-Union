@@ -10,6 +10,7 @@ import { BudgetYear, BudgetItemEntry } from '../types';
 import { formatBaht } from '../lib/format';
 import { useSiteSettings } from '../context/SiteSettingsContext';
 import { SuccessFeedbackModal } from '../components/common/SuccessFeedbackModal';
+import { invalidatePublicDataCache } from '../lib/publicDataService';
 
 export const AdminBudgets: React.FC = () => {
   const { academicYearTH } = useSiteSettings();
@@ -66,6 +67,7 @@ export const AdminBudgets: React.FC = () => {
 
     try {
       await deleteDoc(doc(db, 'budgets', selectedYear));
+      invalidatePublicDataCache('budgets');
       setTotalBudget(0);
       setItems([]);
       await fetchYearsList();
@@ -136,6 +138,7 @@ export const AdminBudgets: React.FC = () => {
         items
       };
       await setDoc(doc(db, 'budgets', selectedYear), budgetDoc);
+      invalidatePublicDataCache('budgets');
       await fetchYearsList();
       setSuccessModalTitle(`บันทึกงบประมาณประจำปีการศึกษา ${selectedYear} เรียบร้อยแล้ว`);
     } catch (err) {

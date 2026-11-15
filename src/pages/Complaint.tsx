@@ -3,14 +3,20 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { setDoc, doc } from 'firebase/firestore';
+import { onAuthStateChanged, signInWithPopup, User } from 'firebase/auth';
 import { motion } from 'motion/react';
-import { db } from '../lib/firebase';
+import { auth, db, googleProvider } from '../lib/firebase';
 import { ComplaintType, ImageAsset } from '../types';
-import { generateTrackingCode } from '../lib/format';
+import { generateTrackingCode, formatThaiDateTime } from '../lib/format';
 import { SectionEyebrow, CornerBracket } from '../components/common/Ornament';
 import { compressImageFile, fileToDataUrl, getImageDimensions } from '../lib/imageService';
+import {
+  generateTicketReceiptBlob,
+  saveComplaintToLocalHistory,
+  saveRecoveryLookup,
+} from '../lib/complaintTracking';
 import { Link } from 'react-router-dom';
 import { SuccessCheck } from '../components/SuccessCheck';
 import { useSiteSettings } from '../context/SiteSettingsContext';
@@ -50,9 +56,28 @@ export const Complaint: React.FC = () => {
   const [attachedImages, setAttachedImages] = useState<ImageAsset[]>([]);
   const [imageCompressing, setImageCompressing] = useState(false);
 
+  // Recovery & Cross-device sync (Optional)
+  const [recoveryKeyword, setRecoveryKeyword] = useState('');
+  const [recoveryPin, setRecoveryPin] = useState('');
+  const [currentUser, setCurrentUser] = useState<User | null>(() => auth.currentUser);
+  const [linkGoogleAccount, setLinkGoogleAccount] = useState<boolean>(Boolean(auth.currentUser));
+  const [authLoading, setAuthLoading] = useState(false);
+
   // Result Tracking Code
   const [generatedCode, setGeneratedCode] = useState<string>('');
+  const [submittedTitle, setSubmittedTitle] = useState<string>('');
+  const [submittedAtISO, setSubmittedAtISO] = useState<string>('');
   const [copied, setCopied] = useState(false);
+  const [copiedLink, setCopiedLink] = useState(false);
+  const [downloadingTicket, setDownloadingTicket] = useState(false);
+
+  useEffect(() => {
+    const unsub = onAuthStateChanged(auth, (u) => {
+      setCurrentUser(u);
+      if (u) setLinkGoogleAccount(true);
+    });
+    return () => unsub();
+  }, []);
 
   // Handle Image Attachments (compressed to webp <= 300KB)
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -139,20 +164,34 @@ export const Complaint: React.FC = () => {
       return;
     }
 
+    // 4. Validate optional recovery key + PIN pair if user started filling either
+    const hasKeyword = recoveryKeyword.trim().length > 0;
+    const hasPin = recoveryPin.trim().length > 0;
+    if (hasKeyword || hasPin) {
+      if (recoveryKeyword.trim().length < 2) {
+        setErrorMsg("กรุณากรอกคำจำส่วนตัวสำหรับกู้คืนอย่างน้อย 2 ตัวอักษร (หรือเว้นว่างทั้ง 2 ช่องหากไม่ใช้)");
+        return;
+      }
+      if (recoveryPin.trim().length < 4) {
+        setErrorMsg("กรุณาตั้งรหัส PIN สำหรับกู้คืนอย่างน้อย 4 หลัก");
+        return;
+      }
+    }
+
     setSubmitting(true);
     setErrorMsg(null);
 
     const yearNum = parseInt(academicYearTH, 10) || 2569;
     const trackingCode = generateTrackingCode(yearNum);
+    const cleanTitle = title.trim();
 
     try {
       const nowISO = new Date().toISOString();
 
-      // Write public complaint document
-      await setDoc(doc(db, 'complaints', trackingCode), {
+      const complaintPayload: Record<string, unknown> = {
         trackingCode,
         type,
-        title: title.trim(),
+        title: cleanTitle,
         body: body.trim(),
         location: location.trim() || 'ไม่ระบุ',
         anonymous,
@@ -160,30 +199,62 @@ export const Complaint: React.FC = () => {
         publicReplies: [],
         createdAt: nowISO,
         updatedAt: nowISO
-      });
+      };
+
+      if (linkGoogleAccount && currentUser?.uid) {
+        complaintPayload.reporterUid = currentUser.uid;
+      }
+
+      // Write public complaint document
+      await setDoc(doc(db, 'complaints', trackingCode), complaintPayload);
+
+      const followUpTasks: Promise<unknown>[] = [];
 
       // Write private contact info in isolated subcollection
       if (!anonymous && (contactName || contactMethod)) {
-        await setDoc(doc(db, 'complaints', trackingCode, 'private', 'contact'), {
-          name: contactName.trim(),
-          gradeClass: gradeClass.trim(),
-          contactMethod: contactMethod.trim(),
-          submittedAt: nowISO
-        });
+        followUpTasks.push(
+          setDoc(doc(db, 'complaints', trackingCode, 'private', 'contact'), {
+            name: contactName.trim(),
+            gradeClass: gradeClass.trim(),
+            contactMethod: contactMethod.trim(),
+            submittedAt: nowISO
+          })
+        );
       }
 
       // Write private attachments in isolated subcollection (only admins read)
       if (attachedImages.length > 0) {
-        await setDoc(doc(db, 'complaints', trackingCode, 'private', 'attachments'), {
-          images: attachedImages,
-          submittedAt: nowISO
-        });
+        followUpTasks.push(
+          setDoc(doc(db, 'complaints', trackingCode, 'private', 'attachments'), {
+            images: attachedImages,
+            submittedAt: nowISO
+          })
+        );
       }
+
+      // Write SHA-256 recovery lookup entry if user configured personal recovery PIN
+      if (hasKeyword && hasPin) {
+        followUpTasks.push(
+          saveRecoveryLookup(recoveryKeyword, recoveryPin, trackingCode)
+        );
+      }
+
+      await Promise.all(followUpTasks);
+
+      // Automatically save to this device's local history so user never loses it on this phone/iPad
+      saveComplaintToLocalHistory({
+        trackingCode,
+        title: cleanTitle,
+        type,
+        createdAt: nowISO,
+      });
 
       // Save rate limit timestamp
       localStorage.setItem('desup_last_complaint_time', String(now));
 
       setGeneratedCode(trackingCode);
+      setSubmittedTitle(cleanTitle);
+      setSubmittedAtISO(nowISO);
       setStep(4);
     } catch (err: unknown) {
       console.error("Complaint submission error:", err);
@@ -193,10 +264,82 @@ export const Complaint: React.FC = () => {
     }
   };
 
+  const handleConnectGoogle = async () => {
+    setAuthLoading(true);
+    setErrorMsg(null);
+    try {
+      const res = await signInWithPopup(auth, googleProvider);
+      setCurrentUser(res.user);
+      setLinkGoogleAccount(true);
+    } catch {
+      setErrorMsg("ไม่สามารถเชื่อมต่อบัญชี Google ได้ในขณะนี้ (สามารถส่งเรื่องได้ตามปกติโดยไม่ต้องล็อกอิน)");
+    } finally {
+      setAuthLoading(false);
+    }
+  };
+
+  const directTrackUrl =
+    typeof window !== 'undefined' && generatedCode
+      ? `${window.location.origin}/track?code=${generatedCode}`
+      : `/track?code=${generatedCode}`;
+
   const handleCopyCode = () => {
     navigator.clipboard.writeText(generatedCode);
     setCopied(true);
     setTimeout(() => setCopied(false), 2500);
+  };
+
+  const handleCopyTrackLink = () => {
+    navigator.clipboard.writeText(directTrackUrl);
+    setCopiedLink(true);
+    setTimeout(() => setCopiedLink(false), 2500);
+  };
+
+  const handleDownloadTicketImage = async () => {
+    if (!generatedCode || downloadingTicket) return;
+    setDownloadingTicket(true);
+    try {
+      const blob = await generateTicketReceiptBlob({
+        trackingCode: generatedCode,
+        title: submittedTitle || 'เรื่องร้องเรียน / ข้อเสนอแนะ',
+        dateText: formatThaiDateTime(submittedAtISO || new Date().toISOString()),
+        trackUrl: directTrackUrl,
+      });
+      if (!blob) return;
+
+      const fileName = `ticket-${generatedCode}.png`;
+      const file = new File([blob], fileName, { type: 'image/png' });
+
+      // Prefer native share sheet on iOS/iPadOS if file sharing is supported so user can tap "Save Image"
+      if (
+        typeof navigator !== 'undefined' &&
+        navigator.share &&
+        navigator.canShare &&
+        navigator.canShare({ files: [file] })
+      ) {
+        try {
+          await navigator.share({
+            files: [file],
+            title: `บัตรติดตามเรื่อง ${generatedCode}`,
+            text: `ลิงก์ติดตามสถานะ: ${directTrackUrl}`,
+          });
+          return;
+        } catch {
+          // User cancelled share or fallback to direct download
+        }
+      }
+
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = fileName;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+    } finally {
+      setDownloadingTicket(false);
+    }
   };
 
   return (
@@ -538,6 +681,78 @@ export const Complaint: React.FC = () => {
                 </div>
               </div>
             )}
+            {/* Anti-Loss Tracking Options (Local Auto-Save + Optional Recovery PIN + Google Sync) */}
+            <div className="p-4 sm:p-5 bg-[#FAF7F0] border border-[#B8923A]/40 rounded-sm space-y-4">
+              <div className="space-y-1">
+                <h3 className="font-serif text-sm font-semibold text-[#2A1245]">
+                  ระบบช่วยจำและติดตามผล (ป้องกันรหัสหาย)
+                </h3>
+                <p className="text-xs text-[#1B1226]/70 leading-relaxed">
+                  ✓ ระบบจะบันทึกรายการเรื่องนี้ไว้บนเครื่องนี้ให้อัตโนมัติเมื่อเปิดหน้าติดตามสถานะ
+                  และท่านสามารถตั้งรหัสกันลืมหรือเชื่อมบัญชี Google เพื่อเปิดดูจากเครื่องอื่นได้
+                </p>
+              </div>
+
+              {/* Option A: Personal Recovery Keyword + PIN */}
+              <div className="pt-2 border-t border-[#4B1F7A]/10 space-y-2">
+                <label className="block text-xs font-semibold text-[#2A1245]">
+                  ตั้งคำจำส่วนตัว + รหัส PIN (ไม่บังคับ — เผื่อใช้ค้นหาคืนเมื่อเปลี่ยนเครื่องหรือล้างประวัติ)
+                </label>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <input
+                    type="text"
+                    value={recoveryKeyword}
+                    onChange={(e) => setRecoveryKeyword(e.target.value)}
+                    placeholder="คำจำส่วนตัว เช่น รหัสนักเรียน หรือชื่อเล่น"
+                    className="w-full text-xs input-underline bg-white px-2.5"
+                    maxLength={50}
+                  />
+                  <input
+                    type="password"
+                    inputMode="numeric"
+                    value={recoveryPin}
+                    onChange={(e) => setRecoveryPin(e.target.value)}
+                    placeholder="รหัส PIN 4-6 หลัก (เช่น 1234)"
+                    className="w-full text-xs input-underline bg-white px-2.5"
+                    maxLength={12}
+                  />
+                </div>
+                <p className="text-[11px] text-[#1B1226]/55">
+                  ข้อมูลนี้จะถูกเข้ารหัสแบบทางเดียว (SHA-256) ก่อนจัดเก็บ จึงไม่เปิดเผยตัวตนของผู้ส่ง
+                </p>
+              </div>
+
+              {/* Option B: Optional Google Account Cross-Device Sync */}
+              <div className="pt-2 border-t border-[#4B1F7A]/10 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                {currentUser ? (
+                  <label className="flex items-center gap-2 text-xs text-[#2A1245] cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={linkGoogleAccount}
+                      onChange={(e) => setLinkGoogleAccount(e.target.checked)}
+                      className="accent-[#4B1F7A]"
+                    />
+                    <span>
+                      ผูกกับบัญชี Google (<strong>{currentUser.email}</strong>) เพื่อดูสถานะข้ามเครื่อง
+                    </span>
+                  </label>
+                ) : (
+                  <>
+                    <span className="text-xs text-[#1B1226]/70">
+                      หรือเชื่อมบัญชี Google เพื่อซิงค์ประวัติข้ามมือถือ / ไอแพด / คอม (ไม่เปิดเผยชื่อต่อผู้ดูแลหากเลือกไม่ระบุตัวตน)
+                    </span>
+                    <button
+                      type="button"
+                      onClick={handleConnectGoogle}
+                      disabled={authLoading}
+                      className="px-3.5 py-1.5 bg-white border border-[#4B1F7A]/25 hover:border-[#B8923A] text-xs font-medium text-[#2A1245] rounded-sm shrink-0 transition-colors"
+                    >
+                      {authLoading ? 'กำลังเชื่อมต่อ...' : 'เชื่อมบัญชี Google'}
+                    </button>
+                  </>
+                )}
+              </div>
+            </div>
           </div>
 
           <div className="flex items-center justify-between pt-4">
@@ -574,7 +789,7 @@ export const Complaint: React.FC = () => {
           <motion.div
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 2, duration: 0.5 }}
+            transition={{ delay: 1.2, duration: 0.4 }}
             className="space-y-6"
           >
             <div className="space-y-2">
@@ -582,38 +797,52 @@ export const Complaint: React.FC = () => {
                 องค์การนักเรียนได้รับเรื่องของท่านแล้ว
               </h2>
               <p className="text-xs md:text-sm text-[#1B1226]/70 max-w-md mx-auto">
-                ขอขอบคุณสำหรับการมีส่วนร่วมพัฒนาโรงเรียนสาธิตมหาวิทยาลัยพะเยา
-                โปรดบันทึกรหัสติดตามด้านล่างนี้ไว้เพื่อตรวจสอบสถานะ
+                ระบบได้บันทึกเรื่องนี้ไว้ในหน้า "ติดตามสถานะ" บนอุปกรณ์นี้ให้อัตโนมัติแล้ว
+                หรือบันทึกรูปบัตร/ลิงก์ด้านล่างเพื่อเก็บไว้เปิดดูจากเครื่องอื่น
               </p>
             </div>
 
             {/* Large Tracking Code Display */}
-            <div className="p-6 bg-white border border-[#B8923A] rounded-sm max-w-md mx-auto space-y-3">
-              <span className="text-[11px] uppercase tracking-widest text-[#9C7A2B] font-semibold">
+            <div className="p-5 sm:p-6 bg-white border border-[#B8923A] rounded-sm max-w-md mx-auto space-y-4">
+              <span className="text-[11px] uppercase tracking-widest text-[#9C7A2B] font-semibold block">
                 รหัสติดตามเรื่องร้องเรียน (TRACKING CODE)
               </span>
-              <div className="font-serif text-3xl md:text-4xl font-bold text-[#4B1F7A] tracking-wider font-mono">
+              <div className="font-serif text-2xl sm:text-3xl md:text-4xl font-bold text-[#4B1F7A] tracking-wider font-mono">
                 {generatedCode}
               </div>
-              <button
-                type="button"
-                onClick={handleCopyCode}
-                className="px-4 py-1.5 bg-[#FAF7F0] border border-[#B8923A]/60 text-xs text-[#2A1245] rounded-sm hover:bg-[#EDE6F5] transition-colors"
-              >
-                {copied ? 'คัดลอกรหัสเรียบร้อยแล้ว ✓' : '📋 คัดลอกรหัสติดตาม'}
-              </button>
+
+              <div className="flex flex-wrap items-center justify-center gap-2 pt-1">
+                <button
+                  type="button"
+                  onClick={handleDownloadTicketImage}
+                  disabled={downloadingTicket}
+                  className="px-4 py-2 bg-[#4B1F7A] text-[#FAF7F0] text-xs font-medium rounded-sm hover:bg-[#2A1245] transition-colors"
+                >
+                  {downloadingTicket ? 'กำลังสร้างรูปบัตร...' : '🖼️ บันทึกรูปบัตรติดตามเรื่อง'}
+                </button>
+                <button
+                  type="button"
+                  onClick={handleCopyTrackLink}
+                  className="px-3.5 py-2 bg-[#FAF7F0] border border-[#B8923A]/60 text-xs text-[#2A1245] rounded-sm hover:bg-[#EDE6F5] transition-colors"
+                >
+                  {copiedLink ? 'คัดลอกลิงก์แล้ว ✓' : '🔗 คัดลอกลิงก์ติดตาม'}
+                </button>
+                <button
+                  type="button"
+                  onClick={handleCopyCode}
+                  className="px-3.5 py-2 bg-[#FAF7F0] border border-stone-300 text-xs text-[#2A1245] rounded-sm hover:bg-stone-100 transition-colors"
+                >
+                  {copied ? 'คัดลอกรหัสแล้ว ✓' : '📋 คัดลอกรหัส'}
+                </button>
+              </div>
             </div>
 
-            <div className="text-xs text-[#1B1226]/60 max-w-md mx-auto">
-              💡 เนื่องจากระบบไม่ได้บังคับให้ล็อกอิน รหัสนี้คือกุญแจดอกเดียวในการเข้าดูผลการพิจารณาและการตอบกลับจากคณะทำงาน
-            </div>
-
-            <div className="pt-4 flex flex-wrap justify-center gap-4">
+            <div className="pt-2 flex flex-wrap justify-center gap-3 sm:gap-4">
               <Link
-                to="/track"
+                to={`/track?code=${generatedCode}`}
                 className="px-6 py-2.5 bg-[#4B1F7A] text-[#FAF7F0] text-xs font-medium rounded-full border border-[#D9B867]/40 hover:bg-[#2A1245] transition-colors"
               >
-                ไปที่หน้าติดตามสถานะ →
+                ติดตามสถานะเรื่องนี้ →
               </Link>
               <Link
                 to="/"

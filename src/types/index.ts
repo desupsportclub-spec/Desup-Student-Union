@@ -134,6 +134,7 @@ export interface ComplaintItem {
   body: string;
   location?: string;
   anonymous: boolean;
+  reporterUid?: string;
   status: ComplaintStatus;
   publicReplies?: PublicReply[];
   createdAt: string;

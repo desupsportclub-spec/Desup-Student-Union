@@ -14,7 +14,7 @@ import {
   getDocFromCache,
 } from 'firebase/firestore';
 import { db } from './firebase';
-import { NewsItem, BannerItem, EventItem, PersonItem } from '../types';
+import { NewsItem, BannerItem, EventItem, PersonItem, DownloadItem, BudgetYear } from '../types';
 
 const CACHE_TTL_MS = 60_000; // 1 minute fresh window before background refresh
 
@@ -35,6 +35,12 @@ let eventsInFlight: Promise<EventItem[]> | null = null;
 
 let peopleCache: CacheEntry<PersonItem[]> | null = null;
 let peopleInFlight: Promise<PersonItem[]> | null = null;
+
+let downloadsCache: CacheEntry<DownloadItem[]> | null = null;
+let downloadsInFlight: Promise<DownloadItem[]> | null = null;
+
+let budgetsCache: CacheEntry<BudgetYear[]> | null = null;
+let budgetsInFlight: Promise<BudgetYear[]> | null = null;
 
 function buildNewsSignature(items: NewsItem[]): string {
   return items
@@ -60,6 +66,18 @@ function buildPeopleSignature(items: PersonItem[]): string {
     .join('|');
 }
 
+function buildDownloadSignature(items: DownloadItem[]): string {
+  return items
+    .map((d) => `${d.id ?? ''}:${d.downloads ?? 0}:${d.createdAt ?? ''}:${d.title ?? ''}`)
+    .join('|');
+}
+
+function buildBudgetSignature(items: BudgetYear[]): string {
+  return items
+    .map((b) => `${b.id ?? b.yearTH}:${b.totalBudget ?? 0}:${b.items?.length ?? 0}`)
+    .join('|');
+}
+
 export function getCachedNewsSync(): NewsItem[] | null {
   return newsCache?.data ?? null;
 }
@@ -74,6 +92,14 @@ export function getCachedEventsSync(): EventItem[] | null {
 
 export function getCachedPeopleSync(): PersonItem[] | null {
   return peopleCache?.data ?? null;
+}
+
+export function getCachedDownloadsSync(): DownloadItem[] | null {
+  return downloadsCache?.data ?? null;
+}
+
+export function getCachedBudgetsSync(): BudgetYear[] | null {
+  return budgetsCache?.data ?? null;
 }
 
 /**
@@ -393,15 +419,137 @@ export async function loadPeopleList(
   }
 }
 
+/**
+ * Fetch downloadable documents list with cache-first hydration
+ */
+export async function loadDownloads(
+  onUpdate?: (items: DownloadItem[]) => void,
+  forceRefresh = false
+): Promise<DownloadItem[]> {
+  const now = Date.now();
+  if (!forceRefresh && downloadsCache) {
+    onUpdate?.(downloadsCache.data);
+    if (now - downloadsCache.fetchedAt < CACHE_TTL_MS) {
+      return downloadsCache.data;
+    }
+  }
+
+  if (downloadsInFlight) {
+    const res = await downloadsInFlight;
+    onUpdate?.(res);
+    return res;
+  }
+
+  const downloadsRef = collection(db, 'downloads');
+  downloadsInFlight = (async () => {
+    if (!downloadsCache && onUpdate) {
+      try {
+        const cachedSnap = await getDocsFromCache(downloadsRef);
+        if (!cachedSnap.empty) {
+          const list: DownloadItem[] = [];
+          cachedSnap.forEach((d) => list.push({ id: d.id, ...d.data() } as DownloadItem));
+          list.sort((a, b) => (b.createdAt || '').localeCompare(a.createdAt || ''));
+          downloadsCache = {
+            data: list,
+            signature: buildDownloadSignature(list),
+            fetchedAt: 0,
+          };
+          onUpdate(list);
+        }
+      } catch {
+        // Ignore cache miss
+      }
+    }
+
+    const snap = await getDocs(downloadsRef);
+    const list: DownloadItem[] = [];
+    snap.forEach((d) => list.push({ id: d.id, ...d.data() } as DownloadItem));
+    list.sort((a, b) => (b.createdAt || '').localeCompare(a.createdAt || ''));
+
+    const sig = buildDownloadSignature(list);
+    const changed = !downloadsCache || downloadsCache.signature !== sig;
+    downloadsCache = { data: list, signature: sig, fetchedAt: Date.now() };
+    if (changed) onUpdate?.(list);
+    return list;
+  })();
+
+  try {
+    return await downloadsInFlight;
+  } finally {
+    downloadsInFlight = null;
+  }
+}
+
+/**
+ * Fetch yearly budgets with cache-first hydration
+ */
+export async function loadBudgets(
+  onUpdate?: (items: BudgetYear[]) => void,
+  forceRefresh = false
+): Promise<BudgetYear[]> {
+  const now = Date.now();
+  if (!forceRefresh && budgetsCache) {
+    onUpdate?.(budgetsCache.data);
+    if (now - budgetsCache.fetchedAt < CACHE_TTL_MS) {
+      return budgetsCache.data;
+    }
+  }
+
+  if (budgetsInFlight) {
+    const res = await budgetsInFlight;
+    onUpdate?.(res);
+    return res;
+  }
+
+  const budgetsRef = collection(db, 'budgets');
+  budgetsInFlight = (async () => {
+    if (!budgetsCache && onUpdate) {
+      try {
+        const cachedSnap = await getDocsFromCache(budgetsRef);
+        if (!cachedSnap.empty) {
+          const list: BudgetYear[] = [];
+          cachedSnap.forEach((d) => list.push({ id: d.id, ...d.data() } as BudgetYear));
+          budgetsCache = {
+            data: list,
+            signature: buildBudgetSignature(list),
+            fetchedAt: 0,
+          };
+          onUpdate(list);
+        }
+      } catch {
+        // Ignore cache miss
+      }
+    }
+
+    const snap = await getDocs(budgetsRef);
+    const list: BudgetYear[] = [];
+    snap.forEach((d) => list.push({ id: d.id, ...d.data() } as BudgetYear));
+
+    const sig = buildBudgetSignature(list);
+    const changed = !budgetsCache || budgetsCache.signature !== sig;
+    budgetsCache = { data: list, signature: sig, fetchedAt: Date.now() };
+    if (changed) onUpdate?.(list);
+    return list;
+  })();
+
+  try {
+    return await budgetsInFlight;
+  } finally {
+    budgetsInFlight = null;
+  }
+}
+
 export function prefetchNews(): void {
   void loadPublishedNews().catch(() => {});
 }
 
 export function invalidatePublicDataCache(
-  target: 'news' | 'banners' | 'events' | 'people' | 'all' = 'all'
+  target: 'news' | 'banners' | 'events' | 'people' | 'downloads' | 'budgets' | 'all' = 'all'
 ): void {
   if (target === 'news' || target === 'all') newsCache = null;
   if (target === 'banners' || target === 'all') bannersCache = null;
   if (target === 'events' || target === 'all') eventsCache = null;
   if (target === 'people' || target === 'all') peopleCache = null;
+  if (target === 'downloads' || target === 'all') downloadsCache = null;
+  if (target === 'budgets' || target === 'all') budgetsCache = null;
 }

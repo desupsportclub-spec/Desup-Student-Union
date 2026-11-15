@@ -10,6 +10,7 @@ import { PersonItem, PersonRole, ImageAsset } from '../types';
 import { ImageUploader } from '../components/common/ImageUploader';
 import { useSiteSettings } from '../context/SiteSettingsContext';
 import { SuccessFeedbackModal } from '../components/common/SuccessFeedbackModal';
+import { invalidatePublicDataCache } from '../lib/publicDataService';
 
 export const AdminPeople: React.FC = () => {
   const { academicYearTH } = useSiteSettings();
@@ -101,6 +102,7 @@ export const AdminPeople: React.FC = () => {
       };
 
       await setDoc(doc(db, 'people', id), personDoc);
+      invalidatePublicDataCache('people');
       setIsModalOpen(false);
       await fetchPeople();
       setSuccessModalTitle(editingItem ? 'อัปเดตข้อมูลบุคลากรเรียบร้อยแล้ว' : 'เพิ่มข้อมูลบุคลากรเรียบร้อยแล้ว');
@@ -115,6 +117,7 @@ export const AdminPeople: React.FC = () => {
     if (!window.confirm(`คุณแน่ใจว่าต้องการลบข้อมูล "${personName}" หรือไม่?`)) return;
     try {
       await deleteDoc(doc(db, 'people', id));
+      invalidatePublicDataCache('people');
       await fetchPeople();
       setSuccessModalTitle('ลบข้อมูลบุคลากรเรียบร้อยแล้ว');
     } catch (err) {

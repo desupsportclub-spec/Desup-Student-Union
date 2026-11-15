@@ -9,6 +9,7 @@ import { db } from '../lib/firebase';
 import { EventItem, EventType } from '../types';
 import { formatThaiDate } from '../lib/format';
 import { SuccessFeedbackModal } from '../components/common/SuccessFeedbackModal';
+import { invalidatePublicDataCache } from '../lib/publicDataService';
 
 export const AdminEvents: React.FC = () => {
   const [events, setEvents] = useState<EventItem[]>([]);
@@ -87,6 +88,7 @@ export const AdminEvents: React.FC = () => {
       };
 
       await setDoc(doc(db, 'events', id), eventDoc);
+      invalidatePublicDataCache('events');
       setIsModalOpen(false);
       await fetchEvents();
       setSuccessModalTitle(editingItem ? 'แก้ไขกิจกรรมเรียบร้อยแล้ว' : 'เพิ่มกิจกรรมใหม่เรียบร้อยแล้ว');
@@ -101,6 +103,7 @@ export const AdminEvents: React.FC = () => {
     if (!window.confirm(`คุณแน่ใจว่าต้องการลบกิจกรรม "${eventTitle}" หรือไม่?`)) return;
     try {
       await deleteDoc(doc(db, 'events', id));
+      invalidatePublicDataCache('events');
       await fetchEvents();
       setSuccessModalTitle('ลบกิจกรรมเรียบร้อยแล้ว');
     } catch (err) {

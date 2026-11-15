@@ -4,11 +4,10 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { collection, query, where, getDocs } from 'firebase/firestore';
-import { db } from '../lib/firebase';
 import { EventItem } from '../types';
 import { formatThaiDate, getThaiDateParts } from '../lib/format';
 import { SectionEyebrow } from '../components/common/Ornament';
+import { getCachedEventsSync, loadPublishedEvents } from '../lib/publicDataService';
 
 const EVENT_TYPES: { id: string; label: string; color: string }[] = [
   { id: 'all', label: 'ทั้งหมด', color: 'bg-[#B8923A]' },
@@ -20,39 +19,32 @@ const EVENT_TYPES: { id: string; label: string; color: string }[] = [
 ];
 
 export const CalendarPage: React.FC = () => {
-  const [events, setEvents] = useState<EventItem[]>([]);
+  const initialEvents = getCachedEventsSync() || [];
+  const todayStr = new Date().toISOString().split('T')[0];
+
+  const [events, setEvents] = useState<EventItem[]>(initialEvents);
   const [selectedType, setSelectedType] = useState<string>('all');
   const [currentDate, setCurrentDate] = useState<Date>(new Date());
-  const [selectedDayEvents, setSelectedDayEvents] = useState<EventItem[]>([]);
-  const [selectedDayStr, setSelectedDayStr] = useState<string>('');
+  const [selectedDayEvents, setSelectedDayEvents] = useState<EventItem[]>(() =>
+    initialEvents.filter((e) => e.startAt.startsWith(todayStr))
+  );
+  const [selectedDayStr, setSelectedDayStr] = useState<string>(todayStr);
 
   useEffect(() => {
-    async function fetchEvents() {
-      try {
-        const q = query(
-          collection(db, 'events'),
-          where('published', '==', true)
-        );
-        const snap = await getDocs(q);
-        const list: EventItem[] = [];
-        snap.forEach((d) => {
-          list.push({ id: d.id, ...d.data() } as EventItem);
-        });
-        list.sort((a, b) => (a.startAt || '').localeCompare(b.startAt || ''));
-        setEvents(list);
-
-        // Default to today's events or upcoming
-        const todayStr = new Date().toISOString().split('T')[0];
-        const match = list.filter(e => e.startAt.startsWith(todayStr));
-        setSelectedDayEvents(match);
-        setSelectedDayStr(todayStr);
-      } catch (err) {
-        console.warn("Could not fetch events:", err);
-      }
-    }
-
-    fetchEvents();
-  }, []);
+    let active = true;
+    loadPublishedEvents((list) => {
+      if (!active) return;
+      setEvents(list);
+      setSelectedDayEvents((prev) =>
+        prev.length > 0 ? prev : list.filter((e) => e.startAt.startsWith(todayStr))
+      );
+    }).catch((err) => {
+      console.warn('Could not fetch events:', err);
+    });
+    return () => {
+      active = false;
+    };
+  }, [todayStr]);
 
   const filteredEvents = events.filter((e) => {
     if (selectedType === 'all') return true;

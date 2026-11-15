@@ -122,14 +122,15 @@ service cloud.firestore {
 
     // Complaints
     match /complaints/{trackingCode} {
-      // Direct get by tracking code allowed for anyone; listing forbidden to non-admins
+      // Direct get by tracking code allowed for anyone; listing allowed for admins or the signed-in reporter's own complaints
       allow get: if true;
-      allow list: if isAdmin();
+      allow list: if isAdmin() || (isSignedIn() && resource.data.reporterUid == request.auth.uid);
       allow create: if request.resource.data.status == 'received' &&
                        request.resource.data.title is string &&
                        request.resource.data.title.size() >= 3 &&
                        request.resource.data.body is string &&
-                       request.resource.data.body.size() >= 10;
+                       request.resource.data.body.size() >= 10 &&
+                       (!('reporterUid' in request.resource.data) || (isSignedIn() && request.resource.data.reporterUid == request.auth.uid));
       allow update, delete: if isAdmin();
 
       // Private subcollection for contact info (only admins can read)
@@ -143,6 +144,32 @@ service cloud.firestore {
         allow create: if true;
         allow read, update, delete: if isAdmin();
       }
+    }
+
+    // Privacy-preserving SHA-256 complaint recovery lookup index (get by exact 64-char hex hash only, no listing)
+    match /complaintLookups/{lookupHash} {
+      allow get: if lookupHash.matches('^[a-f0-9]{64}$');
+      allow list: if false;
+      allow create: if lookupHash.matches('^[a-f0-9]{64}$') &&
+                       request.resource.data.keys().hasAll(['codes', 'updatedAt']) &&
+                       request.resource.data.keys().hasOnly(['codes', 'updatedAt']) &&
+                       request.resource.data.codes is list &&
+                       request.resource.data.codes.size() >= 1 &&
+                       request.resource.data.codes.size() <= 50 &&
+                       request.resource.data.codes[0] is string &&
+                       request.resource.data.updatedAt is string &&
+                       request.resource.data.updatedAt.size() <= 40;
+      allow update: if lookupHash.matches('^[a-f0-9]{64}$') &&
+                       request.resource.data.keys().hasAll(['codes', 'updatedAt']) &&
+                       request.resource.data.keys().hasOnly(['codes', 'updatedAt']) &&
+                       request.resource.data.codes is list &&
+                       request.resource.data.codes.size() >= 1 &&
+                       request.resource.data.codes.size() <= 50 &&
+                       request.resource.data.codes[0] is string &&
+                       request.resource.data.codes.hasAll(resource.data.codes) &&
+                       request.resource.data.updatedAt is string &&
+                       request.resource.data.updatedAt.size() <= 40;
+      allow delete: if isAdmin();
     }
 
     // Messages (Contact form)

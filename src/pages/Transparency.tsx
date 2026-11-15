@@ -3,14 +3,15 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useEffect } from 'react';
-import { collection, getDocs, doc, getDoc } from 'firebase/firestore';
-import { db } from '../lib/firebase';
+import React, { useState, useEffect, useMemo } from 'react';
+import { collection, getDocs } from 'firebase/firestore';
+import { db, auth } from '../lib/firebase';
 import { BudgetYear, ComplaintItem } from '../types';
 import { formatNumber, formatBaht } from '../lib/format';
 import { SectionEyebrow } from '../components/common/Ornament';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
 import { useSiteSettings } from '../context/SiteSettingsContext';
+import { getCachedBudgetsSync, loadBudgets } from '../lib/publicDataService';
 
 const TYPE_LABELS: Record<string, string> = {
   complaint: 'เรื่องร้องเรียนทั่วไป',
@@ -25,74 +26,72 @@ const CHART_COLORS = ['#4B1F7A', '#B8923A', '#6B3FA0', '#9C7A2B', '#2A1245', '#D
 
 export const Transparency: React.FC = () => {
   const { academicYearTH } = useSiteSettings();
+  const initialBudgets = getCachedBudgetsSync();
   const [complaints, setComplaints] = useState<ComplaintItem[]>([]);
-  const [budgetYear, setBudgetYear] = useState<BudgetYear | null>(null);
-  const [availableYears, setAvailableYears] = useState<string[]>([academicYearTH]);
+  const [allBudgets, setAllBudgets] = useState<BudgetYear[]>(initialBudgets || []);
   const [selectedYearTH, setSelectedYearTH] = useState<string>(academicYearTH);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(!initialBudgets);
 
   useEffect(() => {
     setSelectedYearTH((prev) => prev || academicYearTH);
   }, [academicYearTH]);
 
-  // Fetch available budget years dynamically from Firestore
+  // Fetch all budgets with cache-first hydration (single cached read for years + breakdown)
   useEffect(() => {
-    async function fetchBudgetYears() {
-      try {
-        const snap = await getDocs(collection(db, 'budgets'));
-        const yearsSet = new Set<string>();
-        snap.forEach(d => {
-          yearsSet.add(d.id);
-        });
-        yearsSet.add(academicYearTH);
-        const sorted = Array.from(yearsSet).sort((a, b) => b.localeCompare(a));
-        setAvailableYears(sorted);
-      } catch (err) {
-        console.warn("Could not fetch budget years:", err);
-        setAvailableYears([academicYearTH]);
-      }
-    }
-    fetchBudgetYears();
-  }, [academicYearTH]);
+    let active = true;
+    loadBudgets((list) => {
+      if (!active) return;
+      setAllBudgets(list);
+      setLoading(false);
+    })
+      .catch((err) => {
+        console.warn('Could not load budgets:', err);
+      })
+      .finally(() => {
+        if (active) setLoading(false);
+      });
 
-  useEffect(() => {
-    async function loadData() {
-      setLoading(true);
-      try {
-        // Fetch complaints if permitted (admin) without blocking budget load for public users
-        try {
-          const compSnap = await getDocs(collection(db, 'complaints'));
+    // Only attempt complaints collection query when signed in (avoids wasted failing request for public guests)
+    if (auth.currentUser) {
+      getDocs(collection(db, 'complaints'))
+        .then((compSnap) => {
+          if (!active) return;
           const compList: ComplaintItem[] = [];
           compSnap.forEach((d) => {
             compList.push({ id: d.id, ...d.data() } as ComplaintItem);
           });
           setComplaints(compList);
-        } catch {
-          setComplaints([]);
-        }
+        })
+        .catch(() => {
+          if (active) setComplaints([]);
+        });
+    }
 
-        // Fetch budget for the selected year
-        const budgetDoc = await getDoc(doc(db, 'budgets', selectedYearTH));
-        if (budgetDoc.exists()) {
-          setBudgetYear({ id: budgetDoc.id, ...budgetDoc.data() } as BudgetYear);
-        } else {
-          setBudgetYear({
-            yearTH: selectedYearTH,
-            totalBudget: 0,
-            items: []
-          });
-        }
-      } catch (err) {
-        console.warn("Could not load transparency data:", err);
-      } finally {
-        setLoading(false);
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  const availableYears = useMemo(() => {
+    const yearsSet = new Set<string>();
+    allBudgets.forEach((b) => {
+      yearsSet.add(b.id || b.yearTH);
+    });
+    yearsSet.add(academicYearTH);
+    return Array.from(yearsSet).sort((a, b) => b.localeCompare(a));
+  }, [allBudgets, academicYearTH]);
+
+  const budgetYear = useMemo<BudgetYear | null>(() => {
+    if (!selectedYearTH) return null;
+    const found = allBudgets.find((b) => (b.id || b.yearTH) === selectedYearTH);
+    return (
+      found || {
+        yearTH: selectedYearTH,
+        totalBudget: 0,
+        items: [],
       }
-    }
-
-    if (selectedYearTH) {
-      loadData();
-    }
-  }, [selectedYearTH]);
+    );
+  }, [allBudgets, selectedYearTH]);
 
   // Aggregate Complaint Statistics
   const totalCount = complaints.length;

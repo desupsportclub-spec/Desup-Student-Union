@@ -88,7 +88,7 @@ export const Navbar: React.FC<NavbarProps> = ({ tickerItems = [] }) => {
           isVisible ? 'translate-y-0' : '-translate-y-full'
         } ${
           isScrolled
-            ? 'bg-[#FAF7F0]/95 backdrop-blur-md border-b border-[#B8923A]/30 shadow-editorial-sm'
+            ? 'bg-[#FAF7F0]/95 md:backdrop-blur-md border-b border-[#B8923A]/30 shadow-editorial-sm'
             : 'bg-[#FAF7F0] border-b border-[#4B1F7A]/10'
         }`}
       >
@@ -295,11 +295,16 @@ export const Navbar: React.FC<NavbarProps> = ({ tickerItems = [] }) => {
               ประกาศ
             </span>
             <div className="overflow-hidden relative flex-1 group">
-              <div className="whitespace-nowrap inline-block animate-marquee group-hover:[animation-play-state:paused]">
-                {displayTicker.map((item, idx) => (
-                  <span key={idx} className="mr-10 sm:mr-12 inline-block">
-                    {item} <span className="opacity-40 ml-10 sm:ml-12">◆</span>
-                  </span>
+              <div className="whitespace-nowrap animate-marquee group-hover:[animation-play-state:paused]">
+                {[0, 1].map((dupIdx) => (
+                  <div key={dupIdx} className="inline-flex items-center shrink-0" aria-hidden={dupIdx === 1}>
+                    {displayTicker.map((item, idx) => (
+                      <span key={`${dupIdx}-${idx}`} className="inline-flex items-center shrink-0">
+                        <span>{item}</span>
+                        <span className="opacity-40 mx-8 sm:mx-10">◆</span>
+                      </span>
+                    ))}
+                  </div>
                 ))}
               </div>
             </div>

@@ -38,6 +38,8 @@ export const AdminSettings: React.FC = () => {
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [inlineSavedNotice, setInlineSavedNotice] = useState<string | null>(null);
   const [successModalTitle, setSuccessModalTitle] = useState('');
 
   useEffect(() => {
@@ -87,31 +89,55 @@ export const AdminSettings: React.FC = () => {
     loadSettings();
   }, []);
 
-  const handleAddTicker = (e: React.FormEvent) => {
+  const persistPartialSettings = async (patch: Record<string, unknown>, noticeText: string) => {
+    setErrorMsg(null);
+    try {
+      await setDoc(doc(db, 'settings', 'site'), patch, { merge: true });
+      await refreshSettings();
+      setInlineSavedNotice(noticeText);
+      setTimeout(() => setInlineSavedNotice(null), 3000);
+    } catch (err) {
+      console.error("Quick save settings failed:", err);
+      setErrorMsg("ไม่สามารถบันทึกการเปลี่ยนแปลงได้ กรุณาตรวจสอบสิทธิ์ผู้ดูแลระบบ");
+    }
+  };
+
+  const handleAddTicker = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newTickerText.trim()) return;
-    setTickerList(prev => [...prev, newTickerText.trim()]);
+    const text = newTickerText.trim();
+    if (!text) return;
+    const nextList = [...tickerList, text];
+    setTickerList(nextList);
     setNewTickerText('');
+    await persistPartialSettings({ ticker: nextList }, 'บันทึกข้อความประกาศลงแถบข่าวด่วนบนหน้าเว็บแล้ว ✓');
   };
 
-  const handleRemoveTicker = (index: number) => {
-    setTickerList(prev => prev.filter((_, i) => i !== index));
+  const handleRemoveTicker = async (index: number) => {
+    const nextList = tickerList.filter((_, i) => i !== index);
+    setTickerList(nextList);
+    await persistPartialSettings({ ticker: nextList }, 'อัปเดตแถบข้อความข่าวด่วนแล้ว ✓');
   };
 
-  const handleAddLink = () => {
-    if (!newLinkTitle.trim() || !newLinkUrl.trim()) return;
-    setLinks(prev => [
-      ...prev,
+  const handleAddLink = async () => {
+    if (!newLinkTitle.trim() || !newLinkUrl.trim()) {
+      setErrorMsg("กรุณากรอกทั้งชื่อระบบและลิงก์ URL (https://...) ก่อนกดเพิ่มลิงก์");
+      return;
+    }
+    const cleanUrl = newLinkUrl.trim();
+    const nextLinks: ServiceLink[] = [
+      ...links,
       {
         title: newLinkTitle.trim(),
         description: newLinkDesc.trim() || 'ลิงก์ระบบที่เกี่ยวข้อง',
-        url: newLinkUrl.trim(),
-        external: newLinkUrl.trim().startsWith('http'),
+        url: cleanUrl,
+        external: cleanUrl.startsWith('http'),
       }
-    ]);
+    ];
+    setLinks(nextLinks);
     setNewLinkTitle('');
     setNewLinkDesc('');
     setNewLinkUrl('');
+    await persistPartialSettings({ links: nextLinks }, 'บันทึกลิงก์ระบบที่เกี่ยวข้องลงส่วนท้ายเว็บไซต์แล้ว ✓');
   };
 
   const handleUpdateLink = (index: number, field: keyof ServiceLink, value: string) => {
@@ -126,15 +152,46 @@ export const AdminSettings: React.FC = () => {
     });
   };
 
-  const handleRemoveLink = (index: number) => {
-    setLinks(prev => prev.filter((_, i) => i !== index));
+  const handleRemoveLink = async (index: number) => {
+    const nextLinks = links.filter((_, i) => i !== index);
+    setLinks(nextLinks);
+    await persistPartialSettings({ links: nextLinks }, 'อัปเดตลิงก์ระบบที่เกี่ยวข้องแล้ว ✓');
   };
 
   const handleSaveAll = async () => {
+    setErrorMsg(null);
     const cleanYear = academicYearTH.trim();
     if (!/^\d{4}$/.test(cleanYear)) {
-      alert("กรุณาระบุปีการศึกษาเป็นตัวเลข พ.ศ. 4 หลัก เช่น 2569");
+      setErrorMsg("กรุณาระบุปีการศึกษาเป็นตัวเลข พ.ศ. 4 หลัก เช่น 2569");
       return;
+    }
+
+    // Auto-include any pending typed items if user clicked Save All directly
+    const finalTicker = newTickerText.trim()
+      ? [...tickerList, newTickerText.trim()]
+      : tickerList;
+    if (newTickerText.trim()) {
+      setTickerList(finalTicker);
+      setNewTickerText('');
+    }
+
+    const finalLinks =
+      newLinkTitle.trim() && newLinkUrl.trim()
+        ? [
+            ...links,
+            {
+              title: newLinkTitle.trim(),
+              description: newLinkDesc.trim() || 'ลิงก์ระบบที่เกี่ยวข้อง',
+              url: newLinkUrl.trim(),
+              external: newLinkUrl.trim().startsWith('http'),
+            },
+          ]
+        : links;
+    if (newLinkTitle.trim() && newLinkUrl.trim()) {
+      setLinks(finalLinks);
+      setNewLinkTitle('');
+      setNewLinkDesc('');
+      setNewLinkUrl('');
     }
 
     setSaving(true);
@@ -143,8 +200,8 @@ export const AdminSettings: React.FC = () => {
         academicYearTH: cleanYear,
         presidentHeadline: presidentHeadline.trim() || DEFAULT_HEADLINE,
         presidentMessage: presidentMessage.trim() || DEFAULT_MESSAGE,
-        ticker: tickerList,
-        links,
+        ticker: finalTicker,
+        links: finalLinks,
         contactInfo: {
           phone: contactPhone.trim(),
           email: contactEmail.trim(),
@@ -159,6 +216,7 @@ export const AdminSettings: React.FC = () => {
       setSuccessModalTitle('บันทึกการตั้งค่าเว็บไซต์ทั้งหมดเรียบร้อยแล้ว');
     } catch (err) {
       console.error("Save settings failed:", err);
+      setErrorMsg("เกิดข้อผิดพลาดในการบันทึกข้อมูล กรุณาตรวจสอบสิทธิ์ผู้ดูแลระบบ");
     } finally {
       setSaving(false);
     }
@@ -179,6 +237,18 @@ export const AdminSettings: React.FC = () => {
           ปีการศึกษาปัจจุบัน สารจากนายกองค์การนักเรียน ข้อความประกาศวิ่ง ลิงก์ระบบที่เกี่ยวข้อง และข้อมูลติดต่อ
         </p>
       </div>
+
+      {errorMsg && (
+        <div className="p-3 bg-red-50 border-l-2 border-[#9B1C31] text-xs text-[#9B1C31]">
+          {errorMsg}
+        </div>
+      )}
+
+      {inlineSavedNotice && (
+        <div className="p-3 bg-emerald-50 border-l-2 border-emerald-600 text-xs text-emerald-800 font-medium">
+          {inlineSavedNotice}
+        </div>
+      )}
 
       {/* Part 0: Global Academic Year */}
       <div className="bg-white p-6 border border-[#4B1F7A]/15 rounded-sm shadow-editorial-sm space-y-4">

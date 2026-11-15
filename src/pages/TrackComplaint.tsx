@@ -3,15 +3,22 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useEffect } from 'react';
-import { useSearchParams } from 'react-router-dom';
-import { doc, getDoc } from 'firebase/firestore';
-import { db } from '../lib/firebase';
+import React, { useState, useEffect, useCallback } from 'react';
+import { Link, useSearchParams } from 'react-router-dom';
+import { collection, doc, getDoc, getDocs, query, where } from 'firebase/firestore';
+import { onAuthStateChanged, signInWithPopup, User } from 'firebase/auth';
+import { auth, db, googleProvider } from '../lib/firebase';
 import { ComplaintItem, ComplaintStatus } from '../types';
 import { formatThaiDateTime } from '../lib/format';
 import { ComplaintStatusBadge } from '../components/common/StatusBadge';
 import { SectionEyebrow, CornerBracket } from '../components/common/Ornament';
 import { useSiteSettings } from '../context/SiteSettingsContext';
+import {
+  findComplaintsByRecoveryKey,
+  getLocalComplaintHistory,
+  removeComplaintFromLocalHistory,
+  saveComplaintToLocalHistory,
+} from '../lib/complaintTracking';
 
 const STAGES: { key: ComplaintStatus; label: string; desc: string }[] = [
   { key: 'received', label: 'รับเรื่องแล้ว', desc: 'ระบบได้บันทึกเรื่องร้องเรียนเข้าสู่ฐานข้อมูลเรียบร้อยแล้ว' },
@@ -22,18 +29,80 @@ const STAGES: { key: ComplaintStatus; label: string; desc: string }[] = [
 
 export const TrackComplaint: React.FC = () => {
   const { academicYearTH } = useSiteSettings();
-  const [searchParams] = useSearchParams();
-  const [code, setCode] = useState(searchParams.get('code') || '');
-  const [complaint, setComplaint] = useState<ComplaintItem | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [notFound, setNotFound] = useState(false);
+  const [searchParams, setSearchParams] = useSearchParams();
 
-  const fetchComplaint = async (trackingCodeToFetch: string) => {
+  const [lookupMode, setLookupMode] = useState<'code' | 'recovery'>('code');
+  const [code, setCode] = useState(searchParams.get('code') || '');
+  const [recoveryKeyword, setRecoveryKeyword] = useState('');
+  const [recoveryPin, setRecoveryPin] = useState('');
+
+  const [complaint, setComplaint] = useState<ComplaintItem | null>(null);
+  const [myComplaints, setMyComplaints] = useState<ComplaintItem[]>([]);
+  const [myListLoading, setMyListLoading] = useState(true);
+  const [currentUser, setCurrentUser] = useState<User | null>(() => auth.currentUser);
+  const [authLoading, setAuthLoading] = useState(false);
+
+  const [loading, setLoading] = useState(false);
+  const [notFound, setNotFound] = useState<string | null>(null);
+  const [copiedLink, setCopiedLink] = useState(false);
+
+  // Merge complaints from local device history + signed-in Google account
+  const loadMyComplaints = useCallback(async (user: User | null) => {
+    setMyListLoading(true);
+    try {
+      const localEntries = getLocalComplaintHistory();
+      const map = new Map<string, ComplaintItem>();
+
+      // 1. Fetch live status of local device history in parallel
+      const localPromises = localEntries.slice(0, 15).map(async (entry) => {
+        try {
+          const snap = await getDoc(doc(db, 'complaints', entry.trackingCode));
+          if (snap.exists()) {
+            const item = { id: snap.id, ...snap.data() } as ComplaintItem;
+            map.set(item.trackingCode, item);
+          }
+        } catch {
+          // Ignore deleted or unreadable item
+        }
+      });
+
+      // 2. Fetch cross-device complaints linked to signed-in Google account
+      const accountPromise = user
+        ? getDocs(query(collection(db, 'complaints'), where('reporterUid', '==', user.uid)))
+            .then((snap) => {
+              snap.forEach((d) => {
+                const item = { id: d.id, ...d.data() } as ComplaintItem;
+                map.set(item.trackingCode, item);
+              });
+            })
+            .catch(() => {})
+        : Promise.resolve();
+
+      await Promise.all([...localPromises, accountPromise]);
+
+      const merged = Array.from(map.values()).sort((a, b) =>
+        (b.createdAt || '').localeCompare(a.createdAt || '')
+      );
+      setMyComplaints(merged);
+    } finally {
+      setMyListLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    const unsub = onAuthStateChanged(auth, (u) => {
+      setCurrentUser(u);
+      void loadMyComplaints(u);
+    });
+    return () => unsub();
+  }, [loadMyComplaints]);
+
+  const fetchComplaint = useCallback(async (trackingCodeToFetch: string) => {
     const cleanCode = trackingCodeToFetch.trim().toUpperCase();
     if (!cleanCode) return;
 
     setLoading(true);
-    setNotFound(false);
+    setNotFound(null);
     setComplaint(null);
 
     try {
@@ -41,28 +110,133 @@ export const TrackComplaint: React.FC = () => {
       const snap = await getDoc(docRef);
 
       if (snap.exists()) {
-        setComplaint({ id: snap.id, ...snap.data() } as ComplaintItem);
+        const item = { id: snap.id, ...snap.data() } as ComplaintItem;
+        setComplaint(item);
+        setCode(item.trackingCode);
+
+        // Save to local device history for quick one-tap access next time
+        saveComplaintToLocalHistory({
+          trackingCode: item.trackingCode,
+          title: item.title,
+          type: item.type,
+          createdAt: item.createdAt,
+        });
+        setMyComplaints((prev) => {
+          const filtered = prev.filter((p) => p.trackingCode !== item.trackingCode);
+          return [item, ...filtered].sort((a, b) =>
+            (b.createdAt || '').localeCompare(a.createdAt || '')
+          );
+        });
       } else {
-        setNotFound(true);
+        setNotFound(`ไม่พบข้อมูลเรื่องร้องเรียนรหัส "${cleanCode}"`);
       }
     } catch (err) {
       console.warn("Error tracking complaint:", err);
-      setNotFound(true);
+      setNotFound(`ไม่พบข้อมูลเรื่องร้องเรียนรหัส "${cleanCode}"`);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    const initialCode = searchParams.get('code');
+    if (initialCode) {
+      setCode(initialCode.toUpperCase());
+      void fetchComplaint(initialCode);
+    }
+  }, [searchParams, fetchComplaint]);
+
+  const handleSubmitCode = (e: React.FormEvent) => {
+    e.preventDefault();
+    const clean = code.trim().toUpperCase();
+    if (!clean) return;
+    setSearchParams({ code: clean });
+    void fetchComplaint(clean);
+  };
+
+  const handleSubmitRecovery = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (recoveryKeyword.trim().length < 2 || recoveryPin.trim().length < 4) {
+      setNotFound("กรุณากรอกคำจำส่วนตัว (อย่างน้อย 2 ตัวอักษร) และรหัส PIN (อย่างน้อย 4 หลัก)");
+      return;
+    }
+
+    setLoading(true);
+    setNotFound(null);
+    setComplaint(null);
+
+    try {
+      const foundList = await findComplaintsByRecoveryKey(recoveryKeyword, recoveryPin);
+      if (foundList.length === 0) {
+        setNotFound("ไม่พบเรื่องร้องเรียนที่ตรงกับคำจำส่วนตัวและรหัส PIN นี้");
+        return;
+      }
+
+      // Save all recovered items to device history and open the newest one
+      foundList.forEach((item) => {
+        saveComplaintToLocalHistory({
+          trackingCode: item.trackingCode,
+          title: item.title,
+          type: item.type,
+          createdAt: item.createdAt,
+        });
+      });
+
+      setMyComplaints((prev) => {
+        const map = new Map<string, ComplaintItem>();
+        prev.forEach((p) => map.set(p.trackingCode, p));
+        foundList.forEach((f) => map.set(f.trackingCode, f));
+        return Array.from(map.values()).sort((a, b) =>
+          (b.createdAt || '').localeCompare(a.createdAt || '')
+        );
+      });
+
+      setComplaint(foundList[0]);
+      setCode(foundList[0].trackingCode);
+      setSearchParams({ code: foundList[0].trackingCode });
+    } catch (err) {
+      console.warn("Recovery lookup error:", err);
+      setNotFound("ไม่สามารถค้นหาข้อมูลได้ในขณะนี้ กรุณาลองใหม่อีกครั้ง");
     } finally {
       setLoading(false);
     }
   };
 
-  useEffect(() => {
-    const initialCode = searchParams.get('code');
-    if (initialCode) {
-      fetchComplaint(initialCode);
+  const handleConnectGoogle = async () => {
+    setAuthLoading(true);
+    try {
+      const res = await signInWithPopup(auth, googleProvider);
+      setCurrentUser(res.user);
+      await loadMyComplaints(res.user);
+    } catch {
+      // Ignore user cancel
+    } finally {
+      setAuthLoading(false);
     }
-  }, [searchParams]);
+  };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    fetchComplaint(code);
+  const handleSelectMyComplaint = (item: ComplaintItem) => {
+    setNotFound(null);
+    setComplaint(item);
+    setCode(item.trackingCode);
+    setSearchParams({ code: item.trackingCode });
+  };
+
+  const handleRemoveFromDevice = (e: React.MouseEvent, trackingCode: string) => {
+    e.stopPropagation();
+    removeComplaintFromLocalHistory(trackingCode);
+    setMyComplaints((prev) => prev.filter((item) => item.trackingCode !== trackingCode));
+    if (complaint?.trackingCode === trackingCode) {
+      setComplaint(null);
+    }
+  };
+
+  const handleCopyDirectLink = () => {
+    if (!complaint) return;
+    const url = `${window.location.origin}/track?code=${complaint.trackingCode}`;
+    navigator.clipboard.writeText(url);
+    setCopiedLink(true);
+    setTimeout(() => setCopiedLink(false), 2500);
   };
 
   // Determine stage progress
@@ -79,7 +253,7 @@ export const TrackComplaint: React.FC = () => {
   const currentStageIndex = complaint ? getStageIndex(complaint.status) : 0;
 
   return (
-    <div className="max-w-[840px] mx-auto px-4 sm:px-6 py-6 sm:py-10 space-y-8 sm:space-y-12">
+    <div className="max-w-[880px] mx-auto px-4 sm:px-6 py-6 sm:py-10 space-y-6 sm:space-y-8">
       {/* Header */}
       <div className="border-b border-[#B8923A]/30 pb-5 sm:pb-6 text-center max-w-xl mx-auto space-y-2">
         <SectionEyebrow enText="STATUS TRACKING" thText="ติดตามสถานะเรื่องร้องเรียน" />
@@ -87,38 +261,209 @@ export const TrackComplaint: React.FC = () => {
           ตรวจสอบความคืบหน้า
         </h1>
         <p className="text-xs md:text-sm text-[#1B1226]/70">
-          กรอกรหัสติดตาม (รูปแบบ SC-{academicYearTH}-XXXXXX) ที่ได้รับเมื่อส่งเรื่อง
+          ดูรายการเรื่องที่เคยส่งจากอุปกรณ์นี้ได้ทันที หรือค้นหาด้วยรหัสติดตาม / คำจำส่วนตัว / บัญชี Google
         </p>
       </div>
 
-      {/* Code Input Box */}
-      <div className="bg-[#FAF7F0] border border-[#B8923A]/40 p-4 sm:p-6 md:p-8 rounded-sm shadow-editorial">
-        <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-3">
-          <input
-            type="text"
-            value={code}
-            onChange={(e) => setCode(e.target.value.toUpperCase())}
-            placeholder={`ตัวอย่าง: SC-${academicYearTH}-ABCDEF`}
-            className="flex-1 input-underline text-base font-mono tracking-wider px-2"
-            required
-          />
+      {/* Section 1: My Saved Complaints (Automatic Local History + Google Sync) */}
+      <section className="bg-white border border-[#4B1F7A]/15 p-4 sm:p-6 rounded-sm shadow-editorial-sm space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-[#4B1F7A]/10 pb-3">
+          <div>
+            <h2 className="font-serif text-base sm:text-lg font-semibold text-[#2A1245]">
+              เรื่องร้องเรียนของคุณ (บันทึกอัตโนมัติ)
+            </h2>
+            <p className="text-[11px] text-[#1B1226]/60">
+              {currentUser
+                ? `ซิงค์ข้อมูลจากอุปกรณ์นี้และบัญชี ${currentUser.email}`
+                : 'แสดงเรื่องที่เคยส่งหรือเปิดดูจากอุปกรณ์นี้โดยไม่ต้องกรอกรหัสซ้ำ'}
+            </p>
+          </div>
+
+          {!currentUser && (
+            <button
+              type="button"
+              onClick={handleConnectGoogle}
+              disabled={authLoading}
+              className="px-3.5 py-1.5 bg-[#FAF7F0] border border-[#B8923A]/50 hover:border-[#4B1F7A] text-xs font-medium text-[#2A1245] rounded-sm transition-colors self-start sm:self-auto shrink-0"
+            >
+              {authLoading ? 'กำลังเชื่อมต่อ...' : 'ดึงประวัติข้ามเครื่องด้วย Google'}
+            </button>
+          )}
+        </div>
+
+        {myListLoading ? (
+          <div className="space-y-2 animate-pulse">
+            <div className="h-14 bg-stone-100 rounded-sm" />
+            <div className="h-14 bg-stone-100 rounded-sm" />
+          </div>
+        ) : myComplaints.length > 0 ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {myComplaints.map((item) => {
+              const isSelected = complaint?.trackingCode === item.trackingCode;
+              return (
+                <div
+                  key={item.trackingCode}
+                  role="button"
+                  tabIndex={0}
+                  onClick={() => handleSelectMyComplaint(item)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      handleSelectMyComplaint(item);
+                    }
+                  }}
+                  className={`p-3.5 rounded-sm border text-left cursor-pointer transition-all flex flex-col justify-between gap-2 ${
+                    isSelected
+                      ? 'border-[#4B1F7A] bg-[#EDE6F5]/45 ring-1 ring-[#4B1F7A]'
+                      : 'border-[#4B1F7A]/15 bg-[#FAF7F0]/60 hover:border-[#B8923A]'
+                  }`}
+                >
+                  <div className="flex items-start justify-between gap-2">
+                    <span className="font-mono text-[11px] font-bold text-[#9C7A2B]">
+                      {item.trackingCode}
+                    </span>
+                    <div className="flex items-center gap-1.5">
+                      <ComplaintStatusBadge status={item.status} />
+                      <button
+                        type="button"
+                        onClick={(e) => handleRemoveFromDevice(e, item.trackingCode)}
+                        title="นำออกจากประวัติในเครื่องนี้"
+                        className="text-stone-400 hover:text-[#9B1C31] text-xs px-1"
+                      >
+                        ✕
+                      </button>
+                    </div>
+                  </div>
+                  <div className="font-serif text-sm font-semibold text-[#1B1226] line-clamp-1">
+                    {item.title}
+                  </div>
+                  <div className="flex items-center justify-between text-[11px] text-[#1B1226]/60">
+                    <span>{formatThaiDateTime(item.createdAt)}</span>
+                    <span className="text-[#4B1F7A] font-medium">
+                      {(item.publicReplies?.length || 0) > 0
+                        ? `ตอบกลับแล้ว (${item.publicReplies?.length})`
+                        : 'ดูรายละเอียด →'}
+                    </span>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        ) : (
+          <div className="py-5 px-4 text-center bg-[#FAF7F0]/60 border border-dashed border-[#4B1F7A]/20 rounded-sm space-y-2">
+            <p className="text-xs text-[#1B1226]/70">
+              ยังไม่มีประวัติการส่งเรื่องร้องเรียนบนอุปกรณ์นี้
+            </p>
+            <Link
+              to="/complaint"
+              className="inline-block text-xs font-medium text-[#4B1F7A] hover:underline"
+            >
+              ส่งเรื่องร้องเรียน / ข้อเสนอแนะใหม่ →
+            </Link>
+          </div>
+        )}
+      </section>
+
+      {/* Section 2: Search Tabs (By Tracking Code OR By Recovery Keyword + PIN) */}
+      <div className="bg-[#FAF7F0] border border-[#B8923A]/40 p-4 sm:p-6 rounded-sm shadow-editorial space-y-4">
+        <div className="flex items-center gap-4 border-b border-[#4B1F7A]/10 pb-2 text-xs font-medium">
           <button
-            type="submit"
-            disabled={loading}
-            className="px-8 py-3 bg-[#4B1F7A] text-[#FAF7F0] text-xs font-medium rounded-full border border-[#D9B867]/40 hover:bg-[#2A1245] transition-colors shadow-editorial whitespace-nowrap"
+            type="button"
+            onClick={() => {
+              setLookupMode('code');
+              setNotFound(null);
+            }}
+            className={`pb-2 transition-colors relative ${
+              lookupMode === 'code'
+                ? 'text-[#4B1F7A] font-semibold'
+                : 'text-[#1B1226]/60 hover:text-[#2A1245]'
+            }`}
           >
-            {loading ? 'กำลังค้นหา...' : 'ตรวจสอบสถานะ →'}
+            ค้นหาด้วยรหัสติดตาม
+            {lookupMode === 'code' && (
+              <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-[#B8923A]" />
+            )}
           </button>
-        </form>
+
+          <button
+            type="button"
+            onClick={() => {
+              setLookupMode('recovery');
+              setNotFound(null);
+            }}
+            className={`pb-2 transition-colors relative ${
+              lookupMode === 'recovery'
+                ? 'text-[#4B1F7A] font-semibold'
+                : 'text-[#1B1226]/60 hover:text-[#2A1245]'
+            }`}
+          >
+            ลืมรหัส? ค้นหาด้วยคำจำส่วนตัว + PIN
+            {lookupMode === 'recovery' && (
+              <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-[#B8923A]" />
+            )}
+          </button>
+        </div>
+
+        {lookupMode === 'code' ? (
+          <form onSubmit={handleSubmitCode} className="flex flex-col sm:flex-row gap-3">
+            <input
+              type="text"
+              value={code}
+              onChange={(e) => setCode(e.target.value.toUpperCase())}
+              placeholder={`กรอกรหัสติดตาม เช่น SC-${academicYearTH}-ABCDEF`}
+              className="flex-1 input-underline text-sm sm:text-base font-mono tracking-wider px-2"
+              required
+            />
+            <button
+              type="submit"
+              disabled={loading}
+              className="px-7 py-2.5 bg-[#4B1F7A] text-[#FAF7F0] text-xs font-medium rounded-full border border-[#D9B867]/40 hover:bg-[#2A1245] transition-colors shadow-editorial whitespace-nowrap"
+            >
+              {loading ? 'กำลังค้นหา...' : 'ตรวจสอบสถานะ →'}
+            </button>
+          </form>
+        ) : (
+          <form onSubmit={handleSubmitRecovery} className="space-y-3">
+            <div className="grid grid-cols-1 sm:grid-cols-12 gap-3">
+              <input
+                type="text"
+                value={recoveryKeyword}
+                onChange={(e) => setRecoveryKeyword(e.target.value)}
+                placeholder="คำจำส่วนตัวที่ตั้งไว้ (เช่น รหัสนักเรียน / ชื่อเล่น)"
+                className="sm:col-span-5 input-underline text-xs px-2"
+                required
+              />
+              <input
+                type="password"
+                inputMode="numeric"
+                value={recoveryPin}
+                onChange={(e) => setRecoveryPin(e.target.value)}
+                placeholder="รหัส PIN 4-6 หลัก"
+                className="sm:col-span-4 input-underline text-xs px-2"
+                required
+              />
+              <button
+                type="submit"
+                disabled={loading}
+                className="sm:col-span-3 px-6 py-2.5 bg-[#4B1F7A] text-[#FAF7F0] text-xs font-medium rounded-full border border-[#D9B867]/40 hover:bg-[#2A1245] transition-colors whitespace-nowrap"
+              >
+                {loading ? 'กำลังกู้คืน...' : 'ค้นหาเรื่องเดิม →'}
+              </button>
+            </div>
+            <p className="text-[11px] text-[#1B1226]/60">
+              ใช้คำจำส่วนตัวและรหัส PIN ที่ตั้งไว้ตอนส่งเรื่อง ระบบจะดึงรายการเรื่องทั้งหมดของคุณกลับมาให้อัตโนมัติ
+            </p>
+          </form>
+        )}
       </div>
 
       {notFound && (
-        <div className="p-8 text-center border border-dashed border-[#9B1C31]/40 rounded-sm bg-red-50/40 space-y-2">
+        <div className="p-6 text-center border border-dashed border-[#9B1C31]/40 rounded-sm bg-red-50/40 space-y-2">
           <p className="font-serif text-base font-semibold text-[#9B1C31]">
-            ไม่พบข้อมูลเรื่องร้องเรียนรหัส "{code}"
+            {notFound}
           </p>
           <p className="text-xs text-[#1B1226]/60">
-            โปรดตรวจสอบความถูกต้องของรหัสติดตาม (ตัวพิมพ์ใหญ่และตัวเลข) หรือติดต่อองค์การนักเรียนโดยตรง
+            โปรดตรวจสอบความถูกต้องของรหัสติดตาม หรือลองกู้คืนด้วยคำจำส่วนตัว + PIN / บัญชี Google
           </p>
         </div>
       )}
@@ -134,9 +479,18 @@ export const TrackComplaint: React.FC = () => {
           {/* Title & Metadata */}
           <div className="border-b border-[#4B1F7A]/15 pb-5 sm:pb-6 space-y-2">
             <div className="flex flex-wrap items-center justify-between gap-2">
-              <span className="font-mono text-xs font-bold text-[#9C7A2B] tracking-wider">
-                รหัส: {complaint.trackingCode}
-              </span>
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="font-mono text-xs font-bold text-[#9C7A2B] tracking-wider">
+                  รหัส: {complaint.trackingCode}
+                </span>
+                <button
+                  type="button"
+                  onClick={handleCopyDirectLink}
+                  className="text-[11px] px-2 py-0.5 bg-white border border-[#B8923A]/40 rounded-sm text-[#4B1F7A] hover:bg-[#EDE6F5]"
+                >
+                  {copiedLink ? 'คัดลอกลิงก์แล้ว ✓' : '🔗 คัดลอกลิงก์เรื่องนี้'}
+                </button>
+              </div>
               <ComplaintStatusBadge status={complaint.status} />
             </div>
 

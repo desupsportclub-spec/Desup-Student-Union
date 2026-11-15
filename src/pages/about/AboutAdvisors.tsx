@@ -4,38 +4,40 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { collection, getDocs } from 'firebase/firestore';
-import { db } from '../../lib/firebase';
 import { PersonItem } from '../../types';
 import { SectionEyebrow, CornerBracket } from '../../components/common/Ornament';
 import { Emblem } from '../../components/common/Emblem';
+import { getCachedPeopleSync, loadPeopleList } from '../../lib/publicDataService';
+
+function filterAdvisors(list: PersonItem[]): PersonItem[] {
+  return list
+    .filter((item) => item.role === 'advisor')
+    .sort((a, b) => (a.order || 999) - (b.order || 999));
+}
 
 export const AboutAdvisors: React.FC = () => {
-  const [advisors, setAdvisors] = useState<PersonItem[]>([]);
-  const [loading, setLoading] = useState(true);
+  const initialPeople = getCachedPeopleSync();
+  const [advisors, setAdvisors] = useState<PersonItem[]>(
+    initialPeople ? filterAdvisors(initialPeople) : []
+  );
+  const [loading, setLoading] = useState(!initialPeople);
 
   useEffect(() => {
-    async function fetchAdvisors() {
-      setLoading(true);
-      try {
-        const snap = await getDocs(collection(db, 'people'));
-        const list: PersonItem[] = [];
-        snap.forEach((d) => {
-          const item = { id: d.id, ...d.data() } as PersonItem;
-          if (item.role === 'advisor') {
-            list.push(item);
-          }
-        });
-        list.sort((a, b) => (a.order || 999) - (b.order || 999));
-        setAdvisors(list);
-      } catch (err) {
-        console.warn("Could not load advisors:", err);
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    fetchAdvisors();
+    let active = true;
+    loadPeopleList((list) => {
+      if (!active) return;
+      setAdvisors(filterAdvisors(list));
+      setLoading(false);
+    })
+      .catch((err) => {
+        console.warn('Could not load advisors:', err);
+      })
+      .finally(() => {
+        if (active) setLoading(false);
+      });
+    return () => {
+      active = false;
+    };
   }, []);
 
   return (

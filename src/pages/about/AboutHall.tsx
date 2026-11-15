@@ -4,45 +4,49 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { collection, getDocs } from 'firebase/firestore';
-import { db } from '../../lib/firebase';
 import { PersonItem } from '../../types';
 import { SectionEyebrow, CornerBracket } from '../../components/common/Ornament';
 import { Emblem } from '../../components/common/Emblem';
+import { getCachedPeopleSync, loadPeopleList } from '../../lib/publicDataService';
+
+function filterPresidents(all: PersonItem[]): PersonItem[] {
+  const list = all.filter((item) => {
+    const pos = (item.position || '').trim();
+    const isVice = pos.includes('อุปนายก') || pos.includes('รองนายก') || pos.includes('รองประธาน');
+    const isPresidentTitle = (pos.includes('นายก') || pos.includes('ประธาน')) && !isVice;
+    return item.role === 'president' || isPresidentTitle;
+  });
+  list.sort((a, b) => {
+    const yrDiff = (b.yearTH || '').localeCompare(a.yearTH || '');
+    if (yrDiff !== 0) return yrDiff;
+    return (b.updatedAt || b.createdAt || '').localeCompare(a.updatedAt || a.createdAt || '');
+  });
+  return list;
+}
 
 export const AboutHall: React.FC = () => {
-  const [presidents, setPresidents] = useState<PersonItem[]>([]);
-  const [loading, setLoading] = useState(true);
+  const initialPeople = getCachedPeopleSync();
+  const [presidents, setPresidents] = useState<PersonItem[]>(
+    initialPeople ? filterPresidents(initialPeople) : []
+  );
+  const [loading, setLoading] = useState(!initialPeople);
 
   useEffect(() => {
-    async function fetchPresidents() {
-      setLoading(true);
-      try {
-        const snap = await getDocs(collection(db, 'people'));
-        const list: PersonItem[] = [];
-        snap.forEach((d) => {
-          const item = { id: d.id, ...d.data() } as PersonItem;
-          const pos = (item.position || '').trim();
-          const isVice = pos.includes('อุปนายก') || pos.includes('รองนายก') || pos.includes('รองประธาน');
-          const isPresidentTitle = (pos.includes('นายก') || pos.includes('ประธาน')) && !isVice;
-          if (item.role === 'president' || isPresidentTitle) {
-            list.push(item);
-          }
-        });
-        list.sort((a, b) => {
-          const yrDiff = (b.yearTH || '').localeCompare(a.yearTH || '');
-          if (yrDiff !== 0) return yrDiff;
-          return (b.updatedAt || b.createdAt || '').localeCompare(a.updatedAt || a.createdAt || '');
-        });
-        setPresidents(list);
-      } catch (err) {
-        console.warn("Could not load presidents:", err);
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    fetchPresidents();
+    let active = true;
+    loadPeopleList((list) => {
+      if (!active) return;
+      setPresidents(filterPresidents(list));
+      setLoading(false);
+    })
+      .catch((err) => {
+        console.warn('Could not load presidents:', err);
+      })
+      .finally(() => {
+        if (active) setLoading(false);
+      });
+    return () => {
+      active = false;
+    };
   }, []);
 
   return (

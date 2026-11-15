@@ -12,6 +12,7 @@ import { CornerBracket } from '../components/common/Ornament';
 import { saveDownloadWithChunks, deleteDownloadWithChunks, resolveDownloadUrl } from '../lib/downloadStorage';
 import { DOWNLOAD_CATEGORIES, getDownloadCategoryLabel } from '../config/site';
 import { SuccessFeedbackModal } from '../components/common/SuccessFeedbackModal';
+import { invalidatePublicDataCache } from '../lib/publicDataService';
 
 export const AdminDownloads: React.FC = () => {
   const [downloads, setDownloads] = useState<DownloadItem[]>([]);
@@ -158,6 +159,7 @@ export const AdminDownloads: React.FC = () => {
       };
 
       await saveDownloadWithChunks(id, meta, (pct) => setUploadProgress(pct));
+      invalidatePublicDataCache('downloads');
       setIsModalOpen(false);
       await fetchDownloads();
       setSuccessModalTitle(editingItem ? 'แก้ไขเอกสารเรียบร้อยแล้ว' : 'บันทึกและอัปโหลดเอกสารเรียบร้อยแล้ว');
@@ -174,6 +176,7 @@ export const AdminDownloads: React.FC = () => {
     if (!window.confirm(`คุณแน่ใจว่าต้องการลบเอกสาร "${itemTitle}" หรือไม่?`)) return;
     try {
       await deleteDownloadWithChunks(id);
+      invalidatePublicDataCache('downloads');
       await fetchDownloads();
       setSuccessModalTitle('ลบเอกสารเรียบร้อยแล้ว');
     } catch (err) {

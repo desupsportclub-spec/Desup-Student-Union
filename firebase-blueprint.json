@@ -111,12 +111,23 @@
         "body": { "type": "string", "maxLength": 10000 },
         "location": { "type": "string", "maxLength": 300 },
         "anonymous": { "type": "boolean" },
+        "reporterUid": { "type": "string", "maxLength": 128 },
         "status": { "type": "string", "enum": ["received", "considering", "in_progress", "resolved"] },
         "publicReplies": { "type": "array" },
         "createdAt": { "type": "string" },
         "updatedAt": { "type": "string" }
       },
       "required": ["type", "title", "body", "status", "createdAt"]
+    },
+    "ComplaintLookup": {
+      "title": "ComplaintLookup",
+      "description": "Privacy-preserving SHA-256 recovery lookup index mapping a hashed personal recovery key to complaint tracking codes",
+      "type": "object",
+      "properties": {
+        "codes": { "type": "array" },
+        "updatedAt": { "type": "string" }
+      },
+      "required": ["codes", "updatedAt"]
     },
     "Budget": {
       "title": "Budget",
@@ -195,6 +206,7 @@
     "/complaints/{trackingCode}": { "schema": "Complaint", "description": "Public complaint records indexed by tracking code" },
     "/complaints/{trackingCode}/private/contact": { "schema": { "$ref": "object" }, "description": "Private contact info for complaint, viewable only by admins" },
     "/complaints/{trackingCode}/private/attachments": { "schema": { "$ref": "object" }, "description": "Private uploaded photos for complaint, viewable only by admins" },
+    "/complaintLookups/{lookupHash}": { "schema": "ComplaintLookup", "description": "SHA-256 hashed recovery key mapping to tracking codes for cross-device lookup without login" },
     "/budgets/{yearTH}": { "schema": "Budget", "description": "Yearly budget and expense transparency" },
     "/settings/{docId}": { "schema": "Setting", "description": "Site-wide configuration and stats" },
     "/admins/{email}": { "schema": "Admin", "description": "Role-based admin access indexed by lowercase Google email" },

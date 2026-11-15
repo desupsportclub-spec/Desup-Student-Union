@@ -4,13 +4,14 @@
  */
 
 import React, { useState, useEffect, useRef } from 'react';
-import { collection, getDocs, doc, updateDoc, increment } from 'firebase/firestore';
+import { doc, updateDoc, increment } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { DownloadItem } from '../types';
 import { formatThaiDate, formatNumber } from '../lib/format';
 import { SectionEyebrow, CornerBracket } from '../components/common/Ornament';
 import { resolveDownloadUrl } from '../lib/downloadStorage';
 import { DOWNLOAD_CATEGORIES, getDownloadCategoryLabel } from '../config/site';
+import { getCachedDownloadsSync, loadDownloads } from '../lib/publicDataService';
 
 const CATEGORIES: { id: string; label: string }[] = [
   { id: 'all', label: 'เอกสารทั้งหมด' },
@@ -18,10 +19,11 @@ const CATEGORIES: { id: string; label: string }[] = [
 ];
 
 export const Downloads: React.FC = () => {
-  const [downloads, setDownloads] = useState<DownloadItem[]>([]);
+  const initialDownloads = getCachedDownloadsSync();
+  const [downloads, setDownloads] = useState<DownloadItem[]>(initialDownloads || []);
   const [selectedCat, setSelectedCat] = useState<string>('all');
   const [search, setSearch] = useState('');
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(!initialDownloads);
 
   // PDF Viewer Modal State
   const [previewItem, setPreviewItem] = useState<DownloadItem | null>(null);
@@ -33,24 +35,22 @@ export const Downloads: React.FC = () => {
   const pdfFrameRef = useRef<HTMLIFrameElement>(null);
 
   useEffect(() => {
-    async function fetchDownloads() {
-      setLoading(true);
-      try {
-        const snap = await getDocs(collection(db, 'downloads'));
-        const list: DownloadItem[] = [];
-        snap.forEach((d) => {
-          list.push({ id: d.id, ...d.data() } as DownloadItem);
-        });
-        list.sort((a, b) => (b.createdAt || '').localeCompare(a.createdAt || ''));
-        setDownloads(list);
-      } catch (err) {
-        console.warn("Could not load downloads:", err);
-      } finally {
-        setLoading(false);
-      }
-    }
+    let active = true;
+    loadDownloads((list) => {
+      if (!active) return;
+      setDownloads(list);
+      setLoading(false);
+    })
+      .catch((err) => {
+        console.warn('Could not load downloads:', err);
+      })
+      .finally(() => {
+        if (active) setLoading(false);
+      });
 
-    fetchDownloads();
+    return () => {
+      active = false;
+    };
   }, []);
 
   // Cleanup active Blob URL on unmount
