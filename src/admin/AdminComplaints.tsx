@@ -12,6 +12,7 @@ import { formatThaiDateTime, formatThaiDate } from '../lib/format';
 import { ComplaintStatusBadge } from '../components/common/StatusBadge';
 import { SuccessFeedbackModal } from '../components/common/SuccessFeedbackModal';
 import { usePendingComplaints } from './ComplaintAlertsContext';
+import { computeComplaintStats, syncComplaintStatsToSettings } from '../lib/complaintStatsSync';
 
 export const AdminComplaints: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -45,6 +46,7 @@ export const AdminComplaints: React.FC = () => {
       });
       list.sort((a, b) => (b.createdAt || '').localeCompare(a.createdAt || ''));
       setComplaints(list);
+      void syncComplaintStatsToSettings(computeComplaintStats(list));
     } catch (err) {
       console.warn("Could not load complaints:", err);
     } finally {
@@ -120,7 +122,11 @@ export const AdminComplaints: React.FC = () => {
       });
 
       setActiveComplaint(prev => prev ? { ...prev, status: newStatus, updatedAt: now } : null);
-      setComplaints(prev => prev.map(c => getComplaintDocId(c) === docId ? { ...c, status: newStatus, updatedAt: now } : c));
+      setComplaints(prev => {
+        const next = prev.map(c => getComplaintDocId(c) === docId ? { ...c, status: newStatus, updatedAt: now } : c);
+        void syncComplaintStatsToSettings(computeComplaintStats(next));
+        return next;
+      });
       setSuccessModalTitle('ปรับปรุงสถานะเรื่องร้องเรียนเรียบร้อยแล้ว');
     } catch (err) {
       console.error("Status update error:", err);
@@ -185,7 +191,11 @@ export const AdminComplaints: React.FC = () => {
       }
 
       await deleteDoc(doc(db, 'complaints', docId));
-      setComplaints(prev => prev.filter(c => getComplaintDocId(c) !== docId));
+      setComplaints(prev => {
+        const next = prev.filter(c => getComplaintDocId(c) !== docId);
+        void syncComplaintStatsToSettings(computeComplaintStats(next));
+        return next;
+      });
       if (activeComplaint && getComplaintDocId(activeComplaint) === docId) {
         setActiveComplaint(null);
       }

@@ -191,9 +191,9 @@ export const AboutAuthority: React.FC = () => {
     <div className="max-w-[960px] mx-auto px-4 sm:px-6 py-6 sm:py-10 space-y-8 sm:space-y-12">
       {/* Header */}
       <div className="border-b border-[#B8923A]/30 pb-6 sm:pb-8 text-center max-w-2xl mx-auto space-y-2.5">
-        <SectionEyebrow enText="CHARTER & POWERS" thText="อำนาจหน้าที่และธรรมนูญ" />
+        <SectionEyebrow enText="CHARTER & POWERS" thText="อำนาจหน้าที่" />
         <h1 className="font-serif text-3xl md:text-4xl font-semibold text-[#1B1226]">
-          อำนาจหน้าที่และประกาศองค์การนักเรียน
+          อำนาจหน้าที่องค์การนักเรียน
         </h1>
         <p className="text-xs md:text-sm text-[#1B1226]/70">
           ตามประกาศโรงเรียนสาธิตมหาวิทยาลัยพะเยา เรื่อง องค์การนักเรียน พ.ศ. ๒๕๖๙

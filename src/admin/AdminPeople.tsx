@@ -6,9 +6,10 @@
 import React, { useState, useEffect } from 'react';
 import { collection, getDocs, doc, setDoc, deleteDoc } from 'firebase/firestore';
 import { db } from '../lib/firebase';
-import { PersonItem, PersonRole, ImageAsset } from '../types';
+import { PersonItem, PersonRole, AdvisorGroup, ImageAsset } from '../types';
 import { ImageUploader } from '../components/common/ImageUploader';
 import { useSiteSettings } from '../context/SiteSettingsContext';
+import { ADVISOR_GROUPS, getAdvisorGroupLabel, resolveAdvisorGroup } from '../config/site';
 import { SuccessFeedbackModal } from '../components/common/SuccessFeedbackModal';
 import { invalidatePublicDataCache } from '../lib/publicDataService';
 
@@ -24,6 +25,7 @@ export const AdminPeople: React.FC = () => {
   // Form Fields
   const [name, setName] = useState('');
   const [role, setRole] = useState<PersonRole>('board');
+  const [advisorGroup, setAdvisorGroup] = useState<AdvisorGroup>('teacher');
   const [position, setPosition] = useState('');
   const [grade, setGrade] = useState('');
   const [yearTH, setYearTH] = useState(academicYearTH);
@@ -57,6 +59,7 @@ export const AdminPeople: React.FC = () => {
     setEditingItem(null);
     setName('');
     setRole(selectedRole);
+    setAdvisorGroup('teacher');
     setPosition(selectedRole === 'president' ? 'นายกองค์การนักเรียน' : '');
     setGrade('');
     setYearTH(academicYearTH);
@@ -70,6 +73,7 @@ export const AdminPeople: React.FC = () => {
     setEditingItem(item);
     setName(item.name);
     setRole(item.role);
+    setAdvisorGroup(resolveAdvisorGroup(item));
     setPosition(item.position);
     setGrade(item.grade || '');
     setYearTH(item.yearTH || academicYearTH);
@@ -90,6 +94,7 @@ export const AdminPeople: React.FC = () => {
       const personDoc: PersonItem = {
         name: name.trim(),
         role,
+        ...(role === 'advisor' ? { advisorGroup } : {}),
         position: position.trim(),
         grade: grade.trim(),
         yearTH: yearTH.trim() || academicYearTH,
@@ -136,7 +141,7 @@ export const AdminPeople: React.FC = () => {
             จัดการบุคลากรและทำเนียบ
           </h1>
           <p className="text-xs text-[#1B1226]/60">
-            คณะกรรมการองค์การนักเรียน อาจารย์ที่ปรึกษา และทำเนียบนายกองค์การนักเรียน
+            คณะกรรมการองค์การนักเรียน คณะกรรมการที่ปรึกษา และทำเนียบนายกองค์การนักเรียน
           </p>
         </div>
 
@@ -152,7 +157,7 @@ export const AdminPeople: React.FC = () => {
       <div className="flex items-center gap-6 border-b border-[#4B1F7A]/10 text-xs font-medium pb-2">
         {[
           { id: 'board', label: 'คณะกรรมการองค์การนักเรียน' },
-          { id: 'advisor', label: 'อาจารย์ที่ปรึกษา' },
+          { id: 'advisor', label: 'คณะกรรมการที่ปรึกษา' },
           { id: 'president', label: 'ทำเนียบนายกองค์การนักเรียน' }
         ].map((t) => (
           <button
@@ -212,7 +217,12 @@ export const AdminPeople: React.FC = () => {
                       {item.name}
                     </td>
                     <td className="py-3 px-4 text-[#4B1F7A] font-medium">
-                      {item.position}
+                      <div>{item.position}</div>
+                      {item.role === 'advisor' && (
+                        <div className="text-[10px] text-[#9C7A2B] font-normal mt-0.5">
+                          {getAdvisorGroupLabel(resolveAdvisorGroup(item), true)}
+                        </div>
+                      )}
                     </td>
                     <td className="py-3 px-4 text-[#9C7A2B]">
                       {item.yearTH}
@@ -272,7 +282,7 @@ export const AdminPeople: React.FC = () => {
                     className="w-full border p-2 rounded-sm"
                   >
                     <option value="board">คณะกรรมการ</option>
-                    <option value="advisor">อาจารย์ที่ปรึกษา</option>
+                    <option value="advisor">คณะกรรมการที่ปรึกษา</option>
                     <option value="president">ทำเนียบนายกองค์การนักเรียน</option>
                   </select>
                 </div>
@@ -289,6 +299,25 @@ export const AdminPeople: React.FC = () => {
                   />
                 </div>
               </div>
+
+              {role === 'advisor' && (
+                <div>
+                  <label className="block font-semibold text-[#2A1245] mb-1">
+                    ฝ่ายในคณะกรรมการที่ปรึกษา *
+                  </label>
+                  <select
+                    value={advisorGroup}
+                    onChange={(e) => setAdvisorGroup(e.target.value as AdvisorGroup)}
+                    className="w-full border p-2 rounded-sm bg-[#FAF7F0]"
+                  >
+                    {ADVISOR_GROUPS.map((grp) => (
+                      <option key={grp.id} value={grp.id}>
+                        {grp.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
 
               <div>
                 <label className="block font-semibold text-[#2A1245] mb-1">ชื่อ-นามสกุล *</label>

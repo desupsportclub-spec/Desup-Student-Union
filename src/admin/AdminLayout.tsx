@@ -22,7 +22,6 @@ import {
   CalendarIcon,
   DocumentIcon,
   UsersIcon,
-  BudgetIcon,
   ComplaintsIcon,
   BannersIcon,
   SettingsIcon,
@@ -81,7 +80,6 @@ const AdminLayoutShell: React.FC = () => {
     { path: '/admin/events', label: 'ปฏิทินกิจกรรม', icon: <CalendarIcon /> },
     { path: '/admin/downloads', label: 'เอกสารดาวน์โหลด', icon: <DocumentIcon /> },
     { path: '/admin/people', label: 'บุคลากร/ทำเนียบ', icon: <UsersIcon /> },
-    { path: '/admin/budgets', label: 'งบประมาณกิจกรรม', icon: <BudgetIcon /> },
     { path: '/admin/complaints', label: 'เรื่องร้องเรียน/เสนอแนะ', icon: <ComplaintsIcon />, showPendingBadge: true },
     ...(isAdmin ? [
       { path: '/admin/settings', label: 'ตั้งค่าเว็บไซต์', icon: <SettingsIcon /> },

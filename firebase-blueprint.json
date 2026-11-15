@@ -61,7 +61,7 @@
       "type": "object",
       "properties": {
         "title": { "type": "string", "maxLength": 300 },
-        "category": { "type": "string", "enum": ["order", "announcement", "regulation", "official_letter", "meeting_report", "project_report", "finance", "form", "manual", "other"] },
+        "category": { "type": "string", "enum": ["student", "staff", "order", "announcement", "regulation", "official_letter", "meeting_report", "project_report", "finance", "form", "manual", "other"] },
         "fileType": { "type": "string", "enum": ["pdf", "docx", "xlsx"] },
         "fileUrl": { "type": "string", "maxLength": 2000000 },
         "fileName": { "type": "string", "maxLength": 300 },
@@ -90,6 +90,7 @@
       "properties": {
         "name": { "type": "string", "maxLength": 200 },
         "role": { "type": "string", "enum": ["board", "advisor", "president"] },
+        "advisorGroup": { "type": "string", "enum": ["executive", "teacher", "experienced_student"] },
         "position": { "type": "string", "maxLength": 200 },
         "grade": { "type": "string", "maxLength": 50 },
         "yearTH": { "type": "string", "maxLength": 10 },
@@ -129,20 +130,9 @@
       },
       "required": ["codes", "updatedAt"]
     },
-    "Budget": {
-      "title": "Budget",
-      "description": "Student council activity budget for fiscal/academic year",
-      "type": "object",
-      "properties": {
-        "yearTH": { "type": "string", "maxLength": 10 },
-        "totalBudget": { "type": "number" },
-        "items": { "type": "array" }
-      },
-      "required": ["yearTH", "totalBudget"]
-    },
     "Setting": {
       "title": "Setting",
-      "description": "Global website settings, academic year, president message, ticker, external service links, and contacts",
+      "description": "Global website settings, academic year, president message, ticker, external service links, complaint summary stats, and contacts",
       "type": "object",
       "properties": {
         "academicYearTH": { "type": "string", "maxLength": 10 },
@@ -151,6 +141,7 @@
         "ticker": { "type": "array" },
         "links": { "type": "array" },
         "contactInfo": { "type": "object" },
+        "complaintStats": { "type": "object" },
         "statsOverride": { "type": "object" },
         "totalVisits": { "type": "number" }
       }
@@ -207,7 +198,6 @@
     "/complaints/{trackingCode}/private/contact": { "schema": { "$ref": "object" }, "description": "Private contact info for complaint, viewable only by admins" },
     "/complaints/{trackingCode}/private/attachments": { "schema": { "$ref": "object" }, "description": "Private uploaded photos for complaint, viewable only by admins" },
     "/complaintLookups/{lookupHash}": { "schema": "ComplaintLookup", "description": "SHA-256 hashed recovery key mapping to tracking codes for cross-device lookup without login" },
-    "/budgets/{yearTH}": { "schema": "Budget", "description": "Yearly budget and expense transparency" },
     "/settings/{docId}": { "schema": "Setting", "description": "Site-wide configuration and stats" },
     "/admins/{email}": { "schema": "Admin", "description": "Role-based admin access indexed by lowercase Google email" },
     "/auditLogs/{id}": { "schema": "AuditLog", "description": "Security audit logs" },

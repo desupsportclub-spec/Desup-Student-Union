@@ -21,7 +21,7 @@ import {
   loadPublishedEvents,
   loadPublishedNews,
 } from '../lib/publicDataService';
-import { NewsItem, EventItem, PersonItem, BannerItem } from '../types';
+import { NewsItem, EventItem, PersonItem, BannerItem, ComplaintItem } from '../types';
 import {
   formatThaiDate,
   getThaiDateParts,
@@ -35,6 +35,7 @@ import { NewsCategoryBadge } from '../components/common/StatusBadge';
 import { Emblem } from '../components/common/Emblem';
 import { HeroBannerSlider } from '../components/home/HeroBannerSlider';
 import { useSiteSettings } from '../context/SiteSettingsContext';
+import { computeComplaintStats, syncComplaintStatsToSettings } from '../lib/complaintStatsSync';
 import {
   getNewsCoverUrl,
   getNewsYouTubeUrl,
@@ -86,7 +87,7 @@ function resolvePresident(peopleList: PersonItem[]): PersonItem | null {
 }
 
 export const Home: React.FC = () => {
-  const { academicYearTH, presidentHeadline, presidentMessage, totalVisits } = useSiteSettings();
+  const { academicYearTH, presidentHeadline, presidentMessage, complaintStats } = useSiteSettings();
 
   const initialNews = getCachedNewsSync();
   const initialNewsSplit = initialNews ? splitHomeNews(initialNews) : null;
@@ -104,12 +105,12 @@ export const Home: React.FC = () => {
   const [president, setPresident] = useState<PersonItem | null>(() => (initialPeople ? resolvePresident(initialPeople) : null));
   const [galleryPhotos, setGalleryPhotos] = useState<{ src: string; title: string }[]>(() => initialNewsSplit?.photos || []);
 
-  // Statistics
-  const [stats, setStats] = useState({
-    complaintsTotal: 0,
-    resolvedPercent: 100,
-    eventsCount: initialEvents?.length || 0,
-  });
+  // Optional direct admin override when admin visits homepage
+  const [adminComplaintStats, setAdminComplaintStats] = useState<{
+    total: number;
+    inProgress: number;
+    resolved: number;
+  } | null>(null);
 
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(0);
@@ -143,7 +144,6 @@ export const Home: React.FC = () => {
     const loadEventsTask = loadPublishedEvents((list) => {
       if (!active) return;
       setUpcomingEvents(list.filter((e) => isEventActiveOrUpcoming(e)).slice(0, 6));
-      setStats((prev) => ({ ...prev, eventsCount: list.length }));
     });
 
     const loadPeopleTask = loadPeopleList((list) => {
@@ -151,23 +151,19 @@ export const Home: React.FC = () => {
       setPresident(resolvePresident(list));
     });
 
-    // Only attempt complaints stats if signed in (public users cannot list complaints)
+    // If an admin is signed in, reconcile exact complaint counts and sync back to public settings/site
     const loadComplaintsTask = auth.currentUser
       ? getDocs(collection(db, 'complaints'))
           .then((complaintsSnap) => {
             if (!active) return;
-            let totalComplaints = 0;
-            let resolvedCount = 0;
+            const list: Pick<ComplaintItem, 'status'>[] = [];
             complaintsSnap.forEach((d) => {
-              totalComplaints++;
-              if (d.data().status === 'resolved') resolvedCount++;
+              const status = d.data().status;
+              if (status) list.push({ status });
             });
-            const percent = totalComplaints > 0 ? Math.round((resolvedCount / totalComplaints) * 100) : 100;
-            setStats((prev) => ({
-              ...prev,
-              complaintsTotal: totalComplaints,
-              resolvedPercent: percent,
-            }));
+            const computed = computeComplaintStats(list);
+            setAdminComplaintStats(computed);
+            void syncComplaintStatsToSettings(computed);
           })
           .catch(() => {})
       : Promise.resolve();
@@ -515,54 +511,55 @@ export const Home: React.FC = () => {
       </section>
 
       {/* ========================================================
-          02. สถิติความโปร่งใส (Dark violet-900 section with count-up)
+          02. รายงานผลการดำเนินงาน (Dark violet-900 section)
          ======================================================== */}
-      <section className="bg-[#2A1245] text-[#FAF7F0] py-14 sm:py-20 relative overflow-hidden border-y border-[#B8923A]/30">
-        <div className="max-w-[1240px] mx-auto px-4 sm:px-6 md:px-12 relative z-10">
-          <div className="mb-8 sm:mb-12 text-center max-w-xl mx-auto space-y-2">
-            <SectionEyebrow number="02" enText="TRANSPARENCY & IMPACT" thText="สถิติและการดำเนินงาน" light />
-            <h2 className="font-serif text-2xl md:text-3xl font-semibold text-[#FAF7F0]">
-              เปิดเผย โปร่งใส มุ่งมั่นเพื่อนักเรียน
-            </h2>
-          </div>
+      {(() => {
+        const displayStats = adminComplaintStats || complaintStats;
+        return (
+          <section className="bg-[#2A1245] text-[#FAF7F0] py-14 sm:py-20 relative overflow-hidden border-y border-[#B8923A]/30">
+            <div className="max-w-[1240px] mx-auto px-4 sm:px-6 md:px-12 relative z-10">
+              <div className="mb-8 sm:mb-12 text-center max-w-xl mx-auto space-y-2">
+                <SectionEyebrow number="02" enText="PERFORMANCE REPORT" thText="รายงานผลการดำเนินงาน" light />
+                <h2 className="font-serif text-2xl md:text-3xl font-semibold text-[#FAF7F0]">
+                  เปิดเผย โปร่งใส มุ่งมั่นเพื่อนักเรียน
+                </h2>
+              </div>
 
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8 md:gap-12 text-center">
-            {/* Stat 1: Visits */}
-            <div className="space-y-1.5 sm:space-y-2 border-r border-b lg:border-b-0 border-[#B8923A]/20 pb-5 lg:pb-0 pr-2 lg:pr-0">
-              <div className="font-serif text-3xl sm:text-4xl md:text-5xl lg:text-6xl text-[#D9B867] tabular-numbers font-medium">
-                {formatNumber(totalVisits)}
-              </div>
-              <div className="text-[11px] sm:text-xs tracking-wider text-[#FAF7F0]/80 uppercase">ผู้เข้าชมสะสม</div>
-            </div>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 sm:gap-8 md:gap-12 text-center max-w-4xl mx-auto">
+                {/* Stat 1: Total Complaints */}
+                <div className="space-y-1.5 sm:space-y-2 border-b sm:border-b-0 sm:border-r border-[#B8923A]/20 pb-5 sm:pb-0 sm:pr-4">
+                  <div className="font-serif text-3xl sm:text-4xl md:text-5xl lg:text-6xl text-[#D9B867] tabular-numbers font-medium">
+                    {formatNumber(displayStats.total)}
+                  </div>
+                  <div className="text-[11px] sm:text-xs tracking-wider text-[#FAF7F0]/80 uppercase">
+                    เรื่องร้องเรียนทั้งหมด
+                  </div>
+                </div>
 
-            {/* Stat 2: Total Complaints */}
-            <div className="space-y-1.5 sm:space-y-2 border-b lg:border-b-0 lg:border-r border-[#B8923A]/20 pb-5 lg:pb-0 pl-2 lg:pl-0">
-              <div className="font-serif text-3xl sm:text-4xl md:text-5xl lg:text-6xl text-[#FAF7F0] tabular-numbers font-medium">
-                {formatNumber(stats.complaintsTotal)}
-              </div>
-              <div className="text-[11px] sm:text-xs tracking-wider text-[#FAF7F0]/80 uppercase">เรื่องร้องเรียนทั้งหมด</div>
-            </div>
+                {/* Stat 2: In Progress Complaints */}
+                <div className="space-y-1.5 sm:space-y-2 border-b sm:border-b-0 sm:border-r border-[#B8923A]/20 pb-5 sm:pb-0 sm:px-4">
+                  <div className="font-serif text-3xl sm:text-4xl md:text-5xl lg:text-6xl text-[#FAF7F0] tabular-numbers font-medium">
+                    {formatNumber(displayStats.inProgress)}
+                  </div>
+                  <div className="text-[11px] sm:text-xs tracking-wider text-[#FAF7F0]/80 uppercase">
+                    กำลังดำเนินการ
+                  </div>
+                </div>
 
-            {/* Stat 3: Resolved percentage */}
-            <div className="space-y-1.5 sm:space-y-2 border-r border-[#B8923A]/20 pt-1 lg:pt-0 pr-2 lg:pr-0">
-              <div className="font-serif text-3xl sm:text-4xl md:text-5xl lg:text-6xl text-[#D9B867] tabular-numbers font-medium">
-                {stats.resolvedPercent}%
-              </div>
-              <div className="text-[11px] sm:text-xs tracking-wider text-[#FAF7F0]/80 uppercase">ดำเนินการเสร็จสิ้น</div>
-            </div>
-
-            {/* Stat 4: Activities this year */}
-            <div className="space-y-1.5 sm:space-y-2 pt-1 lg:pt-0 pl-2 lg:pl-0">
-              <div className="font-serif text-3xl sm:text-4xl md:text-5xl lg:text-6xl text-[#FAF7F0] tabular-numbers font-medium">
-                {formatNumber(stats.eventsCount)}
-              </div>
-              <div className="text-[11px] sm:text-xs tracking-wider text-[#FAF7F0]/80 uppercase">
-                กิจกรรมส่งเสริมนักเรียนตลอดปี
+                {/* Stat 3: Resolved Complaints (Case count, no %) */}
+                <div className="space-y-1.5 sm:space-y-2 pt-1 sm:pt-0 sm:pl-4">
+                  <div className="font-serif text-3xl sm:text-4xl md:text-5xl lg:text-6xl text-[#D9B867] tabular-numbers font-medium">
+                    {formatNumber(displayStats.resolved)}
+                  </div>
+                  <div className="text-[11px] sm:text-xs tracking-wider text-[#FAF7F0]/80 uppercase">
+                    ดำเนินการเสร็จสิ้น
+                  </div>
+                </div>
               </div>
             </div>
-          </div>
-        </div>
-      </section>
+          </section>
+        );
+      })()}
 
       {/* ========================================================
           03. กิจกรรมที่กำลังจะมาถึง (Upcoming Events carousel)
@@ -606,17 +603,14 @@ export const Home: React.FC = () => {
                           </div>
                         </div>
                         <div className="min-w-0 flex-1">
-                          <div className="flex flex-wrap items-center gap-1.5">
-                            <span className="text-[10px] uppercase tracking-wider text-[#9C7A2B] font-medium">
-                              {evt.type === 'sport' ? 'กีฬา' : evt.type === 'academic' ? 'วิชาการ' : evt.type === 'art' ? 'ศิลปวัฒนธรรม' : evt.type === 'volunteer' ? 'จิตอาสา' : 'การประชุม'}
-                            </span>
-                            {scheduleStatus === 'ongoing' && (
+                          {scheduleStatus === 'ongoing' && (
+                            <div className="mb-1">
                               <span className="px-1.5 py-0.5 rounded-sm bg-emerald-50 border border-emerald-200 text-emerald-800 text-[10px] font-medium">
                                 อยู่ในช่วงจัดกิจกรรม
                               </span>
-                            )}
-                          </div>
-                          <h3 className="font-serif text-lg font-semibold text-[#1B1226] line-clamp-2 mt-1">
+                            </div>
+                          )}
+                          <h3 className="font-serif text-lg font-semibold text-[#1B1226] line-clamp-2">
                             {evt.title}
                           </h3>
                         </div>

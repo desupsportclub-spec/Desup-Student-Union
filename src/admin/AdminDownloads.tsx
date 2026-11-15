@@ -10,7 +10,11 @@ import { DownloadItem, DownloadCategory, FileExtensionType } from '../types';
 import { formatThaiDate } from '../lib/format';
 import { CornerBracket } from '../components/common/Ornament';
 import { saveDownloadWithChunks, deleteDownloadWithChunks, resolveDownloadUrl } from '../lib/downloadStorage';
-import { DOWNLOAD_CATEGORIES, getDownloadCategoryLabel } from '../config/site';
+import {
+  DOWNLOAD_CATEGORIES,
+  getDownloadCategoryLabel,
+  normalizeDownloadCategory,
+} from '../config/site';
 import { SuccessFeedbackModal } from '../components/common/SuccessFeedbackModal';
 import { invalidatePublicDataCache } from '../lib/publicDataService';
 
@@ -22,7 +26,7 @@ export const AdminDownloads: React.FC = () => {
 
   // Form Fields
   const [title, setTitle] = useState('');
-  const [category, setCategory] = useState<DownloadCategory>('form');
+  const [category, setCategory] = useState<DownloadCategory>('student');
   const [fileType, setFileType] = useState<FileExtensionType>('pdf');
   const [fileUrl, setFileUrl] = useState('');
   const [uploadMode, setUploadMode] = useState<'file' | 'url'>('file');
@@ -61,7 +65,7 @@ export const AdminDownloads: React.FC = () => {
   const handleOpenCreate = () => {
     setEditingItem(null);
     setTitle('');
-    setCategory('form');
+    setCategory('student');
     setFileType('pdf');
     setFileUrl('');
     setSelectedFileName('');
@@ -76,7 +80,7 @@ export const AdminDownloads: React.FC = () => {
   const handleOpenEdit = async (item: DownloadItem) => {
     setEditingItem(item);
     setTitle(item.title);
-    setCategory(item.category);
+    setCategory(normalizeDownloadCategory(item.category));
     setFileType(item.fileType);
     setFileUrl(item.fileUrl || '');
     setSelectedFileName(item.fileName || '');
@@ -236,7 +240,7 @@ export const AdminDownloads: React.FC = () => {
               <thead className="bg-[#FAF7F0] border-b border-[#4B1F7A]/10 text-[#9C7A2B] uppercase tracking-wider font-medium">
                 <tr>
                   <th className="py-3 px-4">ชื่อเอกสาร</th>
-                  <th className="py-3 px-4">หมวดหมู่</th>
+                  <th className="py-3 px-4">กลุ่มผู้ใช้งาน</th>
                   <th className="py-3 px-4">ชนิดไฟล์</th>
                   <th className="py-3 px-4">ดาวน์โหลด</th>
                   <th className="py-3 px-4">วันที่เผยแพร่</th>
@@ -339,7 +343,7 @@ export const AdminDownloads: React.FC = () => {
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block font-semibold text-[#2A1245] mb-1">หมวดหมู่ *</label>
+                  <label className="block font-semibold text-[#2A1245] mb-1">กลุ่มผู้ใช้งาน *</label>
                   <select
                     value={category}
                     onChange={(e) => setCategory(e.target.value as DownloadCategory)}

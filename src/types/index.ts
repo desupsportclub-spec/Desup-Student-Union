@@ -62,7 +62,10 @@ export interface EventItem {
   published: boolean;
 }
 
+export type DownloadAudience = 'student' | 'staff';
+
 export type DownloadCategory =
+  | DownloadAudience
   | 'order'
   | 'announcement'
   | 'regulation'
@@ -102,10 +105,13 @@ export interface BannerItem {
 
 export type PersonRole = 'board' | 'advisor' | 'president';
 
+export type AdvisorGroup = 'executive' | 'teacher' | 'experienced_student';
+
 export interface PersonItem {
   id?: string;
   name: string;
   role: PersonRole;
+  advisorGroup?: AdvisorGroup;
   position: string;
   grade?: string; // e.g. มัธยมศึกษาปีที่ 6/1
   yearTH: string; // e.g. 2569
@@ -149,21 +155,6 @@ export interface ComplaintPrivateContact {
 
 export interface ComplaintPrivateAttachment {
   images: ImageAsset[];
-}
-
-export interface BudgetItemEntry {
-  activity: string;
-  date: string;
-  requested: number;
-  approved: number;
-  spent: number;
-}
-
-export interface BudgetYear {
-  id?: string; // yearTH, e.g. 2569
-  yearTH: string;
-  totalBudget: number;
-  items: BudgetItemEntry[];
 }
 
 export type AdminRole = 'super_admin' | 'admin' | 'editor';
@@ -211,6 +202,12 @@ export interface SiteContactInfo {
   facebookUrl?: string;
 }
 
+export interface ComplaintStatsSummary {
+  total: number;
+  inProgress: number;
+  resolved: number;
+}
+
 export interface SiteSettings {
   academicYearTH?: string;
   presidentHeadline?: string;
@@ -219,6 +216,7 @@ export interface SiteSettings {
   links: ServiceLink[];
   contactInfo?: SiteContactInfo;
   totalVisits: number;
+  complaintStats?: ComplaintStatsSummary;
   statsOverride?: {
     complaintsCount?: number;
     eventsCount?: number;

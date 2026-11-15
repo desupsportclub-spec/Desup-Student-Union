@@ -17,6 +17,7 @@ import {
   saveComplaintToLocalHistory,
   saveRecoveryLookup,
 } from '../lib/complaintTracking';
+import { incrementPublicComplaintStats } from '../lib/complaintStatsSync';
 import { Link } from 'react-router-dom';
 import { SuccessCheck } from '../components/SuccessCheck';
 import { useSiteSettings } from '../context/SiteSettingsContext';
@@ -238,6 +239,9 @@ export const Complaint: React.FC = () => {
           saveRecoveryLookup(recoveryKeyword, recoveryPin, trackingCode)
         );
       }
+
+      // Increment public homepage summary counters
+      followUpTasks.push(incrementPublicComplaintStats());
 
       await Promise.all(followUpTasks);
 

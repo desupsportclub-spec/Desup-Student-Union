@@ -181,7 +181,7 @@ export const AdminNews: React.FC = () => {
   const handleOpenEdit = (item: NewsItem) => {
     setEditingItem(item);
     setTitle(item.title);
-    setCategory(item.category);
+    setCategory(item.category === 'order' ? 'regulation' : item.category);
     setExcerpt(item.excerpt || '');
     setCoverImage(item.coverImage || (item.coverUrl ? { url: item.coverUrl, alt: item.title } : { url: '', alt: '' }));
     setVideoUrl(item.videoUrl || '');
@@ -533,8 +533,7 @@ export const AdminNews: React.FC = () => {
                   >
                     <option value="pr">ข่าวประชาสัมพันธ์</option>
                     <option value="activity">ภาพข่าวกิจกรรม</option>
-                    <option value="regulation">ข้อบังคับและระเบียบ</option>
-                    <option value="order">คำสั่งและประกาศ</option>
+                    <option value="regulation">ข้อบังคับ ระเบียบ คำสั่งและประกาศ</option>
                     <option value="knowledge">สาระน่ารู้</option>
                     <option value="video">คลิปวิดีโอ</option>
                   </select>

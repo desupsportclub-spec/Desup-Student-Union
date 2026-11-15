@@ -76,9 +76,8 @@ export const Footer: React.FC = () => {
               <li><Link to="/about/emblem" className="hover:text-[#FAF7F0] transition-colors">ตราสัญลักษณ์</Link></li>
               <li><Link to="/about/authority" className="hover:text-[#FAF7F0] transition-colors">อำนาจหน้าที่</Link></li>
               <li><Link to="/about/board" className="hover:text-[#FAF7F0] transition-colors">คณะกรรมการ</Link></li>
-              <li><Link to="/about/advisors" className="hover:text-[#FAF7F0] transition-colors">ครูที่ปรึกษา</Link></li>
+              <li><Link to="/about/advisors" className="hover:text-[#FAF7F0] transition-colors">คณะกรรมการที่ปรึกษา</Link></li>
               <li><Link to="/about/hall" className="hover:text-[#FAF7F0] transition-colors">ทำเนียบนายกองค์การนักเรียน</Link></li>
-              <li><Link to="/transparency" className="hover:text-[#FAF7F0] transition-colors">ความโปร่งใส</Link></li>
             </ul>
           </div>
 

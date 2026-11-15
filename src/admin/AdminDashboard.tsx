@@ -11,6 +11,7 @@ import { ComplaintItem } from '../types';
 import { formatNumber, formatThaiDate } from '../lib/format';
 import { ComplaintStatusBadge } from '../components/common/StatusBadge';
 import { useAdminAuth } from './AdminAuthContext';
+import { computeComplaintStats, syncComplaintStatsToSettings } from '../lib/complaintStatsSync';
 
 export const AdminDashboard: React.FC = () => {
   const { role: _role } = useAdminAuth();
@@ -32,6 +33,7 @@ export const AdminDashboard: React.FC = () => {
         });
         compList.sort((a, b) => (b.createdAt || '').localeCompare(a.createdAt || ''));
         setComplaints(compList);
+        void syncComplaintStatsToSettings(computeComplaintStats(compList));
 
         // News count
         const newsSnap = await getDocs(collection(db, 'news'));

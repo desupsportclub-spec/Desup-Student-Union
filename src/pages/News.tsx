@@ -17,15 +17,20 @@ const CATEGORIES: { id: string; label: string; en: string }[] = [
   { id: 'all', label: 'ทั้งหมด', en: 'ALL' },
   { id: 'pr', label: 'ข่าวประชาสัมพันธ์', en: 'PR' },
   { id: 'activity', label: 'ภาพข่าวกิจกรรม', en: 'ACTIVITIES' },
-  { id: 'regulation', label: 'ข้อบังคับและระเบียบ', en: 'REGULATIONS' },
-  { id: 'order', label: 'คำสั่งและประกาศ', en: 'ORDERS' },
+  { id: 'regulation', label: 'ข้อบังคับ ระเบียบ คำสั่งและประกาศ', en: 'REGULATIONS & ANNOUNCEMENTS' },
   { id: 'knowledge', label: 'สาระน่ารู้', en: 'KNOWLEDGE' },
   { id: 'video', label: 'คลิปวิดีโอ', en: 'VIDEOS' },
 ];
 
+function normalizeNewsFilterCategory(cat?: string): string {
+  if (!cat) return 'all';
+  if (cat === 'order' || cat === 'regulation') return 'regulation';
+  return cat;
+}
+
 export const News: React.FC = () => {
   const { category: urlCategory } = useParams<{ category?: string }>();
-  const [selectedCat, setSelectedCat] = useState<string>(urlCategory || 'all');
+  const [selectedCat, setSelectedCat] = useState<string>(normalizeNewsFilterCategory(urlCategory));
   const [searchTerm, setSearchTerm] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
 
@@ -36,7 +41,7 @@ export const News: React.FC = () => {
 
   // Sync with URL param if changes and reset pagination count
   useEffect(() => {
-    setSelectedCat(urlCategory || 'all');
+    setSelectedCat(normalizeNewsFilterCategory(urlCategory));
     setDisplayCount(9);
   }, [urlCategory]);
 
@@ -73,7 +78,13 @@ export const News: React.FC = () => {
   const filteredNews = useMemo(() => {
     const term = debouncedSearch.trim().toLowerCase();
     return allNews.filter((item) => {
-      if (selectedCat !== 'all' && item.category !== selectedCat) return false;
+      if (selectedCat !== 'all') {
+        if (selectedCat === 'regulation') {
+          if (item.category !== 'regulation' && item.category !== 'order') return false;
+        } else if (item.category !== selectedCat) {
+          return false;
+        }
+      }
       if (!term) return true;
       return (
         item.title.toLowerCase().includes(term) ||

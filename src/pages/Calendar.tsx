@@ -16,21 +16,11 @@ import {
 import { SectionEyebrow } from '../components/common/Ornament';
 import { getCachedEventsSync, loadPublishedEvents } from '../lib/publicDataService';
 
-const EVENT_TYPES: { id: string; label: string; color: string }[] = [
-  { id: 'all', label: 'ทั้งหมด', color: 'bg-[#B8923A]' },
-  { id: 'sport', label: 'กีฬา', color: 'bg-emerald-600' },
-  { id: 'academic', label: 'วิชาการ', color: 'bg-blue-600' },
-  { id: 'art', label: 'ศิลปวัฒนธรรม', color: 'bg-purple-600' },
-  { id: 'volunteer', label: 'จิตอาสา', color: 'bg-amber-600' },
-  { id: 'meeting', label: 'การประชุม', color: 'bg-rose-600' },
-];
-
 export const CalendarPage: React.FC = () => {
   const initialEvents = getCachedEventsSync() || [];
   const todayStr = getLocalTodayDateKey();
 
   const [events, setEvents] = useState<EventItem[]>(initialEvents);
-  const [selectedType, setSelectedType] = useState<string>('all');
   const [currentDate, setCurrentDate] = useState<Date>(new Date());
   const [selectedDayEvents, setSelectedDayEvents] = useState<EventItem[]>(() =>
     initialEvents.filter((e) => isEventOnDateKey(e, todayStr))
@@ -53,11 +43,6 @@ export const CalendarPage: React.FC = () => {
     };
   }, [todayStr]);
 
-  const filteredEvents = events.filter((e) => {
-    if (selectedType === 'all') return true;
-    return e.type === selectedType;
-  });
-
   // Calendar Math
   const year = currentDate.getFullYear();
   const month = currentDate.getMonth();
@@ -74,12 +59,12 @@ export const CalendarPage: React.FC = () => {
 
   const thaiDateParts = getThaiDateParts(currentDate);
 
-  const activeOrUpcomingEvents = filteredEvents.filter((e) => isEventActiveOrUpcoming(e));
+  const activeOrUpcomingEvents = events.filter((e) => isEventActiveOrUpcoming(e));
 
   // Check events for a given day
   const getEventsForDay = (dayNum: number): EventItem[] => {
     const dayStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(dayNum).padStart(2, '0')}`;
-    return filteredEvents.filter((e) => isEventOnDateKey(e, dayStr));
+    return events.filter((e) => isEventOnDateKey(e, dayStr));
   };
 
   const handleSelectDay = (dayNum: number) => {
@@ -131,33 +116,14 @@ export const CalendarPage: React.FC = () => {
   return (
     <div className="max-w-[1240px] mx-auto px-4 sm:px-6 md:px-12 py-6 sm:py-10 space-y-6 sm:space-y-10">
       {/* Page Header */}
-      <div className="border-b border-[#B8923A]/30 pb-6 flex flex-col md:flex-row md:items-end justify-between gap-4">
-        <div>
-          <SectionEyebrow enText="CALENDAR" thText="ปฏิทินกิจกรรม" />
-          <h1 className="font-serif text-3xl md:text-4xl font-semibold text-[#1B1226] mt-2">
-            กำหนดการและกิจกรรมนักเรียน
-          </h1>
-          <p className="text-xs md:text-sm text-[#1B1226]/70 mt-1">
-            ติดตามตารางกิจกรรมวิชาการ กีฬา ศิลปวัฒนธรรม และวันสำคัญ
-          </p>
-        </div>
-
-        {/* Filter chips */}
-        <div className="flex flex-wrap items-center gap-2">
-          {EVENT_TYPES.map((t) => (
-            <button
-              key={t.id}
-              onClick={() => setSelectedType(t.id)}
-              className={`px-3 py-1 text-xs rounded-full border transition-colors ${
-                selectedType === t.id
-                  ? 'bg-[#4B1F7A] text-[#FAF7F0] border-[#4B1F7A]'
-                  : 'bg-white/80 text-[#1B1226]/70 border-[#4B1F7A]/20 hover:border-[#B8923A]'
-              }`}
-            >
-              {t.label}
-            </button>
-          ))}
-        </div>
+      <div className="border-b border-[#B8923A]/30 pb-6">
+        <SectionEyebrow enText="CALENDAR" thText="ปฏิทินกิจกรรม" />
+        <h1 className="font-serif text-3xl md:text-4xl font-semibold text-[#1B1226] mt-2">
+          กำหนดการและกิจกรรมนักเรียน
+        </h1>
+        <p className="text-xs md:text-sm text-[#1B1226]/70 mt-1">
+          ติดตามตารางกิจกรรม โครงการ และวันสำคัญขององค์การนักเรียน
+        </p>
       </div>
 
       {/* Desktop Split View: Month Grid (Left 8 cols) + Selected Day Panel (Right 4 cols) */}
@@ -282,9 +248,6 @@ export const CalendarPage: React.FC = () => {
               <div className="space-y-4">
                 {selectedDayEvents.map((evt) => (
                   <div key={evt.id} className="p-4 bg-white border border-[#4B1F7A]/15 rounded-sm space-y-2">
-                    <span className="text-[10px] font-medium text-[#9C7A2B] uppercase">
-                      {evt.type === 'sport' ? 'กีฬา' : evt.type === 'academic' ? 'วิชาการ' : evt.type === 'art' ? 'ศิลปวัฒนธรรม' : evt.type === 'volunteer' ? 'จิตอาสา' : 'การประชุม'}
-                    </span>
                     <h4 className="font-serif text-sm font-semibold text-[#1B1226]">
                       {evt.title}
                     </h4>

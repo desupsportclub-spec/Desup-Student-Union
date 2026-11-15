@@ -3,6 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { AdvisorGroup, PersonItem } from '../types';
+
 export interface SiteConfig {
   name: string;
   shortName: string;
@@ -91,19 +93,68 @@ export const RELATED_SYSTEM_LINKS = [
 export const EMBLEM_DESCRIPTION = "ตราสัญลักษณ์องค์การนักเรียน โรงเรียนสาธิตมหาวิทยาลัยพะเยา มีลักษณะเป็นรูปสัตตภัณฑ์สีดำ โดดเด่นอยู่บนพื้นหลังรูปวงกลมสีเหลืองคล้ายดวงอาทิตย์ ภายในบริเวณส่วนฐานของสัตตภัณฑ์มีอักษรย่อ “มพ” สีม่วง และมีข้อความภาษาอังกฤษ \"STUDENT UNION\" สีขาวอยู่เหนืออักษรย่อ โอบล้อมรอบนอกด้วยขอบวงกลมสีดำที่บรรจุชื่อ \"Demonstration School . University of Phayao\" สีขาว ส่วนด้านล่างสุดมีชื่อภาษาไทย \"องค์การนักเรียน\" สีดำทาบอยู่บนพื้นแถบโค้งสีขาว";
 
 export const DOWNLOAD_CATEGORIES = [
-  { id: 'order', label: 'คำสั่ง' },
-  { id: 'announcement', label: 'ประกาศ' },
-  { id: 'regulation', label: 'ระเบียบและข้อบังคับ' },
-  { id: 'official_letter', label: 'หนังสือราชการ / บันทึกข้อความ' },
-  { id: 'meeting_report', label: 'รายงานการประชุม' },
-  { id: 'project_report', label: 'โครงการและรายงานผล' },
-  { id: 'finance', label: 'เอกสารการเงินและงบประมาณ' },
-  { id: 'form', label: 'แบบฟอร์มคำร้อง' },
-  { id: 'manual', label: 'คู่มือและแนวปฏิบัติ' },
-  { id: 'other', label: 'เอกสารอื่น ๆ' }
+  { id: 'student', label: 'สำหรับนักเรียน' },
+  { id: 'staff', label: 'สำหรับเจ้าหน้าที่' },
 ] as const;
 
+export function normalizeDownloadCategory(category: string): 'student' | 'staff' {
+  if (
+    category === 'staff' ||
+    category === 'order' ||
+    category === 'official_letter' ||
+    category === 'meeting_report' ||
+    category === 'project_report' ||
+    category === 'finance'
+  ) {
+    return 'staff';
+  }
+  return 'student';
+}
+
 export function getDownloadCategoryLabel(category: string): string {
-  const found = DOWNLOAD_CATEGORIES.find((c) => c.id === category);
-  return found ? found.label : 'เอกสารอื่น ๆ';
+  const normalized = normalizeDownloadCategory(category);
+  const found = DOWNLOAD_CATEGORIES.find((c) => c.id === normalized);
+  return found ? found.label : 'สำหรับนักเรียน';
+}
+
+export const ADVISOR_GROUPS: { id: AdvisorGroup; label: string; shortLabel: string }[] = [
+  {
+    id: 'executive',
+    label: 'คณะกรรมการฝ่ายอำนวยการ',
+    shortLabel: 'ฝ่ายอำนวยการ',
+  },
+  {
+    id: 'teacher',
+    label: 'คณะกรรมการที่ปรึกษาองค์การนักเรียน ฝ่าย อาจารย์ที่ปรึกษาองค์การนักเรียน',
+    shortLabel: 'ฝ่ายอาจารย์ที่ปรึกษาองค์การนักเรียน',
+  },
+  {
+    id: 'experienced_student',
+    label: 'คณะกรรมการที่ปรึกษาองค์การนักเรียน ฝ่าย นักเรียนผู้มีประสบการณ์',
+    shortLabel: 'ฝ่ายนักเรียนผู้มีประสบการณ์',
+  },
+];
+
+export function resolveAdvisorGroup(person: Pick<PersonItem, 'advisorGroup' | 'position'>): AdvisorGroup {
+  if (
+    person.advisorGroup === 'executive' ||
+    person.advisorGroup === 'teacher' ||
+    person.advisorGroup === 'experienced_student'
+  ) {
+    return person.advisorGroup;
+  }
+  const pos = (person.position || '').toLowerCase();
+  if (pos.includes('อำนวยการ') || pos.includes('ผู้อำนวยการ')) {
+    return 'executive';
+  }
+  if (pos.includes('นักเรียน') || pos.includes('ผู้มีประสบการณ์') || pos.includes('ศิษย์เก่า')) {
+    return 'experienced_student';
+  }
+  return 'teacher';
+}
+
+export function getAdvisorGroupLabel(group: AdvisorGroup, short = false): string {
+  const found = ADVISOR_GROUPS.find((g) => g.id === group);
+  if (!found) return ADVISOR_GROUPS[1].label;
+  return short ? found.shortLabel : found.label;
 }

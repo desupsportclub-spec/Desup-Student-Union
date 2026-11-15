@@ -49,8 +49,8 @@ export const NewsCategoryBadge: React.FC<{ category: NewsCategory; className?: s
   const map: Record<NewsCategory, string> = {
     pr: 'ข่าวประชาสัมพันธ์',
     activity: 'ภาพข่าวกิจกรรม',
-    regulation: 'ข้อบังคับ',
-    order: 'คำสั่งและประกาศ',
+    regulation: 'ข้อบังคับ ระเบียบ คำสั่งและประกาศ',
+    order: 'ข้อบังคับ ระเบียบ คำสั่งและประกาศ',
     knowledge: 'สาระน่ารู้',
     video: 'คลิปวิดีโอ'
   };

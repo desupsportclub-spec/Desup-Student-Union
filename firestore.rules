@@ -110,13 +110,36 @@ service cloud.firestore {
       allow write: if isAdmin();
     }
 
-    // Settings (Site config, ticker, contact info, visit counter)
+    // Settings (Site config, ticker, contact info, visit counter, complaint stats summary)
     match /settings/{docId} {
       allow read: if true;
       allow create, delete: if isAdmin();
       allow update: if isAdmin() || (
         request.resource.data.diff(resource.data).affectedKeys().hasOnly(['totalVisits']) &&
+        request.resource.data.totalVisits is int &&
         request.resource.data.totalVisits == resource.data.totalVisits + 1
+      ) || (
+        docId == 'site' &&
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['complaintStats']) &&
+        request.resource.data.complaintStats is map &&
+        request.resource.data.complaintStats.keys().hasAll(['total', 'inProgress', 'resolved']) &&
+        request.resource.data.complaintStats.keys().hasOnly(['total', 'inProgress', 'resolved']) &&
+        request.resource.data.complaintStats.total is int &&
+        request.resource.data.complaintStats.inProgress is int &&
+        request.resource.data.complaintStats.resolved is int &&
+        (
+          !('complaintStats' in resource.data)
+            ? (
+                request.resource.data.complaintStats.total == 1 &&
+                request.resource.data.complaintStats.inProgress == 1 &&
+                request.resource.data.complaintStats.resolved == 0
+              )
+            : (
+                request.resource.data.complaintStats.total == resource.data.complaintStats.total + 1 &&
+                request.resource.data.complaintStats.inProgress == resource.data.complaintStats.inProgress + 1 &&
+                request.resource.data.complaintStats.resolved == resource.data.complaintStats.resolved
+              )
+        )
       );
     }
 

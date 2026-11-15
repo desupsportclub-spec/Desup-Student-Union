@@ -7,7 +7,7 @@ import React, { createContext, useContext, useEffect, useState, useCallback } fr
 import { doc, getDoc, getDocFromCache, onSnapshot } from 'firebase/firestore';
 import { db, testConnection } from '../lib/firebase';
 import { RELATED_SYSTEM_LINKS, SITE_CONFIG } from '../config/site';
-import { ServiceLink, SiteContactInfo } from '../types';
+import { ComplaintStatsSummary, ServiceLink, SiteContactInfo } from '../types';
 
 export interface SiteSettingsContextValue {
   academicYearTH: string;
@@ -17,6 +17,7 @@ export interface SiteSettingsContextValue {
   links: ServiceLink[];
   contactInfo: Required<SiteContactInfo>;
   totalVisits: number;
+  complaintStats: ComplaintStatsSummary;
   loading: boolean;
   refreshSettings: () => Promise<void>;
 }
@@ -31,6 +32,12 @@ const DEFAULT_CONTACT: Required<SiteContactInfo> = {
   facebookUrl: SITE_CONFIG.contact.facebookUrl,
 };
 
+const DEFAULT_COMPLAINT_STATS: ComplaintStatsSummary = {
+  total: 0,
+  inProgress: 0,
+  resolved: 0,
+};
+
 const SiteSettingsContext = createContext<SiteSettingsContextValue>({
   academicYearTH: SITE_CONFIG.currentAcademicYearTH,
   presidentHeadline: DEFAULT_HEADLINE,
@@ -39,6 +46,7 @@ const SiteSettingsContext = createContext<SiteSettingsContextValue>({
   links: RELATED_SYSTEM_LINKS,
   contactInfo: DEFAULT_CONTACT,
   totalVisits: 0,
+  complaintStats: DEFAULT_COMPLAINT_STATS,
   loading: true,
   refreshSettings: async () => {},
 });
@@ -51,6 +59,7 @@ export const SiteSettingsProvider: React.FC<{ children: React.ReactNode }> = ({ 
   const [links, setLinks] = useState<ServiceLink[]>(RELATED_SYSTEM_LINKS);
   const [contactInfo, setContactInfo] = useState<Required<SiteContactInfo>>(DEFAULT_CONTACT);
   const [totalVisits, setTotalVisits] = useState<number>(0);
+  const [complaintStats, setComplaintStats] = useState<ComplaintStatsSummary>(DEFAULT_COMPLAINT_STATS);
   const [loading, setLoading] = useState<boolean>(true);
 
   const applyDocData = useCallback((data: Record<string, any> | undefined) => {
@@ -89,6 +98,14 @@ export const SiteSettingsProvider: React.FC<{ children: React.ReactNode }> = ({ 
     }
     if (typeof data.totalVisits === 'number') {
       setTotalVisits(data.totalVisits);
+    }
+    if (data.complaintStats && typeof data.complaintStats === 'object') {
+      const total = typeof data.complaintStats.total === 'number' ? data.complaintStats.total : 0;
+      const inProgress =
+        typeof data.complaintStats.inProgress === 'number' ? data.complaintStats.inProgress : 0;
+      const resolved =
+        typeof data.complaintStats.resolved === 'number' ? data.complaintStats.resolved : 0;
+      setComplaintStats({ total, inProgress, resolved });
     }
   }, []);
 
@@ -146,6 +163,7 @@ export const SiteSettingsProvider: React.FC<{ children: React.ReactNode }> = ({ 
         links,
         contactInfo,
         totalVisits,
+        complaintStats,
         loading,
         refreshSettings,
       }}

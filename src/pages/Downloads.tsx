@@ -10,11 +10,15 @@ import { DownloadItem } from '../types';
 import { formatThaiDate, formatNumber } from '../lib/format';
 import { SectionEyebrow, CornerBracket } from '../components/common/Ornament';
 import { resolveDownloadUrl } from '../lib/downloadStorage';
-import { DOWNLOAD_CATEGORIES, getDownloadCategoryLabel } from '../config/site';
+import {
+  DOWNLOAD_CATEGORIES,
+  getDownloadCategoryLabel,
+  normalizeDownloadCategory,
+} from '../config/site';
 import { getCachedDownloadsSync, loadDownloads } from '../lib/publicDataService';
 
 const CATEGORIES: { id: string; label: string }[] = [
-  { id: 'all', label: 'เอกสารทั้งหมด' },
+  { id: 'all', label: 'ทั้งหมด' },
   ...DOWNLOAD_CATEGORIES
 ];
 
@@ -163,7 +167,7 @@ export const Downloads: React.FC = () => {
   };
 
   const filtered = downloads.filter((d) => {
-    if (selectedCat !== 'all' && d.category !== selectedCat) return false;
+    if (selectedCat !== 'all' && normalizeDownloadCategory(d.category) !== selectedCat) return false;
     if (search && !d.title.toLowerCase().includes(search.toLowerCase())) return false;
     return true;
   });
@@ -268,7 +272,7 @@ export const Downloads: React.FC = () => {
               <thead className="bg-[#EDE6F5]/50 border-b border-[#4B1F7A]/15 text-[#9C7A2B] uppercase tracking-wider font-medium">
                 <tr>
                   <th className="py-3 px-4">ชื่อเอกสาร</th>
-                  <th className="py-3 px-4">หมวดหมู่</th>
+                  <th className="py-3 px-4">กลุ่มผู้ใช้งาน</th>
                   <th className="py-3 px-4">ชนิดไฟล์</th>
                   <th className="py-3 px-4">วันที่เผยแพร่</th>
                   <th className="py-3 px-4 text-center">เปิดดู / พิมพ์ / ดาวน์โหลด</th>

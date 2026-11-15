@@ -6,7 +6,7 @@
 import React, { useState, useEffect } from 'react';
 import { collection, getDocs, doc, setDoc, deleteDoc } from 'firebase/firestore';
 import { db } from '../lib/firebase';
-import { EventItem, EventType } from '../types';
+import { EventItem } from '../types';
 import {
   formatThaiDate,
   getEventDateKey,
@@ -26,7 +26,6 @@ export const AdminEvents: React.FC = () => {
   // Form Fields
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
-  const [type, setType] = useState<EventType>('academic');
   const [location, setLocation] = useState('');
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
@@ -58,7 +57,6 @@ export const AdminEvents: React.FC = () => {
     setEditingItem(null);
     setTitle('');
     setDescription('');
-    setType('academic');
     setLocation('โรงเรียนสาธิต มพ.');
     setStartDate(getLocalTodayDateKey());
     setEndDate('');
@@ -70,7 +68,6 @@ export const AdminEvents: React.FC = () => {
     setEditingItem(item);
     setTitle(item.title);
     setDescription(item.description || '');
-    setType(item.type);
     setLocation(item.location || '');
     setStartDate(getEventDateKey(item.startAt));
     setEndDate(item.endAt ? getEventDateKey(item.endAt) : '');
@@ -89,7 +86,7 @@ export const AdminEvents: React.FC = () => {
       const eventDoc: EventItem = {
         title: title.trim(),
         description: description.trim(),
-        type,
+        type: editingItem?.type || 'academic',
         location: location.trim(),
         startAt: new Date(startDate).toISOString(),
         ...(hasValidEnd ? { endAt: new Date(endDate).toISOString() } : {}),
@@ -153,7 +150,6 @@ export const AdminEvents: React.FC = () => {
                 <tr>
                   <th className="py-3 px-4">วันที่</th>
                   <th className="py-3 px-4">ชื่อกิจกรรม</th>
-                  <th className="py-3 px-4">หมวดหมู่</th>
                   <th className="py-3 px-4">สถานที่</th>
                   <th className="py-3 px-4">สถานะ</th>
                   <th className="py-3 px-4 text-center">การจัดการ</th>
@@ -190,9 +186,6 @@ export const AdminEvents: React.FC = () => {
                           </span>
                         )}
                       </div>
-                    </td>
-                    <td className="py-3 px-4 text-[#1B1226]/70">
-                      {item.type === 'sport' ? 'กีฬา' : item.type === 'academic' ? 'วิชาการ' : item.type === 'art' ? 'ศิลปวัฒนธรรม' : item.type === 'volunteer' ? 'จิตอาสา' : 'การประชุม'}
                     </td>
                     <td className="py-3 px-4 text-[#1B1226]/60">
                       {item.location}
@@ -255,21 +248,6 @@ export const AdminEvents: React.FC = () => {
                   className="w-full input-underline"
                   required
                 />
-              </div>
-
-              <div>
-                <label className="block font-semibold text-[#2A1245] mb-1">ประเภท *</label>
-                <select
-                  value={type}
-                  onChange={(e) => setType(e.target.value as EventType)}
-                  className="w-full border p-2 rounded-sm"
-                >
-                  <option value="academic">วิชาการ</option>
-                  <option value="sport">กีฬา</option>
-                  <option value="art">ศิลปวัฒนธรรม</option>
-                  <option value="volunteer">จิตอาสา</option>
-                  <option value="meeting">การประชุม</option>
-                </select>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">

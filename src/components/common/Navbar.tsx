@@ -155,12 +155,8 @@ export const Navbar: React.FC<NavbarProps> = ({ tickerItems = [] }) => {
                       <div className="text-[11px] text-[#1B1226]/60">ภาพบรรยากาศและบันทึกกิจกรรมนักเรียน</div>
                     </Link>
                     <Link to="/news/regulation" className="block px-3 py-2 text-xs hover:bg-[#EDE6F5] rounded transition-colors">
-                      <div className="font-medium text-[#2A1245]">ข้อบังคับและระเบียบ</div>
-                      <div className="text-[11px] text-[#1B1226]/60">ธรรมนูญและกฎระเบียบที่เกี่ยวข้อง</div>
-                    </Link>
-                    <Link to="/news/order" className="block px-3 py-2 text-xs hover:bg-[#EDE6F5] rounded transition-colors">
-                      <div className="font-medium text-[#2A1245]">คำสั่งและประกาศ</div>
-                      <div className="text-[11px] text-[#1B1226]/60">คำสั่งแต่งตั้งและประกาศทางการ</div>
+                      <div className="font-medium text-[#2A1245]">ข้อบังคับ ระเบียบ คำสั่งและประกาศ</div>
+                      <div className="text-[11px] text-[#1B1226]/60">ธรรมนูญ กฎระเบียบ คำสั่ง และประกาศทางการ</div>
                     </Link>
                     <Link to="/news/knowledge" className="block px-3 py-2 text-xs hover:bg-[#EDE6F5] rounded transition-colors">
                       <div className="font-medium text-[#2A1245]">สาระน่ารู้</div>
@@ -222,16 +218,16 @@ export const Navbar: React.FC<NavbarProps> = ({ tickerItems = [] }) => {
                       ข้อมูลองค์การ
                     </div>
                     <Link to="/about/emblem" className="block px-3 py-1.5 text-xs hover:bg-[#EDE6F5] rounded transition-colors text-[#2A1245]">
-                      ตราสัญลักษณ์และความหมาย
+                      ตราสัญลักษณ์
                     </Link>
                     <Link to="/about/authority" className="block px-3 py-1.5 text-xs hover:bg-[#EDE6F5] rounded transition-colors text-[#2A1245]">
-                      อำนาจหน้าที่และธรรมนูญ
+                      อำนาจหน้าที่
                     </Link>
                     <Link to="/about/board" className="block px-3 py-1.5 text-xs hover:bg-[#EDE6F5] rounded transition-colors text-[#2A1245]">
                       คณะกรรมการองค์การนักเรียน
                     </Link>
                     <Link to="/about/advisors" className="block px-3 py-1.5 text-xs hover:bg-[#EDE6F5] rounded transition-colors text-[#2A1245]">
-                      ครูที่ปรึกษาองค์การ
+                      คณะกรรมการที่ปรึกษา
                     </Link>
                     <Link to="/about/hall" className="block px-3 py-1.5 text-xs hover:bg-[#EDE6F5] rounded transition-colors text-[#2A1245]">
                       ทำเนียบนายกองค์การนักเรียน
@@ -240,15 +236,6 @@ export const Navbar: React.FC<NavbarProps> = ({ tickerItems = [] }) => {
                 )}
               </AnimatePresence>
             </div>
-
-            <Link
-              to="/transparency"
-              className={`hover:text-[#4B1F7A] transition-colors whitespace-nowrap shrink-0 ${
-                location.pathname === '/transparency' ? 'text-[#4B1F7A] font-semibold' : ''
-              }`}
-            >
-              ความโปร่งใส
-            </Link>
 
             <Link
               to="/contact"
@@ -425,8 +412,7 @@ export const Navbar: React.FC<NavbarProps> = ({ tickerItems = [] }) => {
                       {[
                         { to: '/news/pr', label: 'ข่าวประชาสัมพันธ์' },
                         { to: '/news/activity', label: 'ภาพข่าวกิจกรรม' },
-                        { to: '/news/regulation', label: 'ข้อบังคับและระเบียบ' },
-                        { to: '/news/order', label: 'คำสั่งและประกาศ' },
+                        { to: '/news/regulation', label: 'ข้อบังคับ ระเบียบ คำสั่งและประกาศ' },
                         { to: '/news/knowledge', label: 'สาระน่ารู้' },
                         { to: '/news/video', label: 'คลิปวิดีโอ' },
                       ].map((sub) => (
@@ -507,10 +493,10 @@ export const Navbar: React.FC<NavbarProps> = ({ tickerItems = [] }) => {
                   {mobileSubmenu === 'about' && (
                     <div className="ml-3 pl-3 mt-0.5 mb-1.5 border-l border-[#B8923A]/30 space-y-0.5">
                       {[
-                        { to: '/about/emblem', label: 'ตราสัญลักษณ์และความหมาย' },
-                        { to: '/about/authority', label: 'อำนาจหน้าที่และธรรมนูญ' },
+                        { to: '/about/emblem', label: 'ตราสัญลักษณ์' },
+                        { to: '/about/authority', label: 'อำนาจหน้าที่' },
                         { to: '/about/board', label: 'คณะกรรมการองค์การนักเรียน' },
-                        { to: '/about/advisors', label: 'ครูที่ปรึกษาองค์การ' },
+                        { to: '/about/advisors', label: 'คณะกรรมการที่ปรึกษา' },
                         { to: '/about/hall', label: 'ทำเนียบนายกองค์การนักเรียน' },
                       ].map((sub) => (
                         <Link
@@ -529,18 +515,6 @@ export const Navbar: React.FC<NavbarProps> = ({ tickerItems = [] }) => {
                     </div>
                   )}
                 </div>
-
-                <Link
-                  to="/transparency"
-                  onClick={() => setMobileMenuOpen(false)}
-                  className={`flex items-center justify-between min-h-[42px] px-3 py-2 rounded-sm text-[15px] font-medium whitespace-nowrap transition-colors ${
-                    isActivePath('/transparency')
-                      ? 'bg-[#4B1F7A]/80 text-[#D9B867]'
-                      : 'text-[#FAF7F0]/90 hover:bg-white/5 hover:text-[#FAF7F0]'
-                  }`}
-                >
-                  <span>ความโปร่งใสและงบประมาณ</span>
-                </Link>
 
                 <Link
                   to="/track"

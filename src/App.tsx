@@ -22,7 +22,6 @@ const AboutAuthority = lazy(() => import('./pages/about/AboutAuthority').then(m 
 const AboutBoard = lazy(() => import('./pages/about/AboutBoard').then(m => ({ default: m.AboutBoard })));
 const AboutAdvisors = lazy(() => import('./pages/about/AboutAdvisors').then(m => ({ default: m.AboutAdvisors })));
 const AboutHall = lazy(() => import('./pages/about/AboutHall').then(m => ({ default: m.AboutHall })));
-const Transparency = lazy(() => import('./pages/Transparency').then(m => ({ default: m.Transparency })));
 const Complaint = lazy(() => import('./pages/Complaint').then(m => ({ default: m.Complaint })));
 const TrackComplaint = lazy(() => import('./pages/TrackComplaint').then(m => ({ default: m.TrackComplaint })));
 const Contact = lazy(() => import('./pages/Contact').then(m => ({ default: m.Contact })));
@@ -36,7 +35,6 @@ const AdminNews = lazy(() => import('./admin/AdminNews').then(m => ({ default: m
 const AdminEvents = lazy(() => import('./admin/AdminEvents').then(m => ({ default: m.AdminEvents })));
 const AdminDownloads = lazy(() => import('./admin/AdminDownloads').then(m => ({ default: m.AdminDownloads })));
 const AdminPeople = lazy(() => import('./admin/AdminPeople').then(m => ({ default: m.AdminPeople })));
-const AdminBudgets = lazy(() => import('./admin/AdminBudgets').then(m => ({ default: m.AdminBudgets })));
 const AdminComplaints = lazy(() => import('./admin/AdminComplaints').then(m => ({ default: m.AdminComplaints })));
 const AdminUsers = lazy(() => import('./admin/AdminUsers').then(m => ({ default: m.AdminUsers })));
 const AdminSettings = lazy(() => import('./admin/AdminSettings').then(m => ({ default: m.AdminSettings })));
@@ -144,14 +142,6 @@ const router = createBrowserRouter([
         ),
       },
       {
-        path: 'transparency',
-        element: (
-          <Suspense fallback={<PageFallback />}>
-            <Transparency />
-          </Suspense>
-        ),
-      },
-      {
         path: 'complaint',
         element: (
           <Suspense fallback={<PageFallback />}>
@@ -240,14 +230,6 @@ const router = createBrowserRouter([
         element: (
           <Suspense fallback={<PageFallback />}>
             <AdminPeople />
-          </Suspense>
-        ),
-      },
-      {
-        path: 'budgets',
-        element: (
-          <Suspense fallback={<PageFallback />}>
-            <AdminBudgets />
           </Suspense>
         ),
       },
