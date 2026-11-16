@@ -352,7 +352,7 @@ export const Complaint: React.FC = () => {
       <div className="border-b border-[#B8923A]/30 pb-5 sm:pb-6 text-center max-w-xl mx-auto space-y-2">
         <SectionEyebrow enText="STUDENT VOICE" thText="รับเรื่องร้องเรียนและข้อเสนอแนะ" />
         <h1 className="font-serif text-3xl md:text-4xl font-semibold text-[#1B1226]">
-          ส่งเสียงถึงองค์การนักเรียน
+          DeSUP CARE
         </h1>
         <p className="text-xs md:text-sm text-[#1B1226]/70">
           ช่องทางสื่อสารโดยตรง ปลอดภัย สามารถส่งแบบไม่ระบุตัวตนได้

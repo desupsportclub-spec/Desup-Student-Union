@@ -50,7 +50,7 @@ export const SITE_CONFIG: SiteConfig = {
   contact: {
     address: "โรงเรียนสาธิตมหาวิทยาลัยพะเยา 19 หมู่ 2 ตำบลแม่กา อำเภอเมืองพะเยา จังหวัดพะเยา 56000",
     phone: "054-466-666",
-    email: "Satit.su@up.ac.th",
+    email: "satit.su@up.ac.th",
     facebook: "องค์การนักเรียน โรงเรียนสาธิตมหาวิทยาลัยพะเยา",
     facebookUrl: "https://www.facebook.com/profile.php?id=61591508559552",
     instagram: "@satitup.council",

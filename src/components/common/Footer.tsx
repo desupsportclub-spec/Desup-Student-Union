@@ -48,29 +48,27 @@ export const Footer: React.FC = () => {
 
             <div className="pt-2 text-xs text-[#FAF7F0]/80 space-y-1.5">
               <p><span className="text-[#D9B867]">ที่อยู่:</span> {contactInfo.address}</p>
-              <p><span className="text-[#D9B867]">โทรศัพท์:</span> {contactInfo.phone}</p>
               <p><span className="text-[#D9B867]">อีเมล:</span> {contactInfo.email}</p>
             </div>
           </div>
 
-          {/* Quick Links Column 1: ข่าวสารและกิจกรรม (2 columns) */}
+          {/* Quick Links Column 1: ข่าวสาร (2 columns) */}
           <div className="md:col-span-2 space-y-3">
             <h4 className="text-xs uppercase tracking-[0.2em] font-semibold text-[#D9B867]">
-              ข่าวและกิจกรรม
+              ข่าวสาร
             </h4>
             <ul className="text-xs space-y-2 text-[#FAF7F0]/75">
               <li><Link to="/news/pr" className="hover:text-[#FAF7F0] transition-colors">ข่าวประชาสัมพันธ์</Link></li>
               <li><Link to="/news/activity" className="hover:text-[#FAF7F0] transition-colors">ภาพข่าวกิจกรรม</Link></li>
               <li><Link to="/calendar" className="hover:text-[#FAF7F0] transition-colors">ปฏิทินกิจกรรม</Link></li>
-              <li><Link to="/downloads" className="hover:text-[#FAF7F0] transition-colors">ดาวน์โหลดเอกสาร</Link></li>
               <li><Link to="/news/video" className="hover:text-[#FAF7F0] transition-colors">คลิปวิดีโอ</Link></li>
             </ul>
           </div>
 
-          {/* Quick Links Column 2: เกี่ยวกับองค์การ (2 columns) */}
+          {/* Quick Links Column 2: เกี่ยวกับเรา (2 columns) */}
           <div className="md:col-span-2 space-y-3">
             <h4 className="text-xs uppercase tracking-[0.2em] font-semibold text-[#D9B867]">
-              เกี่ยวกับองค์การ
+              เกี่ยวกับเรา
             </h4>
             <ul className="text-xs space-y-2 text-[#FAF7F0]/75">
               <li><Link to="/about/emblem" className="hover:text-[#FAF7F0] transition-colors">ตราสัญลักษณ์</Link></li>
@@ -137,7 +135,8 @@ export const Footer: React.FC = () => {
               <ul className="text-xs space-y-2 text-[#FAF7F0]/75">
                 <li><Link to="/complaint" className="hover:text-[#FAF7F0] transition-colors">ส่งเรื่องร้องเรียน / ข้อเสนอแนะ</Link></li>
                 <li><Link to="/track" className="hover:text-[#FAF7F0] transition-colors">ติดตามสถานะเรื่องร้องเรียน</Link></li>
-                <li><Link to="/contact" className="hover:text-[#FAF7F0] transition-colors">แผนที่และการติดต่อ</Link></li>
+                <li><Link to="/downloads" className="hover:text-[#FAF7F0] transition-colors">ดาวน์โหลดเอกสาร</Link></li>
+                <li><Link to="/contact" className="hover:text-[#FAF7F0] transition-colors">ติดต่อเรา</Link></li>
               </ul>
 
               <div className="pt-2 space-y-1.5">

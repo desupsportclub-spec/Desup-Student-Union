@@ -143,12 +143,8 @@ export const Navbar: React.FC<NavbarProps> = ({ tickerItems = [] }) => {
                     transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
                     className="absolute left-0 top-full mt-2 w-72 bg-[#FAF7F0] border-2 border-[#B8923A] p-3 shadow-2xl rounded-sm z-50"
                   >
-                    <div className="text-[10px] uppercase tracking-widest text-[#9C7A2B] font-semibold px-3 py-1 border-b border-[#4B1F7A]/10 mb-1">
-                      หมวดหมู่ข่าวสาร
-                    </div>
                     <Link to="/news/pr" className="block px-3 py-2 text-xs hover:bg-[#EDE6F5] rounded transition-colors">
                       <div className="font-medium text-[#2A1245]">ข่าวประชาสัมพันธ์</div>
-                      <div className="text-[11px] text-[#1B1226]/60">ประกาศทั่วไปและข่าวสารจากองค์การ</div>
                     </Link>
                     <Link to="/news/activity" className="block px-3 py-2 text-xs hover:bg-[#EDE6F5] rounded transition-colors">
                       <div className="font-medium text-[#2A1245]">ภาพข่าวกิจกรรม</div>
@@ -214,9 +210,6 @@ export const Navbar: React.FC<NavbarProps> = ({ tickerItems = [] }) => {
                     transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
                     className="absolute left-0 top-full mt-2 w-64 bg-[#FAF7F0] border-2 border-[#B8923A] p-3 shadow-2xl rounded-sm z-50"
                   >
-                    <div className="text-[10px] uppercase tracking-widest text-[#9C7A2B] font-semibold px-3 py-1 border-b border-[#4B1F7A]/10 mb-1">
-                      ข้อมูลองค์การ
-                    </div>
                     <Link to="/about/emblem" className="block px-3 py-1.5 text-xs hover:bg-[#EDE6F5] rounded transition-colors text-[#2A1245]">
                       ตราสัญลักษณ์
                     </Link>

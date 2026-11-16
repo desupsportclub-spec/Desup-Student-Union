@@ -10,22 +10,11 @@ import { DownloadItem } from '../types';
 import { formatThaiDate, formatNumber } from '../lib/format';
 import { SectionEyebrow, CornerBracket } from '../components/common/Ornament';
 import { resolveDownloadUrl } from '../lib/downloadStorage';
-import {
-  DOWNLOAD_CATEGORIES,
-  getDownloadCategoryLabel,
-  normalizeDownloadCategory,
-} from '../config/site';
 import { getCachedDownloadsSync, loadDownloads } from '../lib/publicDataService';
-
-const CATEGORIES: { id: string; label: string }[] = [
-  { id: 'all', label: 'ทั้งหมด' },
-  ...DOWNLOAD_CATEGORIES
-];
 
 export const Downloads: React.FC = () => {
   const initialDownloads = getCachedDownloadsSync();
   const [downloads, setDownloads] = useState<DownloadItem[]>(initialDownloads || []);
-  const [selectedCat, setSelectedCat] = useState<string>('all');
   const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(!initialDownloads);
 
@@ -167,7 +156,6 @@ export const Downloads: React.FC = () => {
   };
 
   const filtered = downloads.filter((d) => {
-    if (selectedCat !== 'all' && normalizeDownloadCategory(d.category) !== selectedCat) return false;
     if (search && !d.title.toLowerCase().includes(search.toLowerCase())) return false;
     return true;
   });
@@ -177,7 +165,7 @@ export const Downloads: React.FC = () => {
       {/* Header */}
       <div className="border-b border-[#B8923A]/30 pb-5 sm:pb-6 flex flex-col md:flex-row md:items-end justify-between gap-4">
         <div>
-          <SectionEyebrow enText="DOCUMENTS & FORMS" thText="ดาวน์โหลดเอกสารทางการ" />
+          <SectionEyebrow enText="Document" thText="ดาวน์โหลดเอกสาร" />
           <h1 className="font-serif text-3xl md:text-4xl font-semibold text-[#1B1226] mt-2">
             ศูนย์รวมเอกสารและแบบฟอร์ม
           </h1>
@@ -196,26 +184,6 @@ export const Downloads: React.FC = () => {
             className="w-full text-xs input-underline"
           />
         </div>
-      </div>
-
-      {/* Category Tabs */}
-      <div className="flex flex-wrap items-center gap-x-6 gap-y-3 pb-2 border-b border-[#4B1F7A]/10 text-xs font-medium">
-        {CATEGORIES.map((cat) => (
-          <button
-            key={cat.id}
-            onClick={() => setSelectedCat(cat.id)}
-            className={`pb-2 whitespace-nowrap transition-colors relative ${
-              selectedCat === cat.id
-                ? 'text-[#4B1F7A] font-semibold'
-                : 'text-[#1B1226]/60 hover:text-[#2A1245]'
-            }`}
-          >
-            <span>{cat.label}</span>
-            {selectedCat === cat.id && (
-              <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-[#B8923A]" />
-            )}
-          </button>
-        ))}
       </div>
 
       {/* Editorial Table */}
@@ -240,8 +208,6 @@ export const Downloads: React.FC = () => {
                   </span>
                 </div>
                 <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-[#1B1226]/65">
-                  <span>{getDownloadCategoryLabel(item.category)}</span>
-                  <span aria-hidden="true">·</span>
                   <span>{formatThaiDate(item.createdAt, true)}</span>
                 </div>
                 <div className="grid grid-cols-2 gap-2 pt-1">
@@ -272,7 +238,6 @@ export const Downloads: React.FC = () => {
               <thead className="bg-[#EDE6F5]/50 border-b border-[#4B1F7A]/15 text-[#9C7A2B] uppercase tracking-wider font-medium">
                 <tr>
                   <th className="py-3 px-4">ชื่อเอกสาร</th>
-                  <th className="py-3 px-4">กลุ่มผู้ใช้งาน</th>
                   <th className="py-3 px-4">ชนิดไฟล์</th>
                   <th className="py-3 px-4">วันที่เผยแพร่</th>
                   <th className="py-3 px-4 text-center">เปิดดู / พิมพ์ / ดาวน์โหลด</th>
@@ -283,9 +248,6 @@ export const Downloads: React.FC = () => {
                   <tr key={item.id} className="hover:bg-[#EDE6F5]/30 transition-colors">
                     <td className="py-4 px-4 font-serif text-sm font-semibold text-[#1B1226]">
                       {item.title}
-                    </td>
-                    <td className="py-4 px-4 text-[#1B1226]/70">
-                      {getDownloadCategoryLabel(item.category)}
                     </td>
                     <td className="py-4 px-4">
                       <span className="font-mono text-[10px] tracking-wider px-2 py-0.5 border border-[#B8923A]/60 rounded-sm text-[#9C7A2B] uppercase font-bold">
@@ -327,7 +289,7 @@ export const Downloads: React.FC = () => {
       ) : (
         <div className="p-16 text-center border border-dashed border-[#4B1F7A]/25 rounded-sm bg-white/40 space-y-2">
           <p className="font-serif text-lg text-[#2A1245]">
-            {search ? `ไม่พบเอกสารที่ตรงกับ "${search}"` : 'ยังไม่มีเอกสารในหมวดหมู่นี้'}
+            {search ? `ไม่พบเอกสารที่ตรงกับ "${search}"` : 'ยังไม่มีเอกสารให้ดาวน์โหลดในขณะนี้'}
           </p>
           <p className="text-xs text-[#1B1226]/60">
             เอกสารจะถูกจัดเก็บและเปิดให้ดาวน์โหลดผ่านหน้านี้เมื่อมีประกาศเพิ่มเติม
@@ -348,7 +310,7 @@ export const Downloads: React.FC = () => {
             <div className="p-4 sm:p-5 border-b border-[#4B1F7A]/20 flex items-center justify-between bg-white">
               <div className="pr-4">
                 <span className="text-[10px] uppercase font-bold tracking-wider text-[#9C7A2B]">
-                  {getDownloadCategoryLabel(previewItem.category)} · {previewItem.fileType.toUpperCase()}
+                  {previewItem.fileType.toUpperCase()}
                 </span>
                 <h3 className="font-serif text-base sm:text-lg font-bold text-[#2A1245] line-clamp-1">
                   {previewItem.title}

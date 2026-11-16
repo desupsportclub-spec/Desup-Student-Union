@@ -89,7 +89,9 @@ export const SiteSettingsProvider: React.FC<{ children: React.ReactNode }> = ({ 
             ? DEFAULT_CONTACT.phone
             : rawPhone,
         email:
-          !rawEmail || rawEmail.toLowerCase() === 'desup.council@up.ac.th'
+          !rawEmail ||
+          rawEmail.toLowerCase() === 'desup.council@up.ac.th' ||
+          rawEmail.toLowerCase() === 'satit.su@up.ac.th'
             ? DEFAULT_CONTACT.email
             : rawEmail,
         facebook: data.contactInfo.facebook || DEFAULT_CONTACT.facebook,
