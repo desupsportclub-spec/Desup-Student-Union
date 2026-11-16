@@ -46,7 +46,7 @@
     },
     "calendar": "Calendar",
     "downloads": "Downloads",
-    "downloadsFull": "Download Documents & Forms",
+    "downloadsFull": "Documents & Forms",
     "trackComplaint": "Track Submission",
     "contact": "Contact",
     "contactUs": "Contact",
@@ -252,8 +252,8 @@
   },
   "downloads": {
     "eyebrowEn": "Download document",
-    "eyebrowTh": "DOCUMENT CENTER",
-    "title": "Download Documents & Forms",
+    "eyebrowTh": "DOCUMENTS",
+    "title": "Documents & Forms",
     "subtitle": "",
     "searchPlaceholder": "Search document name...",
     "view": "Preview",
@@ -274,7 +274,7 @@
     "previewLoading": "Loading document from storage...",
     "nonPdfNotice": "{{type}} files require downloading to open in a compatible application",
     "clickToDownload": "Click to Download File",
-    "modalMeta": "Published {{date}} · {{count}} downloads",
+    "modalMeta": "Published {{date}}",
     "printDoc": "Print",
     "openNewWindow": "↗ Open in New Tab",
     "downloadFile": "⬇ Download File",
@@ -535,8 +535,8 @@
         "desc": "Follow campus activity schedules, projects, and important Student Union dates."
       },
       "downloads": {
-        "title": "Download Documents & Forms",
-        "desc": "Download official Student Union documents and forms."
+        "title": "Documents & Forms",
+        "desc": "Official Student Union documents and forms."
       },
       "emblem": {
         "title": "Official Emblem & Identity",

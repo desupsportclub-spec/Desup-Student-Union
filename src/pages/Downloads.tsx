@@ -8,7 +8,7 @@ import { useTranslation } from 'react-i18next';
 import { doc, updateDoc, increment } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { DownloadItem } from '../types';
-import { formatDate, formatNumber } from '../lib/format';
+import { formatDate } from '../lib/format';
 import { SectionEyebrow, CornerBracket } from '../components/common/Ornament';
 import { SeoHead } from '../components/common/SeoHead';
 import { useLanguage } from '../context/LanguageContext';
@@ -237,7 +237,6 @@ export const Downloads: React.FC = () => {
                     className="w-full inline-flex items-center justify-center gap-1.5 px-3 py-2 bg-brand text-brand-contrast hover:bg-brand-hover transition-colors rounded-sm text-xs font-medium shadow-editorial-sm disabled:opacity-60"
                   >
                     <span>{downloadingId === item.id ? t('downloads.preparing') : t('downloads.download')}</span>
-                    <span className="text-[10px] opacity-75">({formatNumber(item.downloads, lang)})</span>
                   </button>
                 </div>
               </div>
@@ -291,7 +290,6 @@ export const Downloads: React.FC = () => {
                           className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-brand text-brand-contrast hover:bg-brand-hover transition-colors rounded-sm text-xs font-medium shadow-editorial-sm disabled:opacity-60"
                         >
                           <span>{downloadingId === item.id ? t('downloads.preparingFile') : t('downloads.download')}</span>
-                          <span className="text-[10px] opacity-70">({formatNumber(item.downloads, lang)})</span>
                         </button>
                       </div>
                     </td>
@@ -384,7 +382,6 @@ export const Downloads: React.FC = () => {
               <div className="text-[11px] text-text-muted">
                 {t('downloads.modalMeta', {
                   date: formatDate(previewItem.createdAt, lang, true),
-                  count: formatNumber(previewItem.downloads, lang),
                 })}
               </div>
 
