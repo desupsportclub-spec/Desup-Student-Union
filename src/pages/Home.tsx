@@ -360,13 +360,13 @@ export const Home: React.FC = () => {
       <section className="max-w-[1240px] mx-auto px-4 sm:px-6 md:px-12">
         <div className="flex flex-col md:flex-row md:items-end justify-between mb-6 sm:mb-10 pb-4 border-b border-[#B8923A]/30">
           <div>
-            <SectionEyebrow number="01" enText="NEWS" thText="ข่าวประชาสัมพันธ์" />
+            <SectionEyebrow number="01" enText="NEWS" thText="ข่าวสาร" />
             <h2 className="font-serif text-2xl md:text-3xl text-[#1B1226] font-semibold mt-2">
               ข่าวประชาสัมพันธ์
             </h2>
           </div>
           <Link to="/news" className="btn-secondary-link text-xs font-medium text-[#4B1F7A] mt-3 md:mt-0 self-start md:self-auto">
-            <span>ข่าวทั้งหมด</span>
+            <span>อ่านทั้งหมด</span>
             <span className="text-[#B8923A]">→</span>
           </Link>
         </div>

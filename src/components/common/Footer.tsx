@@ -42,8 +42,7 @@ export const Footer: React.FC = () => {
             </div>
 
             <p className="text-xs text-[#FAF7F0]/70 leading-relaxed max-w-sm">
-              มุ่งมั่นเป็นกระบอกเสียงและสะพานเชื่อมระหว่างนักเรียนและโรงเรียน
-              ส่งเสริมกิจกรรมประชาธิปไตย วินัย คุณธรรม และศักยภาพของนักเรียนสาธิต มพ.
+              ขับเคลื่อนกิจกรรมส่งเสริมอัตลักษณ์อย่างสร้างสรรค์ พิทักษ์รักษาไว้ซึ่งสิทธิของนักเรียน
             </p>
 
             <div className="pt-2 text-xs text-[#FAF7F0]/80 space-y-1.5">
@@ -168,7 +167,7 @@ export const Footer: React.FC = () => {
           <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1">
             <span className="text-[#D9B867]">โรงเรียนสาธิตมหาวิทยาลัยพะเยา</span>
             <span className="text-[#FAF7F0]/30 hidden sm:inline">|</span>
-            <span>Student Union Demonstration School of University of Phayao</span>
+            <span>Demonstration School of University of Phayao Student Union</span>
           </div>
         </div>
       </div>

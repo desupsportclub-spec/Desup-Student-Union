@@ -82,7 +82,7 @@ export const AboutEmblem: React.FC = () => {
       <div className="bg-white border border-[#4B1F7A]/20 p-5 sm:p-8 rounded-sm shadow-editorial space-y-3 sm:space-y-4">
         <div className="border-b border-[#B8923A]/30 pb-3">
           <h2 className="font-serif text-lg sm:text-xl font-bold text-[#2A1245]">
-            คำอธิบายตราสัญลักษณ์ทางการ
+            คำอธิบายตราสัญลักษณ์
           </h2>
         </div>
         <p className="text-sm md:text-base text-[#1B1226]/85 leading-relaxed font-sans indent-6 sm:indent-8">

@@ -8,50 +8,50 @@ import { SectionEyebrow, CornerBracket } from '../../components/common/Ornament'
 
 const DUTIES = [
   {
-    num: '๑',
+    num: '(๑)',
     text: 'รักษาผลประโยชน์และสิทธิอันชอบธรรมของนักเรียนในเรื่องเกี่ยวกับกิจการนักเรียน',
   },
   {
-    num: '๒',
+    num: '(๒)',
     text: 'บริหารกิจกรรมที่เกี่ยวกับองค์การนักเรียน ให้เป็นไปตามนโยบายที่ได้แถลงไว้ ซึ่งไม่ขัดข้อบังคับ ระเบียบ ประกาศ นโยบายของโรงเรียน',
   },
   {
-    num: '๓',
+    num: '(๓)',
     text: 'ปฏิบัติงานอื่น ๆ ตามที่โรงเรียนมอบหมาย',
   },
 ];
 
 const GUIDELINES = [
   {
-    num: '๑',
+    num: '(๑)',
     text: 'รักษาไว้ซึ่งผลประโยชน์ส่วนรวมของนักเรียน',
   },
   {
-    num: '๒',
+    num: '(๒)',
     text: 'รักษาไว้ซึ่งประสิทธิภาพในการขับเคลื่อนการดำเนินกิจกรรมนักเรียน',
   },
   {
-    num: '๓',
+    num: '(๓)',
     text: 'ยึดมั่นและศรัทธาในการปกครองของระบบประชาธิปไตย',
   },
   {
-    num: '๔',
+    num: '(๔)',
     text: 'ยึดมั่นในข้อบังคับ ระเบียบ ประกาศ คำสั่ง และนโยบายของโรงเรียนอย่างเคร่งครัด',
   },
   {
-    num: '๕',
+    num: '(๕)',
     text: 'เป็นผู้ส่งเสริมกิจกรรมเสริมหลักสูตร ตามอัตลักษณ์นักเรียนของโรงเรียน รักษาไว้ซึ่งศิลปะและวัฒนธรรมของชาติ ทำนุบำรุง อนุรักษ์ ฟื้นฟู สืบสานสร้างสรรค์',
   },
   {
-    num: '๖',
+    num: '(๖)',
     text: 'เป็นผู้มีความซื่อสัตย์ สุจริต บริหารงานอย่างโปร่งใส ใฝ่เรียนรู้และกระตือรือร้น',
   },
   {
-    num: '๗',
+    num: '(๗)',
     text: 'มีความเป็นผู้นำและผู้ตามที่ดี',
   },
   {
-    num: '๘',
+    num: '(๘)',
     text: 'เผยแพร่ชื่อเสียงและเกียรติคุณของโรงเรียน',
   },
 ];
@@ -92,7 +92,7 @@ export const AboutAuthority: React.FC = () => {
               key={item.num}
               className="py-4 first:pt-1 last:pb-1 flex items-start gap-4 sm:gap-5"
             >
-              <span className="w-8 h-8 rounded-sm bg-[#4B1F7A] text-[#FAF7F0] border border-[#B8923A]/60 font-serif text-sm font-semibold flex items-center justify-center shrink-0 mt-0.5">
+              <span className="w-9 h-8 rounded-sm bg-[#4B1F7A] text-[#FAF7F0] border border-[#B8923A]/60 font-serif text-sm font-semibold flex items-center justify-center shrink-0 mt-0.5">
                 {item.num}
               </span>
               <p className="text-sm sm:text-[15px] text-[#1B1226]/85 leading-relaxed pt-1">
@@ -104,7 +104,12 @@ export const AboutAuthority: React.FC = () => {
       </section>
 
       {/* Section 2: แนวทางที่องค์การนักเรียนพึงดำเนิน */}
-      <section className="bg-white border border-[#4B1F7A]/20 p-6 sm:p-8 md:p-10 rounded-sm shadow-editorial relative space-y-6">
+      <section className="bg-[#FAF7F0] border border-[#B8923A]/40 p-6 sm:p-8 md:p-10 rounded-sm shadow-editorial relative space-y-6">
+        <CornerBracket position="top-left" />
+        <CornerBracket position="top-right" />
+        <CornerBracket position="bottom-left" />
+        <CornerBracket position="bottom-right" />
+
         <div className="border-b border-[#B8923A]/30 pb-4 flex items-baseline gap-3">
           <span className="font-serif text-sm sm:text-base font-bold text-[#9C7A2B] shrink-0">
             02
@@ -118,12 +123,12 @@ export const AboutAuthority: React.FC = () => {
           {GUIDELINES.map((item) => (
             <li
               key={item.num}
-              className="p-4 sm:p-5 bg-[#FAF7F0]/70 border border-[#4B1F7A]/15 hover:border-[#B8923A]/60 rounded-sm transition-colors flex items-start gap-3.5"
+              className="p-4 sm:p-5 bg-white/75 border border-[#B8923A]/30 rounded-sm flex items-start gap-3.5"
             >
-              <span className="w-7 h-7 rounded-sm bg-[#EDE6F5] border border-[#B8923A]/45 text-[#4B1F7A] font-serif text-xs sm:text-sm font-bold flex items-center justify-center shrink-0 mt-0.5">
+              <span className="w-9 h-8 rounded-sm bg-[#4B1F7A] text-[#FAF7F0] border border-[#B8923A]/60 font-serif text-sm font-semibold flex items-center justify-center shrink-0 mt-0.5">
                 {item.num}
               </span>
-              <p className="text-sm text-[#1B1226]/85 leading-relaxed">
+              <p className="text-sm sm:text-[15px] text-[#1B1226]/85 leading-relaxed pt-0.5">
                 {item.text}
               </p>
             </li>
