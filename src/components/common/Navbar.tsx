@@ -117,6 +117,51 @@ export const Navbar: React.FC<NavbarProps> = ({ tickerItems = [] }) => {
               หน้าหลัก
             </Link>
 
+            {/* Dropdown: เกี่ยวกับเรา */}
+            <div
+              className="relative"
+              onMouseEnter={() => setActiveDropdown('about')}
+              onMouseLeave={() => setActiveDropdown(null)}
+            >
+              <Link
+                to="/about/emblem"
+                className={`flex items-center gap-1 hover:text-[#4B1F7A] transition-colors whitespace-nowrap shrink-0 py-2 ${
+                  location.pathname.startsWith('/about') ? 'text-[#4B1F7A] font-semibold' : ''
+                }`}
+              >
+                <span>เกี่ยวกับเรา</span>
+                <span className="text-[10px] text-[#B8923A]">▾</span>
+              </Link>
+
+              <AnimatePresence>
+                {activeDropdown === 'about' && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 10, scale: 0.98 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: 6, scale: 0.98 }}
+                    transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
+                    className="absolute left-0 top-full mt-2 w-64 bg-[#FAF7F0] border-2 border-[#B8923A] p-3 shadow-2xl rounded-sm z-50"
+                  >
+                    <Link to="/about/emblem" className="block px-3 py-1.5 text-xs hover:bg-[#EDE6F5] rounded transition-colors text-[#2A1245]">
+                      ตราสัญลักษณ์
+                    </Link>
+                    <Link to="/about/authority" className="block px-3 py-1.5 text-xs hover:bg-[#EDE6F5] rounded transition-colors text-[#2A1245]">
+                      อำนาจหน้าที่
+                    </Link>
+                    <Link to="/about/board" className="block px-3 py-1.5 text-xs hover:bg-[#EDE6F5] rounded transition-colors text-[#2A1245]">
+                      คณะกรรมการองค์การนักเรียน
+                    </Link>
+                    <Link to="/about/advisors" className="block px-3 py-1.5 text-xs hover:bg-[#EDE6F5] rounded transition-colors text-[#2A1245]">
+                      คณะกรรมการที่ปรึกษา
+                    </Link>
+                    <Link to="/about/hall" className="block px-3 py-1.5 text-xs hover:bg-[#EDE6F5] rounded transition-colors text-[#2A1245]">
+                      ทำเนียบนายกองค์การนักเรียน
+                    </Link>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+
             {/* Dropdown: ข่าวสาร */}
             <div
               className="relative"
@@ -184,51 +229,6 @@ export const Navbar: React.FC<NavbarProps> = ({ tickerItems = [] }) => {
             >
               ดาวน์โหลด
             </Link>
-
-            {/* Dropdown: เกี่ยวกับเรา */}
-            <div
-              className="relative"
-              onMouseEnter={() => setActiveDropdown('about')}
-              onMouseLeave={() => setActiveDropdown(null)}
-            >
-              <Link
-                to="/about/emblem"
-                className={`flex items-center gap-1 hover:text-[#4B1F7A] transition-colors whitespace-nowrap shrink-0 py-2 ${
-                  location.pathname.startsWith('/about') ? 'text-[#4B1F7A] font-semibold' : ''
-                }`}
-              >
-                <span>เกี่ยวกับเรา</span>
-                <span className="text-[10px] text-[#B8923A]">▾</span>
-              </Link>
-
-              <AnimatePresence>
-                {activeDropdown === 'about' && (
-                  <motion.div
-                    initial={{ opacity: 0, y: 10, scale: 0.98 }}
-                    animate={{ opacity: 1, y: 0, scale: 1 }}
-                    exit={{ opacity: 0, y: 6, scale: 0.98 }}
-                    transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
-                    className="absolute left-0 top-full mt-2 w-64 bg-[#FAF7F0] border-2 border-[#B8923A] p-3 shadow-2xl rounded-sm z-50"
-                  >
-                    <Link to="/about/emblem" className="block px-3 py-1.5 text-xs hover:bg-[#EDE6F5] rounded transition-colors text-[#2A1245]">
-                      ตราสัญลักษณ์
-                    </Link>
-                    <Link to="/about/authority" className="block px-3 py-1.5 text-xs hover:bg-[#EDE6F5] rounded transition-colors text-[#2A1245]">
-                      อำนาจหน้าที่
-                    </Link>
-                    <Link to="/about/board" className="block px-3 py-1.5 text-xs hover:bg-[#EDE6F5] rounded transition-colors text-[#2A1245]">
-                      คณะกรรมการองค์การนักเรียน
-                    </Link>
-                    <Link to="/about/advisors" className="block px-3 py-1.5 text-xs hover:bg-[#EDE6F5] rounded transition-colors text-[#2A1245]">
-                      คณะกรรมการที่ปรึกษา
-                    </Link>
-                    <Link to="/about/hall" className="block px-3 py-1.5 text-xs hover:bg-[#EDE6F5] rounded transition-colors text-[#2A1245]">
-                      ทำเนียบนายกองค์การนักเรียน
-                    </Link>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
 
             <Link
               to="/contact"
@@ -367,6 +367,65 @@ export const Navbar: React.FC<NavbarProps> = ({ tickerItems = [] }) => {
                   <span>หน้าหลัก</span>
                 </Link>
 
+                {/* About with optional expandable sub-links */}
+                <div>
+                  <div className="flex items-center">
+                    <Link
+                      to="/about/emblem"
+                      onClick={() => setMobileMenuOpen(false)}
+                      className={`flex-1 flex items-center min-h-[42px] px-3 py-2 rounded-sm text-[15px] font-medium whitespace-nowrap transition-colors ${
+                        isActivePath('/about')
+                          ? 'bg-[#4B1F7A]/80 text-[#D9B867]'
+                          : 'text-[#FAF7F0]/90 hover:bg-white/5 hover:text-[#FAF7F0]'
+                      }`}
+                    >
+                      <span>เกี่ยวกับเรา</span>
+                    </Link>
+                    <button
+                      type="button"
+                      onClick={() => setMobileSubmenu(mobileSubmenu === 'about' ? null : 'about')}
+                      aria-label="แสดงเมนูย่อยเกี่ยวกับเรา"
+                      aria-expanded={mobileSubmenu === 'about'}
+                      className="w-10 h-[42px] flex items-center justify-center text-[#D9B867]/80 hover:text-[#D9B867] hover:bg-white/5 rounded-sm transition-colors shrink-0"
+                    >
+                      <svg
+                        className={`w-4 h-4 transition-transform duration-200 ${mobileSubmenu === 'about' ? 'rotate-180' : ''}`}
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                      >
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M6 9l6 6 6-6" />
+                      </svg>
+                    </button>
+                  </div>
+
+                  {mobileSubmenu === 'about' && (
+                    <div className="ml-3 pl-3 mt-0.5 mb-1.5 border-l border-[#B8923A]/30 space-y-0.5">
+                      {[
+                        { to: '/about/emblem', label: 'ตราสัญลักษณ์' },
+                        { to: '/about/authority', label: 'อำนาจหน้าที่' },
+                        { to: '/about/board', label: 'คณะกรรมการองค์การนักเรียน' },
+                        { to: '/about/advisors', label: 'คณะกรรมการที่ปรึกษา' },
+                        { to: '/about/hall', label: 'ทำเนียบนายกองค์การนักเรียน' },
+                      ].map((sub) => (
+                        <Link
+                          key={sub.to}
+                          to={sub.to}
+                          onClick={() => setMobileMenuOpen(false)}
+                          className={`block py-2 px-2.5 rounded-sm text-xs transition-colors ${
+                            location.pathname === sub.to
+                              ? 'text-[#D9B867] font-semibold bg-white/5'
+                              : 'text-[#FAF7F0]/75 hover:text-[#FAF7F0] hover:bg-white/5'
+                          }`}
+                        >
+                          {sub.label}
+                        </Link>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
                 {/* News with optional expandable sub-links */}
                 <div>
                   <div className="flex items-center">
@@ -449,65 +508,6 @@ export const Navbar: React.FC<NavbarProps> = ({ tickerItems = [] }) => {
                 >
                   <span>ดาวน์โหลดเอกสาร</span>
                 </Link>
-
-                {/* About with optional expandable sub-links */}
-                <div>
-                  <div className="flex items-center">
-                    <Link
-                      to="/about/emblem"
-                      onClick={() => setMobileMenuOpen(false)}
-                      className={`flex-1 flex items-center min-h-[42px] px-3 py-2 rounded-sm text-[15px] font-medium whitespace-nowrap transition-colors ${
-                        isActivePath('/about')
-                          ? 'bg-[#4B1F7A]/80 text-[#D9B867]'
-                          : 'text-[#FAF7F0]/90 hover:bg-white/5 hover:text-[#FAF7F0]'
-                      }`}
-                    >
-                      <span>เกี่ยวกับองค์การนักเรียน</span>
-                    </Link>
-                    <button
-                      type="button"
-                      onClick={() => setMobileSubmenu(mobileSubmenu === 'about' ? null : 'about')}
-                      aria-label="แสดงเมนูย่อยเกี่ยวกับองค์การ"
-                      aria-expanded={mobileSubmenu === 'about'}
-                      className="w-10 h-[42px] flex items-center justify-center text-[#D9B867]/80 hover:text-[#D9B867] hover:bg-white/5 rounded-sm transition-colors shrink-0"
-                    >
-                      <svg
-                        className={`w-4 h-4 transition-transform duration-200 ${mobileSubmenu === 'about' ? 'rotate-180' : ''}`}
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                      >
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M6 9l6 6 6-6" />
-                      </svg>
-                    </button>
-                  </div>
-
-                  {mobileSubmenu === 'about' && (
-                    <div className="ml-3 pl-3 mt-0.5 mb-1.5 border-l border-[#B8923A]/30 space-y-0.5">
-                      {[
-                        { to: '/about/emblem', label: 'ตราสัญลักษณ์' },
-                        { to: '/about/authority', label: 'อำนาจหน้าที่' },
-                        { to: '/about/board', label: 'คณะกรรมการองค์การนักเรียน' },
-                        { to: '/about/advisors', label: 'คณะกรรมการที่ปรึกษา' },
-                        { to: '/about/hall', label: 'ทำเนียบนายกองค์การนักเรียน' },
-                      ].map((sub) => (
-                        <Link
-                          key={sub.to}
-                          to={sub.to}
-                          onClick={() => setMobileMenuOpen(false)}
-                          className={`block py-2 px-2.5 rounded-sm text-xs transition-colors ${
-                            location.pathname === sub.to
-                              ? 'text-[#D9B867] font-semibold bg-white/5'
-                              : 'text-[#FAF7F0]/75 hover:text-[#FAF7F0] hover:bg-white/5'
-                          }`}
-                        >
-                          {sub.label}
-                        </Link>
-                      ))}
-                    </div>
-                  )}
-                </div>
 
                 <Link
                   to="/track"
