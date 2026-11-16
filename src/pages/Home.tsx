@@ -563,7 +563,7 @@ export const Home: React.FC = () => {
               <div className="mb-8 sm:mb-12 text-center max-w-xl mx-auto space-y-2">
                 <SectionEyebrow number="02" enText={t('home.reportEyebrowEn')} thText={t('home.reportEyebrowTh')} light />
                 <h2 className="font-serif text-2xl md:text-3xl font-semibold text-anchor-text">
-                  {t('site.motto')}
+                  {lang === 'en' ? `"${t('site.motto')}"` : `“${t('site.motto')}”`}
                 </h2>
               </div>
 

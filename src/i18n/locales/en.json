@@ -46,7 +46,7 @@
     },
     "calendar": "Calendar",
     "downloads": "Downloads",
-    "downloadsFull": "Download Documents",
+    "downloadsFull": "Download Documents & Forms",
     "trackComplaint": "Track Submission",
     "contact": "Contact",
     "contactUs": "Contact",
@@ -93,13 +93,13 @@
     "newsCol": "News",
     "aboutCol": "About Us",
     "boardShort": "Executive Board",
-    "relatedCol": "Related Systems",
+    "relatedCol": "Related Links",
     "academicSystem": "Academic Affairs System",
     "studentAffairsSystem": "Student Affairs System",
     "facebookPage": "Student Union Facebook Page",
     "schoolWebsite": "DeSUP Official Website",
     "universityWebsite": "University of Phayao",
-    "servicesCol": "Student Services",
+    "servicesCol": "For Students",
     "cookieSettings": "Cookie Settings",
     "adminPortal": "Admin Portal"
   },
@@ -197,8 +197,8 @@
     "defaultPresidentMessage": "Welcome students, faculty, and parents to the official Student Union portal. This platform serves as our primary channel for news, regulations, activities, and most importantly, listening to your feedback and ideas to build a better school community together."
   },
   "news": {
-    "eyebrowEn": "INFO",
-    "eyebrowTh": "NEWS",
+    "eyebrowEn": "NEWS",
+    "eyebrowTh": "UPDATES",
     "title": "Student Union News",
     "subtitle": "",
     "searchPlaceholder": "Search by headline...",
@@ -253,7 +253,7 @@
   "downloads": {
     "eyebrowEn": "Download document",
     "eyebrowTh": "DOCUMENT CENTER",
-    "title": "Download Documents",
+    "title": "Download Documents & Forms",
     "subtitle": "",
     "searchPlaceholder": "Search document name...",
     "view": "Preview",
@@ -504,7 +504,7 @@
   "contact": {
     "eyebrowEn": "CONTACT",
     "eyebrowTh": "GET IN TOUCH",
-    "title": "Contact",
+    "title": "Contact the Student Union",
     "subtitle": "Demonstration School, University of Phayao",
     "infoHeading": "Contact Information",
     "addressLabel": "Location:",
@@ -535,7 +535,7 @@
         "desc": "Follow campus activity schedules, projects, and important Student Union dates."
       },
       "downloads": {
-        "title": "Download Documents",
+        "title": "Download Documents & Forms",
         "desc": "Download official Student Union documents and forms."
       },
       "emblem": {
@@ -567,7 +567,7 @@
         "desc": "Check the progress of your submitted complaint or suggestion using your tracking code."
       },
       "contact": {
-        "title": "Contact",
+        "title": "Contact the Student Union",
         "desc": "Contact information and location map of Demonstration School of University of Phayao Student Union."
       }
     }
