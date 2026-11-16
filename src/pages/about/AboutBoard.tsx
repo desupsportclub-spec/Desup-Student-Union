@@ -13,6 +13,8 @@ import { useSiteSettings } from '../../context/SiteSettingsContext';
 import { useLanguage } from '../../context/LanguageContext';
 import { formatAcademicYear } from '../../lib/format';
 import { getCachedPeopleSync, loadPeopleList } from '../../lib/publicDataService';
+import { pickL10n } from '../../lib/l10n';
+import { FallbackLangBadge } from '../../components/common/FallbackLangBadge';
 
 export const AboutBoard: React.FC = () => {
   const { t } = useTranslation();
@@ -121,48 +123,59 @@ export const AboutBoard: React.FC = () => {
         </div>
       ) : boardMembers.length > 0 ? (
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-6">
-          {boardMembers.map((member) => (
-            <div
-              key={member.id}
-              className="group relative bg-surface border border-gold-border/20 p-3 sm:p-4 rounded-sm shadow-editorial transition-all duration-300 hover:border-gold text-center flex flex-col justify-between"
-            >
-              <CornerBracket position="top-left" />
-              <CornerBracket position="top-right" />
-              <CornerBracket position="bottom-left" />
-              <CornerBracket position="bottom-right" />
+          {boardMembers.map((member) => {
+            const nameRes = pickL10n(member.name, member.nameEn, lang);
+            const posRes = pickL10n(member.position, member.positionEn, lang);
+            const gradeRes = pickL10n(member.grade, member.gradeEn, lang);
+            return (
+              <div
+                key={member.id}
+                className="group relative bg-surface border border-gold-border/20 p-3 sm:p-4 rounded-sm shadow-editorial transition-all duration-300 hover:border-gold text-center flex flex-col justify-between"
+              >
+                <CornerBracket position="top-left" />
+                <CornerBracket position="top-right" />
+                <CornerBracket position="bottom-left" />
+                <CornerBracket position="bottom-right" />
 
-              <div>
-                <div className="aspect-[4/5] bg-bg-alt rounded-sm overflow-hidden mb-3 sm:mb-4 border border-gold-border/20">
-                  {member.photo?.url || member.photoUrl ? (
-                    <img
-                      src={member.photo?.url || member.photoUrl}
-                      alt={member.name}
-                      className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500 ease-out"
-                    />
-                  ) : (
-                    <div className="w-full h-full bg-brand-soft flex flex-col items-center justify-center p-3 text-text-muted">
-                      <Emblem size={36} />
-                      <span className="text-[10px] text-accent mt-2 font-medium">{t('site.shortName')}</span>
+                <div>
+                  <div className="aspect-[4/5] bg-bg-alt rounded-sm overflow-hidden mb-3 sm:mb-4 border border-gold-border/20">
+                    {member.photo?.url || member.photoUrl ? (
+                      <img
+                        src={member.photo?.url || member.photoUrl}
+                        alt={nameRes.text}
+                        className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500 ease-out"
+                      />
+                    ) : (
+                      <div className="w-full h-full bg-brand-soft flex flex-col items-center justify-center p-3 text-text-muted">
+                        <Emblem size={36} />
+                        <span className="text-[10px] text-accent mt-2 font-medium">{t('site.shortName')}</span>
+                      </div>
+                    )}
+                  </div>
+
+                  <span className="text-[10px] uppercase tracking-wider text-gold-text font-semibold block mb-1">
+                    {posRes.text}
+                  </span>
+
+                  <h3 className="font-serif text-base font-semibold text-heading group-hover:text-accent transition-colors">
+                    {nameRes.text}
+                  </h3>
+
+                  {(nameRes.isFallback || posRes.isFallback) && (
+                    <div className="mt-1.5 flex justify-center">
+                      <FallbackLangBadge show />
                     </div>
                   )}
                 </div>
 
-                <span className="text-[10px] uppercase tracking-wider text-gold-text font-semibold block mb-1">
-                  {member.position}
-                </span>
-
-                <h3 className="font-serif text-base font-semibold text-heading group-hover:text-accent transition-colors">
-                  {member.name}
-                </h3>
+                {gradeRes.text && (
+                  <p className="text-[11px] text-text-muted mt-2 pt-2 border-t border-gold-border/15">
+                    {gradeRes.text}
+                  </p>
+                )}
               </div>
-
-              {member.grade && (
-                <p className="text-[11px] text-text-muted mt-2 pt-2 border-t border-gold-border/15">
-                  {member.grade}
-                </p>
-              )}
-            </div>
-          ))}
+            );
+          })}
         </div>
       ) : (
         <div className="p-16 text-center border border-dashed border-gold-border/30 rounded-sm bg-surface/60 space-y-2">

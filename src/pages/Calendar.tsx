@@ -18,6 +18,8 @@ import { SectionEyebrow } from '../components/common/Ornament';
 import { SeoHead } from '../components/common/SeoHead';
 import { useLanguage } from '../context/LanguageContext';
 import { getCachedEventsSync, loadPublishedEvents } from '../lib/publicDataService';
+import { pickL10n } from '../lib/l10n';
+import { FallbackLangBadge } from '../components/common/FallbackLangBadge';
 
 export const CalendarPage: React.FC = () => {
   const { t } = useTranslation();
@@ -82,15 +84,18 @@ export const CalendarPage: React.FC = () => {
     const end = event.endAt
       ? new Date(event.endAt).toISOString().replace(/-|:|\.\d\d\d/g, "")
       : start;
+    const evtTitle = pickL10n(event.title, event.titleEn, lang).text || event.title;
+    const evtDesc = pickL10n(event.description, event.descriptionEn, lang).text;
+    const evtLoc = pickL10n(event.location, event.locationEn, lang).text;
 
     const icsData = [
       "BEGIN:VCALENDAR",
       "VERSION:2.0",
-      "PRODID:-//DESUP//Student Council//TH",
+      `PRODID:-//DESUP//Student Union//${lang === 'en' ? 'EN' : 'TH'}`,
       "BEGIN:VEVENT",
-      `SUMMARY:${event.title}`,
-      `DESCRIPTION:${event.description || ''}`,
-      `LOCATION:${event.location || ''}`,
+      `SUMMARY:${evtTitle}`,
+      `DESCRIPTION:${evtDesc}`,
+      `LOCATION:${evtLoc}`,
       `DTSTART:${start}`,
       `DTEND:${end}`,
       "END:VEVENT",
@@ -100,7 +105,7 @@ export const CalendarPage: React.FC = () => {
     const blob = new Blob([icsData], { type: 'text/calendar;charset=utf-8' });
     const link = document.createElement('a');
     link.href = window.URL.createObjectURL(blob);
-    link.setAttribute('download', `${event.title}.ics`);
+    link.setAttribute('download', `${evtTitle}.ics`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -212,7 +217,7 @@ export const CalendarPage: React.FC = () => {
                           key={ev.id}
                           className="text-[10px] truncate text-accent bg-brand-soft px-1 py-0.5 rounded-sm"
                         >
-                          {ev.title}
+                          {pickL10n(ev.title, ev.titleEn, lang).text}
                         </div>
                       ))}
                       {dayEvents.length > 2 && (
@@ -241,27 +246,35 @@ export const CalendarPage: React.FC = () => {
 
             {selectedDayEvents.length > 0 ? (
               <div className="space-y-4">
-                {selectedDayEvents.map((evt) => (
-                  <div key={evt.id} className="p-4 bg-surface-elevated border border-gold-border/20 rounded-sm space-y-2">
-                    <h4 className="font-serif text-sm font-semibold text-heading">
-                      {evt.title}
-                    </h4>
-                    {evt.description && (
-                      <p className="text-xs text-text-muted line-clamp-3 leading-relaxed">
-                        {evt.description}
-                      </p>
-                    )}
-                    <div className="text-[11px] text-text-muted pt-2 border-t border-gold-border/15 flex items-center justify-between">
-                      <span>📍 {evt.location || t('home.defaultLocation')}</span>
-                      <button
-                        onClick={() => handleExportICS(evt)}
-                        className="text-accent hover:text-gold-text underline"
-                      >
-                        {t('calendar.addToIcsShort')}
-                      </button>
+                {selectedDayEvents.map((evt) => {
+                  const titleRes = pickL10n(evt.title, evt.titleEn, lang);
+                  const descRes = pickL10n(evt.description, evt.descriptionEn, lang);
+                  const locRes = pickL10n(evt.location, evt.locationEn, lang);
+                  return (
+                    <div key={evt.id} className="p-4 bg-surface-elevated border border-gold-border/20 rounded-sm space-y-2">
+                      <div className="flex flex-wrap items-start justify-between gap-2">
+                        <h4 className="font-serif text-sm font-semibold text-heading">
+                          {titleRes.text}
+                        </h4>
+                        <FallbackLangBadge show={titleRes.isFallback} />
+                      </div>
+                      {descRes.text && (
+                        <p className="text-xs text-text-muted line-clamp-3 leading-relaxed">
+                          {descRes.text}
+                        </p>
+                      )}
+                      <div className="text-[11px] text-text-muted pt-2 border-t border-gold-border/15 flex items-center justify-between">
+                        <span>📍 {locRes.text || t('home.defaultLocation')}</span>
+                        <button
+                          onClick={() => handleExportICS(evt)}
+                          className="text-accent hover:text-gold-text underline"
+                        >
+                          {t('calendar.addToIcsShort')}
+                        </button>
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             ) : (
               <div className="py-12 text-center text-xs text-text-muted space-y-1">
@@ -284,6 +297,9 @@ export const CalendarPage: React.FC = () => {
             {activeOrUpcomingEvents.map((evt) => {
               const p = getDateParts(evt.startAt, lang);
               const hasEnd = Boolean(evt.endAt && getEventDateKey(evt.endAt) > getEventDateKey(evt.startAt));
+              const titleRes = pickL10n(evt.title, evt.titleEn, lang);
+              const descRes = pickL10n(evt.description, evt.descriptionEn, lang);
+              const locRes = pickL10n(evt.location, evt.locationEn, lang);
               return (
                 <div key={evt.id} className="p-4 bg-surface-elevated border border-gold-border/20 rounded-sm flex gap-4">
                   <div className="w-14 h-14 bg-brand-soft rounded-sm flex flex-col items-center justify-center shrink-0 border border-gold-border/30">
@@ -291,7 +307,10 @@ export const CalendarPage: React.FC = () => {
                     <span className="text-[10px] text-gold-text font-medium">{p.monthShort}</span>
                   </div>
                   <div className="space-y-1 flex-1">
-                    <h4 className="font-serif text-sm font-semibold text-heading">{evt.title}</h4>
+                    <div className="flex flex-wrap items-center gap-2">
+                      <h4 className="font-serif text-sm font-semibold text-heading">{titleRes.text}</h4>
+                      <FallbackLangBadge show={titleRes.isFallback} />
+                    </div>
                     {hasEnd && evt.endAt && (
                       <p className="text-[11px] text-gold-text font-medium">
                         {t('calendar.dateRange', {
@@ -300,9 +319,11 @@ export const CalendarPage: React.FC = () => {
                         })}
                       </p>
                     )}
-                    <p className="text-xs text-text-muted line-clamp-2">{evt.description}</p>
+                    {descRes.text && (
+                      <p className="text-xs text-text-muted line-clamp-2">{descRes.text}</p>
+                    )}
                     <div className="text-[11px] text-text-muted pt-1 flex items-center justify-between">
-                      <span>📍 {evt.location || t('home.defaultLocation')}</span>
+                      <span>📍 {locRes.text || t('home.defaultLocation')}</span>
                       <button
                         onClick={() => handleExportICS(evt)}
                         className="text-accent underline text-[11px]"

@@ -6,6 +6,8 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { SocialMediaLink, SocialPlatform } from '../../types';
+import { useLanguage } from '../../context/LanguageContext';
+import { pickL10n } from '../../lib/l10n';
 
 export function detectSocialPlatform(url: string): SocialPlatform {
   const lower = url.toLowerCase();
@@ -433,6 +435,7 @@ export const SocialMediaList: React.FC<{
   title?: string;
   excludeUrl?: string;
 }> = ({ videoUrl, socialLinks, title, excludeUrl }) => {
+  const { lang } = useLanguage();
   const combined: SocialMediaLink[] = [];
   const seen = new Set<string>();
   const excludedId = excludeUrl ? extractYouTubeVideoId(excludeUrl) : null;
@@ -456,10 +459,11 @@ export const SocialMediaList: React.FC<{
       const clean = item.url?.trim();
       if (clean && !seen.has(clean) && !shouldSkip(clean)) {
         seen.add(clean);
+        const resolvedLabel = pickL10n(item.label, item.labelEn, lang).text;
         combined.push({
           platform: item.platform || detectSocialPlatform(clean),
           url: clean,
-          label: item.label,
+          label: resolvedLabel || undefined,
         });
       }
     }

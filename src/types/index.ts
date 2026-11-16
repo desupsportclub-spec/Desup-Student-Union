@@ -23,17 +23,21 @@ export interface SocialMediaLink {
   platform: SocialPlatform;
   url: string;
   label?: string;
+  labelEn?: string;
 }
 
 export interface NewsItem {
   id?: string;
   title: string;
+  titleEn?: string;
   slug: string;
   category: NewsCategory;
   excerpt: string;
-  content: string; // Tiptap HTML
+  excerptEn?: string;
+  content: string; // เนื้อหา Tiptap HTML ภาษาไทย
+  contentEn?: string; // เนื้อหา Tiptap HTML ภาษาอังกฤษ (ไม่บังคับ)
   coverImage?: ImageAsset;
-  coverUrl?: string; // backwards compatibility
+  coverUrl?: string; // รองรับข้อมูลเดิม
   gallery?: ImageAsset[];
   galleryUrls?: string[];
   attachments?: NewsAttachment[];
@@ -51,9 +55,12 @@ export type EventType = 'sport' | 'academic' | 'art' | 'volunteer' | 'meeting';
 export interface EventItem {
   id?: string;
   title: string;
+  titleEn?: string;
   description: string;
+  descriptionEn?: string;
   type: EventType;
   location: string;
+  locationEn?: string;
   startAt: string; // ISO date string
   endAt?: string;
   allDay: boolean;
@@ -81,6 +88,7 @@ export type FileExtensionType = 'pdf' | 'docx' | 'xlsx';
 export interface DownloadItem {
   id?: string;
   title: string;
+  titleEn?: string;
   category: DownloadCategory;
   fileType: FileExtensionType;
   fileUrl: string;
@@ -95,7 +103,9 @@ export interface DownloadItem {
 export interface BannerItem {
   id?: string;
   title: string;
+  titleEn?: string;
   subtitle?: string;
+  subtitleEn?: string;
   imageUrl: string;
   linkUrl?: string;
   order: number;
@@ -110,14 +120,18 @@ export type AdvisorGroup = 'executive' | 'teacher' | 'experienced_student';
 export interface PersonItem {
   id?: string;
   name: string;
+  nameEn?: string;
   role: PersonRole;
   advisorGroup?: AdvisorGroup;
   position: string;
-  grade?: string; // e.g. มัธยมศึกษาปีที่ 6/1
-  yearTH: string; // e.g. 2569
+  positionEn?: string;
+  grade?: string; // เช่น มัธยมศึกษาปีที่ 6/1
+  gradeEn?: string; // เช่น M.6/1
+  yearTH: string; // เช่น 2569
   photo?: ImageAsset;
   photoUrl?: string;
   quote?: string;
+  quoteEn?: string;
   order: number;
   createdAt?: string;
   updatedAt?: string;
@@ -189,16 +203,20 @@ export interface ContactMessage {
 
 export interface ServiceLink {
   title: string;
+  titleEn?: string;
   description: string;
+  descriptionEn?: string;
   url: string;
   external: boolean;
 }
 
 export interface SiteContactInfo {
   address?: string;
+  addressEn?: string;
   phone?: string;
   email?: string;
   facebook?: string;
+  facebookEn?: string;
   facebookUrl?: string;
 }
 
@@ -211,8 +229,11 @@ export interface ComplaintStatsSummary {
 export interface SiteSettings {
   academicYearTH?: string;
   presidentHeadline?: string;
+  presidentHeadlineEn?: string;
   presidentMessage?: string;
+  presidentMessageEn?: string;
   ticker: string[];
+  tickerEn?: string[];
   links: ServiceLink[];
   contactInfo?: SiteContactInfo;
   totalVisits: number;

@@ -25,19 +25,30 @@ export const AdminSettings: React.FC = () => {
 
   const [academicYearTH, setAcademicYearTH] = useState(SITE_CONFIG.currentAcademicYearTH);
   const [presidentHeadline, setPresidentHeadline] = useState(DEFAULT_HEADLINE);
+  const [presidentHeadlineEn, setPresidentHeadlineEn] = useState('');
   const [presidentMessage, setPresidentMessage] = useState(DEFAULT_MESSAGE);
+  const [presidentMessageEn, setPresidentMessageEn] = useState('');
 
   const [tickerList, setTickerList] = useState<string[]>([]);
   const [newTickerText, setNewTickerText] = useState('');
+  const [tickerListEn, setTickerListEn] = useState<string[]>([]);
+  const [newTickerTextEn, setNewTickerTextEn] = useState('');
 
   const [contactPhone, setContactPhone] = useState(SITE_CONFIG.contact.phone);
   const [contactEmail, setContactEmail] = useState(SITE_CONFIG.contact.email);
   const [contactAddress, setContactAddress] = useState(SITE_CONFIG.contact.address);
+  const [contactAddressEn, setContactAddressEn] = useState(
+    'Demonstration School, University of Phayao, 19 Moo 2, Maeka, Mueang Phayao, Phayao 56000'
+  );
   const [facebookName, setFacebookName] = useState(SITE_CONFIG.contact.facebook);
+  const [facebookNameEn, setFacebookNameEn] = useState(
+    'Demonstration School of University of Phayao Student Union'
+  );
   const [facebookUrl, setFacebookUrl] = useState(SITE_CONFIG.contact.facebookUrl);
 
   const [links, setLinks] = useState<ServiceLink[]>(RELATED_SYSTEM_LINKS);
   const [newLinkTitle, setNewLinkTitle] = useState('');
+  const [newLinkTitleEn, setNewLinkTitleEn] = useState('');
   const [newLinkDesc, setNewLinkDesc] = useState('');
   const [newLinkUrl, setNewLinkUrl] = useState('');
 
@@ -56,8 +67,15 @@ export const AdminSettings: React.FC = () => {
           const data = snap.data();
           if (data.academicYearTH) setAcademicYearTH(String(data.academicYearTH));
           if (data.presidentHeadline) setPresidentHeadline(String(data.presidentHeadline));
+          if (typeof data.presidentHeadlineEn === 'string') {
+            setPresidentHeadlineEn(data.presidentHeadlineEn);
+          }
           if (data.presidentMessage) setPresidentMessage(String(data.presidentMessage));
+          if (typeof data.presidentMessageEn === 'string') {
+            setPresidentMessageEn(data.presidentMessageEn);
+          }
           if (data.ticker && Array.isArray(data.ticker)) setTickerList(data.ticker);
+          if (data.tickerEn && Array.isArray(data.tickerEn)) setTickerListEn(data.tickerEn);
           if (data.links && Array.isArray(data.links) && data.links.length > 0) setLinks(data.links);
           if (data.contactInfo) {
             if (data.contactInfo.phone) {
@@ -75,7 +93,13 @@ export const AdminSettings: React.FC = () => {
               );
             }
             if (data.contactInfo.address) setContactAddress(data.contactInfo.address);
+            if (typeof data.contactInfo.addressEn === 'string') {
+              setContactAddressEn(data.contactInfo.addressEn);
+            }
             if (data.contactInfo.facebook) setFacebookName(data.contactInfo.facebook);
+            if (typeof data.contactInfo.facebookEn === 'string') {
+              setFacebookNameEn(data.contactInfo.facebookEn);
+            }
             if (data.contactInfo.facebookUrl) setFacebookUrl(data.contactInfo.facebookUrl);
           }
         } else {
@@ -123,6 +147,22 @@ export const AdminSettings: React.FC = () => {
     await persistPartialSettings({ ticker: nextList }, 'อัปเดตแถบข้อความข่าวด่วนแล้ว ✓');
   };
 
+  const handleAddTickerEn = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const text = newTickerTextEn.trim();
+    if (!text) return;
+    const nextList = [...tickerListEn, text];
+    setTickerListEn(nextList);
+    setNewTickerTextEn('');
+    await persistPartialSettings({ tickerEn: nextList }, 'บันทึกข้อความประกาศภาษาอังกฤษลงแถบข่าวด่วนแล้ว ✓');
+  };
+
+  const handleRemoveTickerEn = async (index: number) => {
+    const nextList = tickerListEn.filter((_, i) => i !== index);
+    setTickerListEn(nextList);
+    await persistPartialSettings({ tickerEn: nextList }, 'อัปเดตแถบข้อความข่าวด่วนภาษาอังกฤษแล้ว ✓');
+  };
+
   const handleAddLink = async () => {
     if (!newLinkTitle.trim() || !newLinkUrl.trim()) {
       setErrorMsg("กรุณากรอกทั้งชื่อระบบและลิงก์ URL (https://...) ก่อนกดเพิ่มลิงก์");
@@ -133,6 +173,7 @@ export const AdminSettings: React.FC = () => {
       ...links,
       {
         title: newLinkTitle.trim(),
+        titleEn: newLinkTitleEn.trim(),
         description: newLinkDesc.trim() || 'ลิงก์ระบบที่เกี่ยวข้อง',
         url: cleanUrl,
         external: cleanUrl.startsWith('http'),
@@ -140,6 +181,7 @@ export const AdminSettings: React.FC = () => {
     ];
     setLinks(nextLinks);
     setNewLinkTitle('');
+    setNewLinkTitleEn('');
     setNewLinkDesc('');
     setNewLinkUrl('');
     await persistPartialSettings({ links: nextLinks }, 'บันทึกลิงก์ระบบที่เกี่ยวข้องลงส่วนท้ายเว็บไซต์แล้ว ✓');
@@ -171,7 +213,7 @@ export const AdminSettings: React.FC = () => {
       return;
     }
 
-    // Auto-include any pending typed items if user clicked Save All directly
+    // รวมข้อความที่ยังค้างอยู่ในช่องพิมพ์เข้ากับรายการโดยอัตโนมัติเมื่อกดบันทึกทั้งหมด
     const finalTicker = newTickerText.trim()
       ? [...tickerList, newTickerText.trim()]
       : tickerList;
@@ -180,12 +222,21 @@ export const AdminSettings: React.FC = () => {
       setNewTickerText('');
     }
 
+    const finalTickerEn = newTickerTextEn.trim()
+      ? [...tickerListEn, newTickerTextEn.trim()]
+      : tickerListEn;
+    if (newTickerTextEn.trim()) {
+      setTickerListEn(finalTickerEn);
+      setNewTickerTextEn('');
+    }
+
     const finalLinks =
       newLinkTitle.trim() && newLinkUrl.trim()
         ? [
             ...links,
             {
               title: newLinkTitle.trim(),
+              titleEn: newLinkTitleEn.trim(),
               description: newLinkDesc.trim() || 'ลิงก์ระบบที่เกี่ยวข้อง',
               url: newLinkUrl.trim(),
               external: newLinkUrl.trim().startsWith('http'),
@@ -195,6 +246,7 @@ export const AdminSettings: React.FC = () => {
     if (newLinkTitle.trim() && newLinkUrl.trim()) {
       setLinks(finalLinks);
       setNewLinkTitle('');
+      setNewLinkTitleEn('');
       setNewLinkDesc('');
       setNewLinkUrl('');
     }
@@ -204,14 +256,19 @@ export const AdminSettings: React.FC = () => {
       await setDoc(doc(db, 'settings', 'site'), {
         academicYearTH: cleanYear,
         presidentHeadline: presidentHeadline.trim() || DEFAULT_HEADLINE,
+        presidentHeadlineEn: presidentHeadlineEn.trim(),
         presidentMessage: presidentMessage.trim() || DEFAULT_MESSAGE,
+        presidentMessageEn: presidentMessageEn.trim(),
         ticker: finalTicker,
+        tickerEn: finalTickerEn,
         links: finalLinks,
         contactInfo: {
           phone: contactPhone.trim(),
           email: contactEmail.trim(),
           address: contactAddress.trim(),
+          addressEn: contactAddressEn.trim(),
           facebook: facebookName.trim(),
+          facebookEn: facebookNameEn.trim(),
           facebookUrl: facebookUrl.trim(),
           mapIframeUrl: SITE_CONFIG.contact.mapIframeUrl,
         }
@@ -279,85 +336,164 @@ export const AdminSettings: React.FC = () => {
         </div>
       </div>
 
-      {/* Part 1: Section 06 Message from the President */}
+      {/* Part 1: Section 05 Message from the President */}
       <div className="bg-surface-elevated p-6 border border-gold-border/20 rounded-sm shadow-editorial-sm space-y-4">
         <div>
           <h2 className="font-serif text-base font-semibold text-heading">
-            06 สารจากนายกองค์การนักเรียน (หน้าแรก)
+            สารจากนายกองค์การนักเรียน (หน้าแรก)
           </h2>
           <p className="text-xs text-text-muted mt-0.5">
-            ปรับแต่งหัวข้อคำคมและเนื้อหาสารจากนายกองค์การนักเรียนที่แสดงในส่วนที่ 06 ของหน้าแรก (รูปภาพและชื่อจะดึงจากบุคลากรตำแหน่ง "นายกองค์การนักเรียน" ล่าสุดให้อัตโนมัติ)
+            ปรับแต่งหัวข้อคำคมและเนื้อหาสารจากนายกองค์การนักเรียนทั้งภาษาไทยและภาษาอังกฤษ (รูปภาพและชื่อจะดึงจากบุคลากรตำแหน่ง "นายกองค์การนักเรียน" ล่าสุดให้อัตโนมัติ)
           </p>
         </div>
 
         <div className="space-y-4 text-xs">
-          <div>
-            <label className="block font-semibold text-heading mb-1">
-              หัวข้อคำคม / ประโยคเด่น (Headline Quote)
-            </label>
-            <input
-              type="text"
-              value={presidentHeadline}
-              onChange={(e) => setPresidentHeadline(e.target.value)}
-              placeholder={DEFAULT_HEADLINE}
-              className="w-full input-underline text-sm font-serif"
-            />
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <div>
+              <label className="block font-semibold text-heading mb-1">
+                หัวข้อคำคม / ประโยคเด่น (ภาษาไทย)
+              </label>
+              <input
+                type="text"
+                value={presidentHeadline}
+                onChange={(e) => setPresidentHeadline(e.target.value)}
+                placeholder={DEFAULT_HEADLINE}
+                className="w-full input-underline text-sm font-serif"
+              />
+            </div>
+
+            <div>
+              <label className="block font-semibold text-heading mb-1">
+                Headline Quote (English — ไม่บังคับ)
+              </label>
+              <input
+                type="text"
+                value={presidentHeadlineEn}
+                onChange={(e) => setPresidentHeadlineEn(e.target.value)}
+                placeholder='"We are ready to represent and listen to every voice of DeSUP students."'
+                className="w-full input-underline text-sm font-serif"
+              />
+            </div>
           </div>
 
-          <div>
-            <label className="block font-semibold text-heading mb-1">
-              เนื้อหาสารจากนายกองค์การนักเรียน
-            </label>
-            <textarea
-              value={presidentMessage}
-              onChange={(e) => setPresidentMessage(e.target.value)}
-              rows={4}
-              placeholder={DEFAULT_MESSAGE}
-              className="w-full input-underline leading-relaxed"
-            />
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <div>
+              <label className="block font-semibold text-heading mb-1">
+                เนื้อหาสารจากนายกองค์การนักเรียน (ภาษาไทย)
+              </label>
+              <textarea
+                value={presidentMessage}
+                onChange={(e) => setPresidentMessage(e.target.value)}
+                rows={4}
+                placeholder={DEFAULT_MESSAGE}
+                className="w-full input-underline leading-relaxed"
+              />
+            </div>
+
+            <div>
+              <label className="block font-semibold text-heading mb-1">
+                Message from the President (English — ไม่บังคับ)
+              </label>
+              <textarea
+                value={presidentMessageEn}
+                onChange={(e) => setPresidentMessageEn(e.target.value)}
+                rows={4}
+                placeholder="Welcome students, faculty, and parents to the official Student Union portal..."
+                className="w-full input-underline leading-relaxed"
+              />
+            </div>
           </div>
         </div>
       </div>
 
-      {/* Part 2: Ticker Announcements */}
-      <div className="bg-surface-elevated p-6 border border-gold-border/20 rounded-sm shadow-editorial-sm space-y-4">
-        <h2 className="font-serif text-base font-semibold text-heading">
-          แถบข้อความข่าวด่วนวิ่ง (Ticker Announcement Bar)
-        </h2>
-        <p className="text-xs text-text-muted">
-          ข้อความเหล่านี้จะวิ่งอยู่ใต้เมนูหลักหน้าเว็บไซต์ เพื่อแจ้งข่าวเร่งด่วนแก่นักเรียน
-        </p>
-
-        <div className="space-y-2">
-          {tickerList.map((item, idx) => (
-            <div key={idx} className="flex items-center justify-between p-2.5 bg-surface border border-gold-border/20 rounded-sm text-xs">
-              <span className="text-text font-medium">{item}</span>
-              <button
-                type="button"
-                onClick={() => handleRemoveTicker(idx)}
-                className="text-error hover:underline text-xs ml-4"
-              >
-                ลบ
-              </button>
-            </div>
-          ))}
+      {/* Part 2: Ticker Announcements (TH / EN) */}
+      <div className="bg-surface-elevated p-6 border border-gold-border/20 rounded-sm shadow-editorial-sm space-y-5">
+        <div>
+          <h2 className="font-serif text-base font-semibold text-heading">
+            แถบข้อความข่าวด่วนวิ่ง (Ticker Announcement Bar)
+          </h2>
+          <p className="text-xs text-text-muted mt-0.5">
+            ข้อความเหล่านี้จะวิ่งอยู่ใต้เมนูหลักหน้าเว็บไซต์ ทั้งเวอร์ชันภาษาไทยและภาษาอังกฤษ
+          </p>
         </div>
 
-        <form onSubmit={handleAddTicker} className="flex gap-2 pt-2">
-          <input
-            type="text"
-            value={newTickerText}
-            onChange={(e) => setNewTickerText(e.target.value)}
-            placeholder="พิมพ์ข้อความประกาศใหม่..."
-            className="flex-1 text-xs input-underline"
-          />
-          <button
-            type="submit"
-            className="px-4 py-2 bg-brand text-brand-contrast text-xs rounded-sm hover:bg-brand-hover transition-colors"
-          >
-            + เพิ่มข้อความ
-          </button>
-        </form>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* แถบข่าวด่วนภาษาไทย */}
+          <div className="space-y-3">
+            <h3 className="text-xs font-semibold text-heading">ข้อความวิ่ง (ภาษาไทย)</h3>
+            <div className="space-y-2">
+              {tickerList.map((item, idx) => (
+                <div key={idx} className="flex items-center justify-between p-2.5 bg-surface border border-gold-border/20 rounded-sm text-xs">
+                  <span className="text-text font-medium">{item}</span>
+                  <button
+                    type="button"
+                    onClick={() => handleRemoveTicker(idx)}
+                    className="text-error hover:underline text-xs ml-4 shrink-0"
+                  >
+                    ลบ
+                  </button>
+                </div>
+              ))}
+            </div>
+
+            <form onSubmit={handleAddTicker} className="flex gap-2 pt-1">
+              <input
+                type="text"
+                value={newTickerText}
+                onChange={(e) => setNewTickerText(e.target.value)}
+                placeholder="พิมพ์ข้อความประกาศใหม่ (ไทย)..."
+                className="flex-1 text-xs input-underline"
+              />
+              <button
+                type="submit"
+                className="px-4 py-2 bg-brand text-brand-contrast text-xs rounded-sm hover:bg-brand-hover transition-colors shrink-0"
+              >
+                + เพิ่มข้อความ
+              </button>
+            </form>
+          </div>
+
+          {/* แถบข่าวด่วนภาษาอังกฤษ */}
+          <div className="space-y-3">
+            <h3 className="text-xs font-semibold text-heading">Ticker Announcements (English — ไม่บังคับ)</h3>
+            <div className="space-y-2">
+              {tickerListEn.length === 0 ? (
+                <p className="text-[11px] text-text-muted italic py-2">
+                  หากยังไม่กำหนด ระบบหน้าภาษาอังกฤษจะใช้ข้อความมาตรฐานภาษาอังกฤษโดยอัตโนมัติ
+                </p>
+              ) : (
+                tickerListEn.map((item, idx) => (
+                  <div key={idx} className="flex items-center justify-between p-2.5 bg-surface border border-gold-border/20 rounded-sm text-xs">
+                    <span className="text-text font-medium">{item}</span>
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveTickerEn(idx)}
+                      className="text-error hover:underline text-xs ml-4 shrink-0"
+                    >
+                      ลบ
+                    </button>
+                  </div>
+                ))
+              )}
+            </div>
+
+            <form onSubmit={handleAddTickerEn} className="flex gap-2 pt-1">
+              <input
+                type="text"
+                value={newTickerTextEn}
+                onChange={(e) => setNewTickerTextEn(e.target.value)}
+                placeholder="Type English ticker notice..."
+                className="flex-1 text-xs input-underline"
+              />
+              <button
+                type="submit"
+                className="px-4 py-2 bg-brand text-brand-contrast text-xs rounded-sm hover:bg-brand-hover transition-colors shrink-0"
+              >
+                + เพิ่ม EN
+              </button>
+            </form>
+          </div>
+        </div>
       </div>
 
       {/* Part 3: Related System Links */}
@@ -367,7 +503,7 @@ export const AdminSettings: React.FC = () => {
             ลิงก์ระบบที่เกี่ยวข้อง (Footer)
           </h2>
           <p className="text-xs text-text-muted mt-0.5">
-            แสดงในส่วนท้ายของเว็บไซต์ทุกหน้า (เช่น ระบบบริหารงานวิชาการ, ระบบบริหารงานกิจการนักเรียน, เพจ Facebook องค์การนักเรียน)
+            แสดงในส่วนท้ายของเว็บไซต์ทุกหน้า รองรับชื่อลิงก์ทั้งภาษาไทยและภาษาอังกฤษ
           </p>
         </div>
 
@@ -378,15 +514,22 @@ export const AdminSettings: React.FC = () => {
                 type="text"
                 value={lk.title}
                 onChange={(e) => handleUpdateLink(idx, 'title', e.target.value)}
-                placeholder="ชื่อระบบ"
-                className="sm:col-span-4 input-underline bg-surface-elevated px-2"
+                placeholder="ชื่อระบบ (ไทย)"
+                className="sm:col-span-3 input-underline bg-surface-elevated px-2"
+              />
+              <input
+                type="text"
+                value={lk.titleEn || ''}
+                onChange={(e) => handleUpdateLink(idx, 'titleEn', e.target.value)}
+                placeholder="English Title (ไม่บังคับ)"
+                className="sm:col-span-3 input-underline bg-surface-elevated px-2"
               />
               <input
                 type="url"
                 value={lk.url}
                 onChange={(e) => handleUpdateLink(idx, 'url', e.target.value)}
                 placeholder="https://..."
-                className="sm:col-span-7 input-underline bg-surface-elevated px-2 font-mono"
+                className="sm:col-span-5 input-underline bg-surface-elevated px-2 font-mono"
               />
               <button
                 type="button"
@@ -404,22 +547,29 @@ export const AdminSettings: React.FC = () => {
             type="text"
             value={newLinkTitle}
             onChange={(e) => setNewLinkTitle(e.target.value)}
-            placeholder="ชื่อระบบที่เกี่ยวข้องใหม่..."
-            className="sm:col-span-4 input-underline"
+            placeholder="ชื่อระบบ (ไทย)..."
+            className="sm:col-span-3 input-underline"
+          />
+          <input
+            type="text"
+            value={newLinkTitleEn}
+            onChange={(e) => setNewLinkTitleEn(e.target.value)}
+            placeholder="English Title (ไม่บังคับ)"
+            className="sm:col-span-3 input-underline"
           />
           <input
             type="text"
             value={newLinkDesc}
             onChange={(e) => setNewLinkDesc(e.target.value)}
             placeholder="คำอธิบายสั้น (ไม่บังคับ)"
-            className="sm:col-span-3 input-underline"
+            className="sm:col-span-2 input-underline"
           />
           <input
             type="url"
             value={newLinkUrl}
             onChange={(e) => setNewLinkUrl(e.target.value)}
             placeholder="https://..."
-            className="sm:col-span-3 input-underline font-mono"
+            className="sm:col-span-2 input-underline font-mono"
           />
           <button
             type="button"
@@ -458,8 +608,8 @@ export const AdminSettings: React.FC = () => {
             />
           </div>
 
-          <div className="sm:col-span-2">
-            <label className="block font-semibold text-heading mb-1">ที่อยู่โรงเรียน</label>
+          <div>
+            <label className="block font-semibold text-heading mb-1">ที่อยู่โรงเรียน (ภาษาไทย)</label>
             <input
               type="text"
               value={contactAddress}
@@ -469,7 +619,18 @@ export const AdminSettings: React.FC = () => {
           </div>
 
           <div>
-            <label className="block font-semibold text-heading mb-1">ชื่อเพจ Facebook</label>
+            <label className="block font-semibold text-heading mb-1">School Address (English — ไม่บังคับ)</label>
+            <input
+              type="text"
+              value={contactAddressEn}
+              onChange={(e) => setContactAddressEn(e.target.value)}
+              placeholder="Demonstration School, University of Phayao..."
+              className="w-full input-underline"
+            />
+          </div>
+
+          <div>
+            <label className="block font-semibold text-heading mb-1">ชื่อเพจ Facebook (ภาษาไทย)</label>
             <input
               type="text"
               value={facebookName}
@@ -479,6 +640,17 @@ export const AdminSettings: React.FC = () => {
           </div>
 
           <div>
+            <label className="block font-semibold text-heading mb-1">Facebook Page Name (English — ไม่บังคับ)</label>
+            <input
+              type="text"
+              value={facebookNameEn}
+              onChange={(e) => setFacebookNameEn(e.target.value)}
+              placeholder="Demonstration School of University of Phayao Student Union"
+              className="w-full input-underline"
+            />
+          </div>
+
+          <div className="sm:col-span-2">
             <label className="block font-semibold text-heading mb-1">ลิงก์เพจ Facebook</label>
             <input
               type="url"

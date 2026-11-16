@@ -18,6 +18,12 @@
     "academicYearLabel": "Academic Year {{year}}",
     "copyright": "© {{year}} {{name}} · {{school}}"
   },
+  "l10n": {
+    "thOriginalBadge": "Thai Original",
+    "thOriginalTitle": "Displayed in original Thai because an English translation is not yet available.",
+    "articleUntranslatedTitle": "Original Thai Content",
+    "articleUntranslatedDesc": "An English translation for this article is not yet available; the complete original Thai version is shown below."
+  },
   "nav": {
     "home": "Home",
     "homeAria": "Home — Demonstration School of University of Phayao Student Union",

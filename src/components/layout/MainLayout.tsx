@@ -18,10 +18,31 @@ import { doc, updateDoc, increment } from 'firebase/firestore';
 import { db } from '../../lib/firebase';
 import { prefetchNews } from '../../lib/publicDataService';
 import { useSiteSettings } from '../../context/SiteSettingsContext';
+import { getLangFromPath } from '../../lib/i18nRouting';
+import { pickArrayL10n } from '../../lib/l10n';
+
+// ข้อความตั้งต้นแบบเก่าสำหรับตรวจสอบเพื่อให้หน้า EN แสดงชุดข้อความภาษาอังกฤษมาตรฐานเมื่อยังไม่มีการแปล
+const LEGACY_TH_DEFAULT_TICKERS = new Set([
+  'ยินดีต้อนรับสู่เว็บไซต์ทางการ องค์การนักเรียน โรงเรียนสาธิตมหาวิทยาลัยพะเยา',
+  'ร่วมส่งเสียงและข้อเสนอแนะเพื่อพัฒนาโรงเรียนของเราผ่านระบบรับเรื่องร้องเรียนออนไลน์',
+  'ติดตามปฏิทินกิจกรรมและการดาวน์โหลดเอกสารระเบียบข้อบังคับได้ที่นี่',
+]);
 
 export const MainLayout: React.FC = () => {
   const location = useLocation();
-  const { ticker: tickerItems } = useSiteSettings();
+  const { ticker, tickerEn } = useSiteSettings();
+  const currentLang = getLangFromPath(location.pathname);
+
+  const resolvedTicker = React.useMemo(() => {
+    if (currentLang === 'en') {
+      const cleanEn = tickerEn.map((s) => s.trim()).filter(Boolean);
+      if (cleanEn.length > 0) return cleanEn;
+      const hasOnlyLegacyDefaults =
+        ticker.length > 0 && ticker.every((item) => LEGACY_TH_DEFAULT_TICKERS.has(item.trim()));
+      if (hasOnlyLegacyDefaults) return [];
+    }
+    return pickArrayL10n(ticker, tickerEn, currentLang).items;
+  }, [currentLang, ticker, tickerEn]);
 
   // Smooth scroll via Lenis only on desktop pointers; let iPhone/iPad use native hardware momentum scrolling
   useEffect(() => {
@@ -110,7 +131,7 @@ export const MainLayout: React.FC = () => {
         <Preloader />
 
         {/* แถบนำทางหลักและประกาศ */}
-        <Navbar tickerItems={tickerItems} />
+        <Navbar tickerItems={resolvedTicker} />
 
         {/* เนื้อหาหลักของแต่ละหน้า */}
         <main className="flex-1">

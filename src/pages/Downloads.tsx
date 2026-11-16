@@ -14,6 +14,8 @@ import { SeoHead } from '../components/common/SeoHead';
 import { useLanguage } from '../context/LanguageContext';
 import { resolveDownloadUrl } from '../lib/downloadStorage';
 import { getCachedDownloadsSync, loadDownloads } from '../lib/publicDataService';
+import { pickL10n } from '../lib/l10n';
+import { FallbackLangBadge } from '../components/common/FallbackLangBadge';
 
 export const Downloads: React.FC = () => {
   const { t } = useTranslation();
@@ -118,12 +120,13 @@ export const Downloads: React.FC = () => {
         shouldRevoke = resolved.isBlob;
       }
 
-      const ext = item.fileType && !item.title.toLowerCase().endsWith(`.${item.fileType.toLowerCase()}`)
+      const displayTitle = pickL10n(item.title, item.titleEn, lang).text || item.title;
+      const ext = item.fileType && !displayTitle.toLowerCase().endsWith(`.${item.fileType.toLowerCase()}`)
         ? `.${item.fileType.toLowerCase()}`
         : '';
       const link = document.createElement('a');
       link.href = targetUrl;
-      link.download = `${item.title}${ext}`;
+      link.download = `${displayTitle}${ext}`;
       if (!shouldRevoke && !targetUrl.startsWith('blob:')) {
         link.target = '_blank';
         link.rel = 'noreferrer';
@@ -159,8 +162,12 @@ export const Downloads: React.FC = () => {
   };
 
   const filtered = downloads.filter((d) => {
-    if (search && !d.title.toLowerCase().includes(search.toLowerCase())) return false;
-    return true;
+    const q = search.trim().toLowerCase();
+    if (!q) return true;
+    return (
+      d.title.toLowerCase().includes(q) ||
+      (d.titleEn || '').toLowerCase().includes(q)
+    );
   });
 
   return (
@@ -200,12 +207,17 @@ export const Downloads: React.FC = () => {
       ) : filtered.length > 0 ? (
         <div className="border border-gold-border/20 bg-surface rounded-sm shadow-editorial overflow-hidden">
           <div className="md:hidden divide-y divide-gold-border/15">
-            {filtered.map((item) => (
+            {filtered.map((item) => {
+              const titleRes = pickL10n(item.title, item.titleEn, lang);
+              return (
               <div key={item.id} className="p-4 space-y-3">
                 <div className="flex items-start justify-between gap-2">
-                  <h3 className="font-serif text-base font-semibold text-heading leading-snug">
-                    {item.title}
-                  </h3>
+                  <div className="space-y-1 min-w-0">
+                    <h3 className="font-serif text-base font-semibold text-heading leading-snug">
+                      {titleRes.text}
+                    </h3>
+                    <FallbackLangBadge show={titleRes.isFallback} />
+                  </div>
                   <span className="font-mono text-[10px] tracking-wider px-2 py-0.5 border border-gold/60 rounded-sm text-gold-text uppercase font-bold shrink-0">
                     {item.fileType}
                   </span>
@@ -232,7 +244,8 @@ export const Downloads: React.FC = () => {
                   </button>
                 </div>
               </div>
-            ))}
+              );
+            })}
           </div>
 
           <div className="hidden md:block overflow-x-auto">
@@ -246,10 +259,15 @@ export const Downloads: React.FC = () => {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gold-border/15">
-                {filtered.map((item) => (
+                {filtered.map((item) => {
+                  const titleRes = pickL10n(item.title, item.titleEn, lang);
+                  return (
                   <tr key={item.id} className="hover:bg-brand-soft/30 transition-colors">
                     <td className="py-4 px-4 font-serif text-sm font-semibold text-heading">
-                      {item.title}
+                      <div className="flex flex-wrap items-center gap-2">
+                        <span>{titleRes.text}</span>
+                        <FallbackLangBadge show={titleRes.isFallback} />
+                      </div>
                     </td>
                     <td className="py-4 px-4">
                       <span className="font-mono text-[10px] tracking-wider px-2 py-0.5 border border-gold/60 rounded-sm text-gold-text uppercase font-bold">
@@ -281,7 +299,8 @@ export const Downloads: React.FC = () => {
                       </div>
                     </td>
                   </tr>
-                ))}
+                  );
+                })}
               </tbody>
             </table>
           </div>
@@ -298,7 +317,9 @@ export const Downloads: React.FC = () => {
       )}
 
       {/* หน้าต่างแสดงตัวอย่างเอกสาร PDF */}
-      {previewItem && (
+      {previewItem && (() => {
+        const previewTitleRes = pickL10n(previewItem.title, previewItem.titleEn, lang);
+        return (
         <div className="fixed inset-0 z-50 bg-anchor-bg-deep/70 backdrop-blur-sm flex items-center justify-center p-3 sm:p-6 overflow-hidden">
           <div className="bg-surface border-2 border-gold rounded-sm w-full max-w-4xl max-h-[95vh] flex flex-col shadow-2xl relative overflow-hidden">
             <CornerBracket position="top-left" />
@@ -308,11 +329,14 @@ export const Downloads: React.FC = () => {
 
             <div className="p-4 sm:p-5 border-b border-gold-border/25 flex items-center justify-between bg-surface-elevated">
               <div className="pr-4">
-                <span className="text-[10px] uppercase font-bold tracking-wider text-gold-text">
-                  {previewItem.fileType.toUpperCase()}
-                </span>
+                <div className="flex items-center gap-2">
+                  <span className="text-[10px] uppercase font-bold tracking-wider text-gold-text">
+                    {previewItem.fileType.toUpperCase()}
+                  </span>
+                  <FallbackLangBadge show={previewTitleRes.isFallback} />
+                </div>
                 <h3 className="font-serif text-base sm:text-lg font-bold text-heading line-clamp-1">
-                  {previewItem.title}
+                  {previewTitleRes.text}
                 </h3>
               </div>
               <button
@@ -339,7 +363,7 @@ export const Downloads: React.FC = () => {
                 <iframe
                   ref={pdfFrameRef}
                   src={previewUrl}
-                  title={previewItem.title}
+                  title={previewTitleRes.text}
                   className="w-full h-full min-h-[60vh] rounded-sm border border-gold-border/25 bg-surface-elevated"
                 />
               ) : (
@@ -401,7 +425,8 @@ export const Downloads: React.FC = () => {
             </div>
           </div>
         </div>
-      )}
+        );
+      })()}
     </div>
   );
 };

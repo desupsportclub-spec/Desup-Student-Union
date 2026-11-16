@@ -12,6 +12,8 @@ import { SeoHead } from '../../components/common/SeoHead';
 import { useLanguage } from '../../context/LanguageContext';
 import { formatAcademicYear } from '../../lib/format';
 import { getCachedPeopleSync, loadPeopleList } from '../../lib/publicDataService';
+import { pickL10n } from '../../lib/l10n';
+import { FallbackLangBadge } from '../../components/common/FallbackLangBadge';
 
 function filterPresidents(all: PersonItem[]): PersonItem[] {
   const list = all.filter((item) => {
@@ -86,6 +88,9 @@ export const AboutHall: React.FC = () => {
             {presidents.map((pres, index) => {
               const isEven = index % 2 === 0;
               const formattedYear = pres.yearTH ? formatAcademicYear(pres.yearTH, lang) : '';
+              const nameRes = pickL10n(pres.name, pres.nameEn, lang);
+              const posRes = pickL10n(pres.position, pres.positionEn, lang);
+              const quoteRes = pickL10n(pres.quote, pres.quoteEn, lang);
 
               return (
                 <div
@@ -112,7 +117,7 @@ export const AboutHall: React.FC = () => {
                           {pres.photo?.url || pres.photoUrl ? (
                             <img
                               src={pres.photo?.url || pres.photoUrl}
-                              alt={pres.name}
+                              alt={nameRes.text}
                               className="w-full h-full object-cover"
                             />
                           ) : (
@@ -122,24 +127,27 @@ export const AboutHall: React.FC = () => {
                           )}
                         </div>
 
-                        <div>
-                          {formattedYear && (
-                            <span className="text-[10px] uppercase tracking-wider text-gold-text font-semibold">
-                              {t('site.academicYearLabel', { year: formattedYear })}
-                            </span>
-                          )}
+                        <div className="min-w-0 flex-1">
+                          <div className="flex flex-wrap items-center gap-2">
+                            {formattedYear && (
+                              <span className="text-[10px] uppercase tracking-wider text-gold-text font-semibold">
+                                {t('site.academicYearLabel', { year: formattedYear })}
+                              </span>
+                            )}
+                            <FallbackLangBadge show={nameRes.isFallback || posRes.isFallback} />
+                          </div>
                           <h3 className="font-serif text-lg font-semibold text-heading">
-                            {pres.name}
+                            {nameRes.text}
                           </h3>
                           <p className="text-xs text-accent font-medium">
-                            {pres.position || t('about.hall.roleFallback')}
+                            {posRes.text || t('about.hall.roleFallback')}
                           </p>
                         </div>
                       </div>
 
-                      {pres.quote && (
+                      {quoteRes.text && (
                         <p className="text-xs text-text-muted italic pt-2 border-t border-gold-border/15 font-serif leading-relaxed">
-                          "{pres.quote}"
+                          "{quoteRes.text}"
                         </p>
                       )}
                     </div>

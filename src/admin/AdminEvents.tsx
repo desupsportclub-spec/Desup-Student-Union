@@ -15,6 +15,8 @@ import {
 } from '../lib/format';
 import { SuccessFeedbackModal } from '../components/common/SuccessFeedbackModal';
 import { invalidatePublicDataCache } from '../lib/publicDataService';
+import { hasAnyEnTranslation } from '../lib/l10n';
+import { AdminLangTabs, AdminEnStatusBadge, AdminLangMode } from './AdminLangTabs';
 
 export const AdminEvents: React.FC = () => {
   const [events, setEvents] = useState<EventItem[]>([]);
@@ -23,10 +25,14 @@ export const AdminEvents: React.FC = () => {
   const [editingItem, setEditingItem] = useState<EventItem | null>(null);
   const [successModalTitle, setSuccessModalTitle] = useState('');
 
-  // Form Fields
+  // ฟิลด์ข้อมูลฟอร์ม 2 ภาษา
+  const [editLang, setEditLang] = useState<AdminLangMode>('th');
   const [title, setTitle] = useState('');
+  const [titleEn, setTitleEn] = useState('');
   const [description, setDescription] = useState('');
+  const [descriptionEn, setDescriptionEn] = useState('');
   const [location, setLocation] = useState('');
+  const [locationEn, setLocationEn] = useState('');
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
   const [published, setPublished] = useState(true);
@@ -55,9 +61,13 @@ export const AdminEvents: React.FC = () => {
 
   const handleOpenCreate = () => {
     setEditingItem(null);
+    setEditLang('th');
     setTitle('');
+    setTitleEn('');
     setDescription('');
+    setDescriptionEn('');
     setLocation('โรงเรียนสาธิต มพ.');
+    setLocationEn('DeSUP Campus');
     setStartDate(getLocalTodayDateKey());
     setEndDate('');
     setPublished(true);
@@ -66,9 +76,13 @@ export const AdminEvents: React.FC = () => {
 
   const handleOpenEdit = (item: EventItem) => {
     setEditingItem(item);
+    setEditLang('th');
     setTitle(item.title);
+    setTitleEn(item.titleEn || '');
     setDescription(item.description || '');
+    setDescriptionEn(item.descriptionEn || '');
     setLocation(item.location || '');
+    setLocationEn(item.locationEn || '');
     setStartDate(getEventDateKey(item.startAt));
     setEndDate(item.endAt ? getEventDateKey(item.endAt) : '');
     setPublished(item.published);
@@ -85,9 +99,12 @@ export const AdminEvents: React.FC = () => {
       const hasValidEnd = Boolean(endDate && endDate > startDate);
       const eventDoc: EventItem = {
         title: title.trim(),
+        titleEn: titleEn.trim(),
         description: description.trim(),
+        descriptionEn: descriptionEn.trim(),
         type: editingItem?.type || 'academic',
         location: location.trim(),
+        locationEn: locationEn.trim(),
         startAt: new Date(startDate).toISOString(),
         ...(hasValidEnd ? { endAt: new Date(endDate).toISOString() } : {}),
         allDay: true,
@@ -150,6 +167,7 @@ export const AdminEvents: React.FC = () => {
                 <tr>
                   <th className="py-3 px-4">วันที่</th>
                   <th className="py-3 px-4">ชื่อกิจกรรม</th>
+                  <th className="py-3 px-4">ภาษา</th>
                   <th className="py-3 px-4">สถานที่</th>
                   <th className="py-3 px-4">สถานะ</th>
                   <th className="py-3 px-4 text-center">การจัดการ</th>
@@ -159,6 +177,7 @@ export const AdminEvents: React.FC = () => {
                 {events.map((item) => {
                   const scheduleStatus = getEventScheduleStatus(item.startAt, item.endAt);
                   const hasEnd = Boolean(item.endAt && getEventDateKey(item.endAt) > getEventDateKey(item.startAt));
+                  const hasEn = hasAnyEnTranslation(item.titleEn, item.descriptionEn, item.locationEn);
                   return (
                   <tr key={item.id} className="hover:bg-bg-alt/60 transition-colors">
                     <td className="py-3 px-4 font-mono font-bold text-accent whitespace-nowrap">
@@ -171,6 +190,9 @@ export const AdminEvents: React.FC = () => {
                     </td>
                     <td className="py-3 px-4 font-medium text-text">
                       <div>{item.title}</div>
+                      {item.titleEn && (
+                        <div className="text-[10px] text-text-muted mt-0.5">EN: {item.titleEn}</div>
+                      )}
                       <div className="mt-1">
                         {scheduleStatus === 'ongoing' ? (
                           <span className="inline-block px-1.5 py-0.5 text-[10px] rounded-sm bg-success-bg text-success border border-success/30">
@@ -186,6 +208,9 @@ export const AdminEvents: React.FC = () => {
                           </span>
                         )}
                       </div>
+                    </td>
+                    <td className="py-3 px-4 whitespace-nowrap">
+                      <AdminEnStatusBadge translated={hasEn} />
                     </td>
                     <td className="py-3 px-4 text-text-muted">
                       {item.location}
@@ -238,8 +263,14 @@ export const AdminEvents: React.FC = () => {
             </div>
 
             <form onSubmit={handleSave} className="space-y-4 text-xs">
-              <div>
-                <label className="block font-semibold text-heading mb-1">ชื่อกิจกรรม *</label>
+              <AdminLangTabs
+                value={editLang}
+                onChange={setEditLang}
+                enReady={hasAnyEnTranslation(titleEn, descriptionEn, locationEn)}
+              />
+
+              <div className={editLang === 'th' ? 'block' : 'hidden'}>
+                <label className="block font-semibold text-heading mb-1">ชื่อกิจกรรม (ภาษาไทย) *</label>
                 <input
                   type="text"
                   value={title}
@@ -247,6 +278,17 @@ export const AdminEvents: React.FC = () => {
                   placeholder="เช่น การแข่งขันกรีฑาสาธิตเกมส์"
                   className="w-full input-underline"
                   required
+                />
+              </div>
+
+              <div className={editLang === 'en' ? 'block' : 'hidden'}>
+                <label className="block font-semibold text-heading mb-1">Activity Title (English — Optional)</label>
+                <input
+                  type="text"
+                  value={titleEn}
+                  onChange={(e) => setTitleEn(e.target.value)}
+                  placeholder="e.g., Satit Games Annual Athletics Competition"
+                  className="w-full input-underline"
                 />
               </div>
 
@@ -278,8 +320,8 @@ export const AdminEvents: React.FC = () => {
                 </div>
               </div>
 
-              <div>
-                <label className="block font-semibold text-heading mb-1">สถานที่จัดกิจกรรม</label>
+              <div className={editLang === 'th' ? 'block' : 'hidden'}>
+                <label className="block font-semibold text-heading mb-1">สถานที่จัดกิจกรรม (ภาษาไทย)</label>
                 <input
                   type="text"
                   value={location}
@@ -289,14 +331,36 @@ export const AdminEvents: React.FC = () => {
                 />
               </div>
 
-              <div>
-                <label className="block font-semibold text-heading mb-1">คำอธิบายรายละเอียด</label>
+              <div className={editLang === 'en' ? 'block' : 'hidden'}>
+                <label className="block font-semibold text-heading mb-1">Location (English — Optional)</label>
+                <input
+                  type="text"
+                  value={locationEn}
+                  onChange={(e) => setLocationEn(e.target.value)}
+                  placeholder="e.g., Main Stadium, Assembly Hall"
+                  className="w-full input-underline"
+                />
+              </div>
+
+              <div className={editLang === 'th' ? 'block' : 'hidden'}>
+                <label className="block font-semibold text-heading mb-1">คำอธิบายรายละเอียด (ภาษาไทย)</label>
                 <textarea
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
                   rows={3}
                   className="w-full input-underline"
                   placeholder="รายละเอียดกำหนดการ..."
+                />
+              </div>
+
+              <div className={editLang === 'en' ? 'block' : 'hidden'}>
+                <label className="block font-semibold text-heading mb-1">Description (English — Optional)</label>
+                <textarea
+                  value={descriptionEn}
+                  onChange={(e) => setDescriptionEn(e.target.value)}
+                  rows={3}
+                  className="w-full input-underline"
+                  placeholder="Schedule details and activity overview in English..."
                 />
               </div>
 

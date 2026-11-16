@@ -11,6 +11,8 @@ import { ImageUploader } from '../components/common/ImageUploader';
 import { CornerBracket } from '../components/common/Ornament';
 import { SuccessFeedbackModal } from '../components/common/SuccessFeedbackModal';
 import { invalidatePublicDataCache } from '../lib/publicDataService';
+import { hasAnyEnTranslation } from '../lib/l10n';
+import { AdminLangTabs, AdminEnStatusBadge, AdminLangMode } from './AdminLangTabs';
 
 export const AdminBanners: React.FC = () => {
   const [banners, setBanners] = useState<BannerItem[]>([]);
@@ -18,9 +20,12 @@ export const AdminBanners: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<BannerItem | null>(null);
 
-  // Form Fields
+  // ฟิลด์ข้อมูลฟอร์ม 2 ภาษา
+  const [editLang, setEditLang] = useState<AdminLangMode>('th');
   const [title, setTitle] = useState('');
+  const [titleEn, setTitleEn] = useState('');
   const [subtitle, setSubtitle] = useState('');
+  const [subtitleEn, setSubtitleEn] = useState('');
   const [imageUrl, setImageUrl] = useState('');
   const [linkUrl, setLinkUrl] = useState('');
   const [order, setOrder] = useState(1);
@@ -52,8 +57,11 @@ export const AdminBanners: React.FC = () => {
 
   const handleOpenCreate = () => {
     setEditingItem(null);
+    setEditLang('th');
     setTitle('');
+    setTitleEn('');
     setSubtitle('');
+    setSubtitleEn('');
     setImageUrl('');
     setLinkUrl('');
     setOrder(banners.length + 1);
@@ -64,8 +72,11 @@ export const AdminBanners: React.FC = () => {
 
   const handleOpenEdit = (item: BannerItem) => {
     setEditingItem(item);
+    setEditLang('th');
     setTitle(item.title);
+    setTitleEn(item.titleEn || '');
     setSubtitle(item.subtitle || '');
+    setSubtitleEn(item.subtitleEn || '');
     setImageUrl(item.imageUrl);
     setLinkUrl(item.linkUrl || '');
     setOrder(item.order || 1);
@@ -92,7 +103,9 @@ export const AdminBanners: React.FC = () => {
       const id = editingItem?.id || doc(collection(db, 'banners')).id;
       const bannerDoc: BannerItem = {
         title: title.trim(),
+        titleEn: titleEn.trim(),
         subtitle: subtitle.trim(),
+        subtitleEn: subtitleEn.trim(),
         imageUrl: imageUrl.trim(),
         linkUrl: linkUrl.trim(),
         order: Number(order) || 1,
@@ -134,6 +147,7 @@ export const AdminBanners: React.FC = () => {
         ...item,
         active: !item.active
       });
+      invalidatePublicDataCache('banners');
       await fetchBanners();
     } catch (err) {
       console.error("Toggle error:", err);
@@ -192,7 +206,7 @@ export const AdminBanners: React.FC = () => {
                     alt={item.title}
                     className="w-full h-full object-cover"
                   />
-                  <div className="absolute top-2 left-2 flex gap-1.5">
+                  <div className="absolute top-2 left-2 flex flex-wrap gap-1.5">
                     <span className="text-[10px] px-2 py-0.5 bg-anchor-bg/90 text-anchor-text rounded font-medium">
                       ลำดับ {item.order}
                     </span>
@@ -203,6 +217,9 @@ export const AdminBanners: React.FC = () => {
                     >
                       {item.active ? 'แสดงผล' : 'ซ่อน'}
                     </span>
+                    <AdminEnStatusBadge
+                      translated={hasAnyEnTranslation(item.titleEn, item.subtitleEn)}
+                    />
                   </div>
                 </div>
 
@@ -210,6 +227,11 @@ export const AdminBanners: React.FC = () => {
                   <h3 className="font-serif text-base font-semibold text-heading line-clamp-2">
                     {item.title}
                   </h3>
+                  {item.titleEn && (
+                    <p className="text-[11px] text-text-muted line-clamp-1">
+                      EN: {item.titleEn}
+                    </p>
+                  )}
                   {item.subtitle && (
                     <p className="text-xs text-text-muted line-clamp-2">
                       {item.subtitle}
@@ -282,30 +304,67 @@ export const AdminBanners: React.FC = () => {
                   {errorMsg}
                 </div>
               )}
-              <div>
-                <label className="block text-xs font-medium text-heading mb-1">
-                  หัวข้อ / ข้อความหลักบนแบนเนอร์ (ปล่อยว่างได้หากไม่ต้องการข้อความทับภาพ)
-                </label>
-                <input
-                  type="text"
-                  value={title}
-                  onChange={(e) => setTitle(e.target.value)}
-                  placeholder="เช่น ยินดีต้อนรับสู่เว็บไซต์ทางการ องค์การนักเรียน"
-                  className="w-full text-xs input-underline"
-                />
+
+              <AdminLangTabs
+                value={editLang}
+                onChange={setEditLang}
+                enReady={hasAnyEnTranslation(titleEn, subtitleEn)}
+              />
+
+              <div className={editLang === 'th' ? 'space-y-4' : 'hidden'}>
+                <div>
+                  <label className="block text-xs font-medium text-heading mb-1">
+                    หัวข้อ / ข้อความหลักบนแบนเนอร์ — ภาษาไทย (ปล่อยว่างได้หากไม่ต้องการข้อความทับภาพ)
+                  </label>
+                  <input
+                    type="text"
+                    value={title}
+                    onChange={(e) => setTitle(e.target.value)}
+                    placeholder="เช่น ยินดีต้อนรับสู่เว็บไซต์ทางการ องค์การนักเรียน"
+                    className="w-full text-xs input-underline"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-medium text-heading mb-1">
+                    ข้อความรอง / คำบรรยาย — ภาษาไทย (Subtitle)
+                  </label>
+                  <input
+                    type="text"
+                    value={subtitle}
+                    onChange={(e) => setSubtitle(e.target.value)}
+                    placeholder="เช่น มุ่งมั่นพัฒนาวิชาการ ควบคู่กิจกรรมสร้างสรรค์"
+                    className="w-full text-xs input-underline"
+                  />
+                </div>
               </div>
 
-              <div>
-                <label className="block text-xs font-medium text-heading mb-1">
-                  ข้อความรอง / คำบรรยาย (Subtitle)
-                </label>
-                <input
-                  type="text"
-                  value={subtitle}
-                  onChange={(e) => setSubtitle(e.target.value)}
-                  placeholder="เช่น มุ่งมั่นพัฒนาวิชาการ ควบคู่กิจกรรมสร้างสรรค์"
-                  className="w-full text-xs input-underline"
-                />
+              <div className={editLang === 'en' ? 'space-y-4' : 'hidden'}>
+                <div>
+                  <label className="block text-xs font-medium text-heading mb-1">
+                    Banner Headline — English (Optional)
+                  </label>
+                  <input
+                    type="text"
+                    value={titleEn}
+                    onChange={(e) => setTitleEn(e.target.value)}
+                    placeholder="e.g., Welcome to the Official DeSUP Student Union Portal"
+                    className="w-full text-xs input-underline"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-medium text-heading mb-1">
+                    Banner Subtitle — English (Optional)
+                  </label>
+                  <input
+                    type="text"
+                    value={subtitleEn}
+                    onChange={(e) => setSubtitleEn(e.target.value)}
+                    placeholder="e.g., Promoting identity and protecting student rights"
+                    className="w-full text-xs input-underline"
+                  />
+                </div>
               </div>
 
               <div>

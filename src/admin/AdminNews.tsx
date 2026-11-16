@@ -22,6 +22,8 @@ import {
 import { SuccessFeedbackModal } from '../components/common/SuccessFeedbackModal';
 import { PinIcon } from '../components/common/Ornament';
 import { invalidatePublicDataCache } from '../lib/publicDataService';
+import { hasAnyEnTranslation, hasRichContent, normalizeRichHtml } from '../lib/l10n';
+import { AdminLangTabs, AdminEnStatusBadge, AdminLangMode } from './AdminLangTabs';
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 
@@ -53,10 +55,13 @@ export const AdminNews: React.FC = () => {
   const [search, setSearch] = useState('');
   const [successModalTitle, setSuccessModalTitle] = useState('');
 
-  // Form Fields
+  // ฟิลด์ฟอร์ม (ภาษาไทยหลัก + ภาษาอังกฤษไม่บังคับ)
+  const [editLang, setEditLang] = useState<AdminLangMode>('th');
   const [title, setTitle] = useState('');
+  const [titleEn, setTitleEn] = useState('');
   const [category, setCategory] = useState<NewsCategory>('pr');
   const [excerpt, setExcerpt] = useState('');
+  const [excerptEn, setExcerptEn] = useState('');
   const [coverImage, setCoverImage] = useState<ImageAsset>({ url: '', alt: '' });
   const [videoUrl, setVideoUrl] = useState('');
   const [socialLinks, setSocialLinks] = useState<SocialMediaLink[]>([]);
@@ -66,8 +71,12 @@ export const AdminNews: React.FC = () => {
   const [pinned, setPinned] = useState(false);
   const [ytPreview, setYtPreview] = useState<YouTubePreviewState | null>(null);
 
-  // Tiptap Editor setup
+  // ตั้งค่าเครื่องมือแก้ไขเนื้อหา Tiptap ทั้งภาษาไทยและภาษาอังกฤษแยกอิสระเพื่อไม่ให้เนื้อหาสูญหายเวลาสลับแท็บ
   const editor = useEditor({
+    extensions: [StarterKit],
+    content: '',
+  });
+  const editorEn = useEditor({
     extensions: [StarterKit],
     content: '',
   });
@@ -163,9 +172,12 @@ export const AdminNews: React.FC = () => {
 
   const handleOpenCreate = () => {
     setEditingItem(null);
+    setEditLang('th');
     setTitle('');
+    setTitleEn('');
     setCategory('pr');
     setExcerpt('');
+    setExcerptEn('');
     setCoverImage({ url: '', alt: '' });
     setVideoUrl('');
     setSocialLinks([]);
@@ -175,14 +187,18 @@ export const AdminNews: React.FC = () => {
     setPinned(false);
     setYtPreview(null);
     if (editor) editor.commands.setContent('');
+    if (editorEn) editorEn.commands.setContent('');
     setIsModalOpen(true);
   };
 
   const handleOpenEdit = (item: NewsItem) => {
     setEditingItem(item);
+    setEditLang('th');
     setTitle(item.title);
+    setTitleEn(item.titleEn || '');
     setCategory(item.category === 'order' ? 'regulation' : item.category);
     setExcerpt(item.excerpt || '');
+    setExcerptEn(item.excerptEn || '');
     setCoverImage(item.coverImage || (item.coverUrl ? { url: item.coverUrl, alt: item.title } : { url: '', alt: '' }));
     setVideoUrl(item.videoUrl || '');
     setSocialLinks(item.socialLinks || []);
@@ -192,6 +208,7 @@ export const AdminNews: React.FC = () => {
     setPinned(item.pinned || false);
     setYtPreview(null);
     if (editor) editor.commands.setContent(item.content || '');
+    if (editorEn) editorEn.commands.setContent(item.contentEn || '');
     setIsModalOpen(true);
   };
 
@@ -288,16 +305,20 @@ export const AdminNews: React.FC = () => {
 
     setSaving(true);
     const contentHTML = editor ? editor.getHTML() : '';
+    const contentEnHTML = normalizeRichHtml(editorEn ? editorEn.getHTML() : '');
     const now = new Date().toISOString();
 
     try {
       const id = editingItem?.id || doc(collection(db, 'news')).id;
       const newsDoc: NewsItem = {
         title: title.trim(),
+        titleEn: titleEn.trim(),
         slug: slugifyThai(title.trim()),
         category,
         excerpt: excerpt.trim(),
+        excerptEn: excerptEn.trim(),
         content: contentHTML,
+        contentEn: contentEnHTML,
         coverImage: finalCoverImage,
         videoUrl: cleanPrimaryVideo,
         socialLinks: finalSocialLinks,
@@ -333,9 +354,13 @@ export const AdminNews: React.FC = () => {
     }
   };
 
-  const filteredNews = news.filter((n) =>
-    n.title.toLowerCase().includes(search.toLowerCase())
-  );
+  const filteredNews = news.filter((n) => {
+    const q = search.toLowerCase();
+    return (
+      n.title.toLowerCase().includes(q) ||
+      (n.titleEn || '').toLowerCase().includes(q)
+    );
+  });
 
   return (
     <div className="space-y-6">
@@ -396,6 +421,7 @@ export const AdminNews: React.FC = () => {
               <thead className="bg-surface border-b border-gold-border/15 text-gold-text uppercase tracking-wider font-medium">
                 <tr>
                   <th className="py-3 px-4">หัวข้อข่าว</th>
+                  <th className="py-3 px-4">ภาษา</th>
                   <th className="py-3 px-4">หมวดหมู่</th>
                   <th className="py-3 px-4">ปักหมุดหน้าแรก</th>
                   <th className="py-3 px-4">สถานะ</th>
@@ -407,6 +433,9 @@ export const AdminNews: React.FC = () => {
               <tbody className="divide-y divide-gold-border/10">
                 {filteredNews.map((item) => {
                   const thumb = getNewsCoverUrl(item);
+                  const hasEn =
+                    hasAnyEnTranslation(item.titleEn, item.excerptEn) ||
+                    hasRichContent(item.contentEn);
                   return (
                     <tr key={item.id} className="hover:bg-bg-alt/60 transition-colors">
                       <td className="py-3 px-4 font-medium text-text max-w-xs">
@@ -418,8 +447,18 @@ export const AdminNews: React.FC = () => {
                               className="w-11 h-7 object-cover rounded-sm border border-gold-border/20 shrink-0"
                             />
                           )}
-                          <span className="truncate">{item.title}</span>
+                          <div className="min-w-0">
+                            <span className="truncate block">{item.title}</span>
+                            {item.titleEn && (
+                              <span className="truncate block text-[10px] text-text-muted">
+                                EN: {item.titleEn}
+                              </span>
+                            )}
+                          </div>
                         </div>
+                      </td>
+                      <td className="py-3 px-4 whitespace-nowrap">
+                        <AdminEnStatusBadge translated={hasEn} />
                       </td>
                       <td className="py-3 px-4 whitespace-nowrap">
                         <NewsCategoryBadge category={item.category} />
@@ -507,9 +546,20 @@ export const AdminNews: React.FC = () => {
             </div>
 
             <form onSubmit={handleSave} className="space-y-5">
-              <div>
+              {/* แถบสลับภาษาเนื้อหาข่าว */}
+              <AdminLangTabs
+                value={editLang}
+                onChange={setEditLang}
+                enReady={
+                  hasAnyEnTranslation(titleEn, excerptEn) ||
+                  hasRichContent(editorEn?.getHTML())
+                }
+              />
+
+              {/* หัวข้อข่าวตามภาษาที่เลือก */}
+              <div className={editLang === 'th' ? 'block' : 'hidden'}>
                 <label className="block text-xs font-semibold text-heading mb-1">
-                  หัวข้อข่าวสาร *
+                  หัวข้อข่าวสาร (ภาษาไทย) *
                 </label>
                 <input
                   type="text"
@@ -518,6 +568,19 @@ export const AdminNews: React.FC = () => {
                   placeholder="เช่น สรุปผลการแข่งขันกีฬาสาธิตเกมส์ ครั้งที่ 12 (หรือวางลิงก์ YouTube เพื่อดึงชื่ออัตโนมัติ)"
                   className="w-full text-xs input-underline"
                   required
+                />
+              </div>
+
+              <div className={editLang === 'en' ? 'block' : 'hidden'}>
+                <label className="block text-xs font-semibold text-heading mb-1">
+                  News Headline (English — Optional)
+                </label>
+                <input
+                  type="text"
+                  value={titleEn}
+                  onChange={(e) => setTitleEn(e.target.value)}
+                  placeholder="e.g., Summary of the 12th Satit Games Sports Competition"
+                  className="w-full text-xs input-underline"
                 />
               </div>
 
@@ -694,9 +757,10 @@ export const AdminNews: React.FC = () => {
                 />
               </div>
 
-              <div>
+              {/* บทคัดย่อสั้น (TH / EN) */}
+              <div className={editLang === 'th' ? 'block' : 'hidden'}>
                 <label className="block text-xs font-semibold text-heading mb-1">
-                  บทคัดย่อสั้น (Excerpt)
+                  บทคัดย่อสั้น (ภาษาไทย)
                 </label>
                 <textarea
                   value={excerpt}
@@ -707,10 +771,23 @@ export const AdminNews: React.FC = () => {
                 />
               </div>
 
-              {/* Tiptap Rich Text Content Editor */}
-              <div>
+              <div className={editLang === 'en' ? 'block' : 'hidden'}>
                 <label className="block text-xs font-semibold text-heading mb-1">
-                  เนื้อหาข่าวฉบับเต็ม (Rich Text Editor)
+                  Short Excerpt (English — Optional)
+                </label>
+                <textarea
+                  value={excerptEn}
+                  onChange={(e) => setExcerptEn(e.target.value)}
+                  rows={2}
+                  placeholder="Short 1-2 line summary shown on news cards in English view..."
+                  className="w-full text-xs input-underline"
+                />
+              </div>
+
+              {/* เครื่องมือแก้ไขเนื้อหาฉบับเต็ม Tiptap (TH) */}
+              <div className={editLang === 'th' ? 'block' : 'hidden'}>
+                <label className="block text-xs font-semibold text-heading mb-1">
+                  เนื้อหาข่าวฉบับเต็ม — ภาษาไทย (Rich Text Editor)
                 </label>
                 <div className="border border-gold-border/30 rounded-sm overflow-hidden bg-surface">
                   <div className="bg-bg-alt border-b border-gold-border/20 p-2 flex flex-wrap gap-2 text-xs">
@@ -744,6 +821,46 @@ export const AdminNews: React.FC = () => {
                     </button>
                   </div>
                   <EditorContent editor={editor} className="p-4 min-h-[160px] text-xs leading-relaxed text-text focus:outline-none" />
+                </div>
+              </div>
+
+              {/* เครื่องมือแก้ไขเนื้อหาฉบับเต็ม Tiptap (EN) */}
+              <div className={editLang === 'en' ? 'block' : 'hidden'}>
+                <label className="block text-xs font-semibold text-heading mb-1">
+                  Full Article Content — English (Optional Rich Text Editor)
+                </label>
+                <div className="border border-gold-border/30 rounded-sm overflow-hidden bg-surface">
+                  <div className="bg-bg-alt border-b border-gold-border/20 p-2 flex flex-wrap gap-2 text-xs">
+                    <button
+                      type="button"
+                      onClick={() => editorEn?.chain().focus().toggleBold().run()}
+                      className={`px-2 py-0.5 rounded transition-colors ${editorEn?.isActive('bold') ? 'bg-brand text-brand-contrast' : 'bg-surface-elevated text-text'}`}
+                    >
+                      B
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => editorEn?.chain().focus().toggleItalic().run()}
+                      className={`px-2 py-0.5 rounded transition-colors ${editorEn?.isActive('italic') ? 'bg-brand text-brand-contrast' : 'bg-surface-elevated text-text'}`}
+                    >
+                      I
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => editorEn?.chain().focus().toggleHeading({ level: 2 }).run()}
+                      className={`px-2 py-0.5 rounded transition-colors ${editorEn?.isActive('heading', { level: 2 }) ? 'bg-brand text-brand-contrast' : 'bg-surface-elevated text-text'}`}
+                    >
+                      H2
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => editorEn?.chain().focus().toggleBulletList().run()}
+                      className={`px-2 py-0.5 rounded transition-colors ${editorEn?.isActive('bulletList') ? 'bg-brand text-brand-contrast' : 'bg-surface-elevated text-text'}`}
+                    >
+                      • List
+                    </button>
+                  </div>
+                  <EditorContent editor={editorEn} className="p-4 min-h-[160px] text-xs leading-relaxed text-text focus:outline-none" />
                 </div>
               </div>
 

@@ -8,11 +8,17 @@ import { useTranslation } from 'react-i18next';
 import { SectionEyebrow, CornerBracket } from '../components/common/Ornament';
 import { SeoHead } from '../components/common/SeoHead';
 import { useSiteSettings } from '../context/SiteSettingsContext';
+import { useLanguage } from '../context/LanguageContext';
 import { SITE_CONFIG } from '../config/site';
+import { pickL10n } from '../lib/l10n';
 
 export const Contact: React.FC = () => {
   const { t } = useTranslation();
+  const { lang } = useLanguage();
   const { contactInfo } = useSiteSettings();
+
+  const addressText = pickL10n(contactInfo.address, contactInfo.addressEn, lang).text;
+  const facebookText = pickL10n(contactInfo.facebook, contactInfo.facebookEn, lang).text;
 
   return (
     <div className="max-w-[1240px] mx-auto px-4 sm:px-6 md:px-12 py-6 sm:py-10 space-y-8 sm:space-y-12">
@@ -40,7 +46,7 @@ export const Contact: React.FC = () => {
             <div className="space-y-3.5 text-xs md:text-sm text-text/85 leading-relaxed">
               <div>
                 <span className="font-semibold text-accent block">{t('contact.addressLabel')}</span>
-                <span>{contactInfo.address}</span>
+                <span>{addressText}</span>
               </div>
 
               <div>
@@ -56,7 +62,7 @@ export const Contact: React.FC = () => {
                   rel="noreferrer"
                   className="text-gold-text hover:underline"
                 >
-                  {contactInfo.facebook} ↗
+                  {facebookText} ↗
                 </a>
               </div>
             </div>

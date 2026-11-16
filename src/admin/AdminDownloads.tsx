@@ -12,6 +12,8 @@ import { CornerBracket } from '../components/common/Ornament';
 import { saveDownloadWithChunks, deleteDownloadWithChunks, resolveDownloadUrl } from '../lib/downloadStorage';
 import { SuccessFeedbackModal } from '../components/common/SuccessFeedbackModal';
 import { invalidatePublicDataCache } from '../lib/publicDataService';
+import { hasAnyEnTranslation } from '../lib/l10n';
+import { AdminEnStatusBadge } from './AdminLangTabs';
 
 export const AdminDownloads: React.FC = () => {
   const [downloads, setDownloads] = useState<DownloadItem[]>([]);
@@ -19,8 +21,9 @@ export const AdminDownloads: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<DownloadItem | null>(null);
 
-  // Form Fields
+  // ฟิลด์ข้อมูลฟอร์ม (ชื่อเอกสารรองรับทั้ง TH และ EN ส่วนไฟล์ใช้ร่วมกัน)
   const [title, setTitle] = useState('');
+  const [titleEn, setTitleEn] = useState('');
   const [fileType, setFileType] = useState<FileExtensionType>('pdf');
   const [fileUrl, setFileUrl] = useState('');
   const [uploadMode, setUploadMode] = useState<'file' | 'url'>('file');
@@ -59,6 +62,7 @@ export const AdminDownloads: React.FC = () => {
   const handleOpenCreate = () => {
     setEditingItem(null);
     setTitle('');
+    setTitleEn('');
     setFileType('pdf');
     setFileUrl('');
     setSelectedFileName('');
@@ -73,6 +77,7 @@ export const AdminDownloads: React.FC = () => {
   const handleOpenEdit = async (item: DownloadItem) => {
     setEditingItem(item);
     setTitle(item.title);
+    setTitleEn(item.titleEn || '');
     setFileType(item.fileType);
     setFileUrl(item.fileUrl || '');
     setSelectedFileName(item.fileName || '');
@@ -145,6 +150,7 @@ export const AdminDownloads: React.FC = () => {
 
       const meta: Omit<DownloadItem, 'id'> = {
         title: title.trim(),
+        titleEn: titleEn.trim(),
         category: editingItem?.category || 'student',
         fileType,
         fileUrl: finalFileUrl,
@@ -232,6 +238,7 @@ export const AdminDownloads: React.FC = () => {
               <thead className="bg-surface border-b border-gold-border/15 text-gold-text uppercase tracking-wider font-medium">
                 <tr>
                   <th className="py-3 px-4">ชื่อเอกสาร</th>
+                  <th className="py-3 px-4">ภาษา</th>
                   <th className="py-3 px-4">ชนิดไฟล์</th>
                   <th className="py-3 px-4">ดาวน์โหลด</th>
                   <th className="py-3 px-4">วันที่เผยแพร่</th>
@@ -242,7 +249,13 @@ export const AdminDownloads: React.FC = () => {
                 {downloads.map((item) => (
                   <tr key={item.id} className="hover:bg-bg-alt/60 transition-colors">
                     <td className="py-3 px-4 font-medium text-text">
-                      {item.title}
+                      <div>{item.title}</div>
+                      {item.titleEn && (
+                        <div className="text-[10px] text-text-muted mt-0.5">EN: {item.titleEn}</div>
+                      )}
+                    </td>
+                    <td className="py-3 px-4 whitespace-nowrap">
+                      <AdminEnStatusBadge translated={hasAnyEnTranslation(item.titleEn)} />
                     </td>
                     <td className="py-3 px-4 font-mono uppercase font-bold text-gold-text">
                       {item.fileType}
@@ -318,7 +331,7 @@ export const AdminDownloads: React.FC = () => {
                 </div>
               )}
               <div>
-                <label className="block font-semibold text-heading mb-1">ชื่อเอกสาร *</label>
+                <label className="block font-semibold text-heading mb-1">ชื่อเอกสาร (ภาษาไทย) *</label>
                 <input
                   type="text"
                   value={title}
@@ -326,6 +339,19 @@ export const AdminDownloads: React.FC = () => {
                   placeholder="เช่น แบบฟอร์มขออนุมัติโครงการ (สธ.๐๑)"
                   className="w-full input-underline text-xs"
                   required
+                />
+              </div>
+
+              <div>
+                <label className="block font-semibold text-heading mb-1">
+                  ชื่อเอกสารภาษาอังกฤษ (English Title — ไม่บังคับ)
+                </label>
+                <input
+                  type="text"
+                  value={titleEn}
+                  onChange={(e) => setTitleEn(e.target.value)}
+                  placeholder="e.g., Student Project Proposal Request Form"
+                  className="w-full input-underline text-xs"
                 />
               </div>
 

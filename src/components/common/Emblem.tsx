@@ -4,6 +4,7 @@
  */
 
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { SITE_CONFIG } from '../../config/site';
 
 interface EmblemProps {
@@ -13,12 +14,14 @@ interface EmblemProps {
 }
 
 export const Emblem: React.FC<EmblemProps> = ({ className = "w-12 h-12", size = 48, animate = false }) => {
-  // If an external or local real image file is provided in site.ts, use it directly
+  const { t } = useTranslation();
+
+  // หากกำหนดพาธไฟล์ภาพตราสัญลักษณ์ไว้ใน site.ts ให้แสดงภาพนั้นโดยตรง
   if (SITE_CONFIG.emblemUrl) {
     return (
       <img
         src={SITE_CONFIG.emblemUrl}
-        alt={SITE_CONFIG.schoolName}
+        alt={t('site.schoolName')}
         data-emblem="true"
         className={`object-contain ${className}`}
         width={size}
@@ -27,8 +30,7 @@ export const Emblem: React.FC<EmblemProps> = ({ className = "w-12 h-12", size = 
     );
   }
 
-  // Placeholder Emblem: Elegant geometric shield with Demonstration School UP initials (สธ.มพ)
-  // Designed in gold & royal purple with clean contemporary Thai lines
+  // ตราสัญลักษณ์สำรองในโทนม่วง-ทอง
   return (
     <svg
       width={size}
@@ -37,7 +39,7 @@ export const Emblem: React.FC<EmblemProps> = ({ className = "w-12 h-12", size = 
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
       className={className}
-      aria-label="ตราประจำองค์การนักเรียน โรงเรียนสาธิตมหาวิทยาลัยพะเยา"
+      aria-label={t('seo.siteTitle')}
     >
       <defs>
         <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="100%">

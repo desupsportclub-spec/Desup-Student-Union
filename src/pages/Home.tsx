@@ -40,6 +40,8 @@ import { SeoHead } from '../components/common/SeoHead';
 import { useLanguage } from '../context/LanguageContext';
 import { useSiteSettings } from '../context/SiteSettingsContext';
 import { computeComplaintStats, syncComplaintStatsToSettings } from '../lib/complaintStatsSync';
+import { pickL10n } from '../lib/l10n';
+import { FallbackLangBadge } from '../components/common/FallbackLangBadge';
 import {
   getNewsCoverUrl,
   getNewsYouTubeUrl,
@@ -59,14 +61,14 @@ function splitHomeNews(newsList: NewsItem[]) {
   const featured = topPool[0] || null;
   const recent = featured ? topPool.filter((n) => n.id !== featured.id).slice(0, 4) : [];
 
-  const photos: { src: string; title: string }[] = [];
+  const photos: { src: string; title: string; titleEn?: string }[] = [];
   newsList
     .filter((n) => n.category === 'activity')
     .slice(0, 6)
     .forEach((item) => {
       const src = getNewsCoverUrl(item);
       if (src) {
-        photos.push({ src, title: item.title });
+        photos.push({ src, title: item.title, titleEn: item.titleEn });
       }
     });
 
@@ -94,7 +96,14 @@ function resolvePresident(peopleList: PersonItem[]): PersonItem | null {
 export const Home: React.FC = () => {
   const { t } = useTranslation();
   const { lang } = useLanguage();
-  const { academicYearTH, presidentHeadline, presidentMessage, complaintStats } = useSiteSettings();
+  const {
+    academicYearTH,
+    presidentHeadline,
+    presidentHeadlineEn,
+    presidentMessage,
+    presidentMessageEn,
+    complaintStats,
+  } = useSiteSettings();
 
   const initialNews = getCachedNewsSync();
   const initialNewsSplit = initialNews ? splitHomeNews(initialNews) : null;
@@ -110,7 +119,9 @@ export const Home: React.FC = () => {
     initialEvents ? initialEvents.filter((e) => isEventActiveOrUpcoming(e)).slice(0, 6) : []
   );
   const [president, setPresident] = useState<PersonItem | null>(() => (initialPeople ? resolvePresident(initialPeople) : null));
-  const [galleryPhotos, setGalleryPhotos] = useState<{ src: string; title: string }[]>(() => initialNewsSplit?.photos || []);
+  const [galleryPhotos, setGalleryPhotos] = useState<{ src: string; title: string; titleEn?: string }[]>(
+    () => initialNewsSplit?.photos || []
+  );
 
   const [adminComplaintStats, setAdminComplaintStats] = useState<{
     total: number;
@@ -184,11 +195,19 @@ export const Home: React.FC = () => {
     };
   }, [applyNewsList]);
 
-  const displayHeadline =
-    lang === 'en' && presidentHeadline === THAI_DEFAULT_HEADLINE
-      ? '"We are ready to represent and listen to every voice of DeSUP students."'
-      : presidentHeadline;
+  // เลือกคำกล่าวหัวข้อ สาร และชื่อนายกองค์การตามภาษาปัจจุบัน พร้อมคำแปลเริ่มต้นกรณีข้อความยังเป็นค่าตั้งต้น
+  const headlineRes =
+    lang === 'en' && presidentHeadline === THAI_DEFAULT_HEADLINE && !presidentHeadlineEn.trim()
+      ? {
+          text: '"We are ready to represent and listen to every voice of DeSUP students."',
+          isFallback: false,
+        }
+      : pickL10n(presidentHeadline, presidentHeadlineEn, lang);
 
+  const rawPresidentMsgTh = presidentMessage?.trim() || president?.quote?.trim() || '';
+  const rawPresidentMsgEn = presidentMessageEn?.trim() || president?.quoteEn?.trim() || '';
+  const presidentMsgRes = pickL10n(rawPresidentMsgTh, rawPresidentMsgEn, lang);
+  const presidentNameRes = pickL10n(president?.name, president?.nameEn, lang);
   const displayPresidentYear = formatAcademicYear(president?.yearTH || academicYearTH, lang);
 
   return (
@@ -220,6 +239,8 @@ export const Home: React.FC = () => {
               const item = pinnedNews[0];
               const ytUrl = getNewsYouTubeUrl(item);
               const coverUrl = getNewsCoverUrl(item);
+              const titleRes = pickL10n(item.title, item.titleEn, lang);
+              const excerptRes = pickL10n(item.excerpt, item.excerptEn, lang);
               return (
                 <div className="relative border border-gold-border/45 bg-surface p-4 sm:p-6 rounded-sm shadow-editorial">
                   <CornerBracket position="top-left" />
@@ -230,12 +251,12 @@ export const Home: React.FC = () => {
                   <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 sm:gap-6 items-center">
                     <div className="lg:col-span-7">
                       {ytUrl ? (
-                        <YouTubeLitePlayer url={ytUrl} title={item.title} />
+                        <YouTubeLitePlayer url={ytUrl} title={titleRes.text} />
                       ) : coverUrl ? (
                         <LocLink to={`/news/read/${item.id}`} className="block aspect-[16/9] bg-bg-alt rounded-sm overflow-hidden">
                           <img
                             src={coverUrl}
-                            alt={item.title}
+                            alt={titleRes.text}
                             loading="eager"
                             decoding="async"
                             className="w-full h-full object-cover hover:scale-[1.03] transition-transform duration-500"
@@ -257,17 +278,18 @@ export const Home: React.FC = () => {
                         <NewsCategoryBadge category={item.category} />
                         <span aria-hidden="true">·</span>
                         <span>{formatDate(item.createdAt, lang, true)}</span>
+                        <FallbackLangBadge show={titleRes.isFallback} />
                       </div>
 
                       <LocLink to={`/news/read/${item.id}`} className="block group">
                         <h3 className="font-serif text-xl sm:text-2xl font-semibold text-heading group-hover:text-accent transition-colors leading-snug">
-                          {item.title}
+                          {titleRes.text}
                         </h3>
                       </LocLink>
 
-                      {item.excerpt && (
+                      {excerptRes.text && (
                         <p className="text-xs sm:text-sm text-text-muted line-clamp-3 leading-relaxed">
-                          {item.excerpt}
+                          {excerptRes.text}
                         </p>
                       )}
 
@@ -297,6 +319,8 @@ export const Home: React.FC = () => {
               {pinnedNews.map((item) => {
                 const ytUrl = getNewsYouTubeUrl(item);
                 const coverUrl = getNewsCoverUrl(item);
+                const titleRes = pickL10n(item.title, item.titleEn, lang);
+                const excerptRes = pickL10n(item.excerpt, item.excerptEn, lang);
                 return (
                   <div
                     key={item.id}
@@ -309,12 +333,12 @@ export const Home: React.FC = () => {
 
                     <div className="space-y-3">
                       {ytUrl ? (
-                        <YouTubeLitePlayer url={ytUrl} title={item.title} />
+                        <YouTubeLitePlayer url={ytUrl} title={titleRes.text} />
                       ) : coverUrl ? (
                         <LocLink to={`/news/read/${item.id}`} className="block aspect-[16/9] bg-bg-alt rounded-sm overflow-hidden">
                           <img
                             src={coverUrl}
-                            alt={item.title}
+                            alt={titleRes.text}
                             loading="lazy"
                             decoding="async"
                             className="w-full h-full object-cover hover:scale-[1.03] transition-transform duration-500"
@@ -334,17 +358,18 @@ export const Home: React.FC = () => {
                         <NewsCategoryBadge category={item.category} />
                         <span aria-hidden="true">·</span>
                         <span>{formatDate(item.createdAt, lang, true)}</span>
+                        <FallbackLangBadge show={titleRes.isFallback} />
                       </div>
 
                       <LocLink to={`/news/read/${item.id}`} className="block group">
                         <h3 className="font-serif text-base sm:text-lg font-semibold text-heading group-hover:text-accent transition-colors line-clamp-2 leading-snug">
-                          {item.title}
+                          {titleRes.text}
                         </h3>
                       </LocLink>
 
-                      {item.excerpt && (
+                      {excerptRes.text && (
                         <p className="text-xs text-text-muted line-clamp-2 leading-relaxed">
-                          {item.excerpt}
+                          {excerptRes.text}
                         </p>
                       )}
                     </div>
@@ -404,114 +429,123 @@ export const Home: React.FC = () => {
             </div>
           </div>
         ) : featuredNews ? (
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8">
-            <div className="lg:col-span-7">
-              <LocLink
-                to={`/news/read/${featuredNews.id}`}
-                className="group block relative border border-gold-border/20 bg-surface p-4 sm:p-6 rounded-sm shadow-editorial transition-all duration-300 hover:border-gold"
-              >
-                <CornerBracket position="top-left" />
-                <CornerBracket position="top-right" />
-                <CornerBracket position="bottom-left" />
-                <CornerBracket position="bottom-right" />
+          (() => {
+            const featuredTitleRes = pickL10n(featuredNews.title, featuredNews.titleEn, lang);
+            const featuredExcerptRes = pickL10n(featuredNews.excerpt, featuredNews.excerptEn, lang);
+            return (
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8">
+                <div className="lg:col-span-7">
+                  <LocLink
+                    to={`/news/read/${featuredNews.id}`}
+                    className="group block relative border border-gold-border/20 bg-surface p-4 sm:p-6 rounded-sm shadow-editorial transition-all duration-300 hover:border-gold"
+                  >
+                    <CornerBracket position="top-left" />
+                    <CornerBracket position="top-right" />
+                    <CornerBracket position="bottom-left" />
+                    <CornerBracket position="bottom-right" />
 
-                <div className="aspect-[16/9] bg-bg-alt overflow-hidden mb-4 sm:mb-5 rounded-sm relative">
-                  {getNewsCoverUrl(featuredNews) ? (
-                    <img
-                      src={getNewsCoverUrl(featuredNews) || ''}
-                      alt={featuredNews.title}
-                      decoding="async"
-                      fetchPriority="high"
-                      className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.04]"
-                    />
-                  ) : (
-                    <div className="w-full h-full bg-brand-soft flex items-center justify-center text-accent">
-                      <Emblem size={64} />
-                    </div>
-                  )}
-
-                  {(featuredNews.category === 'video' || getNewsYouTubeUrl(featuredNews)) && (
-                    <div className="absolute inset-0 bg-anchor-bg-deep/25 flex items-center justify-center">
-                      <div className="w-12 h-12 rounded-full bg-gold text-anchor-bg-deep flex items-center justify-center shadow-lg">
-                        ▶
-                      </div>
-                    </div>
-                  )}
-                </div>
-
-                <div className="space-y-2">
-                  <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-text-muted">
-                    <NewsCategoryBadge category={featuredNews.category} />
-                    <span aria-hidden="true">·</span>
-                    <span>{formatDate(featuredNews.createdAt, lang)}</span>
-                    <span aria-hidden="true">·</span>
-                    <span>{t('site.viewsCount', { count: formatNumber(featuredNews.views, lang) })}</span>
-                  </div>
-
-                  <h3 className="font-serif text-lg sm:text-xl md:text-2xl font-semibold text-heading group-hover:text-accent transition-colors line-clamp-2">
-                    {featuredNews.title}
-                  </h3>
-
-                  <p className="text-xs md:text-sm text-text-muted line-clamp-2 leading-relaxed">
-                    {featuredNews.excerpt || t('home.defaultExcerpt')}
-                  </p>
-                </div>
-              </LocLink>
-            </div>
-
-            <div className="lg:col-span-5 flex flex-col justify-between space-y-3 sm:space-y-4">
-              {recentNews.length > 0 ? (
-                recentNews.map((item) => {
-                  const thumb = getNewsCoverUrl(item);
-                  const hasVideo = item.category === 'video' || Boolean(getNewsYouTubeUrl(item));
-                  return (
-                    <LocLink
-                      key={item.id}
-                      to={`/news/read/${item.id}`}
-                      className="group flex gap-3 sm:gap-4 p-3 sm:p-3.5 border border-gold-border/15 hover:border-gold bg-surface rounded-sm transition-all duration-300"
-                    >
-                      <div className="w-20 h-16 sm:w-24 sm:h-20 bg-bg-alt rounded-sm shrink-0 overflow-hidden relative">
-                        {thumb ? (
-                          <img
-                            src={thumb}
-                            alt={item.title}
-                            loading="lazy"
-                            decoding="async"
-                            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                          />
-                        ) : (
-                          <div className="w-full h-full bg-brand-soft flex items-center justify-center text-accent/60">
-                            <Emblem size={28} />
-                          </div>
-                        )}
-                        {hasVideo && (
-                          <div className="absolute inset-0 bg-anchor-bg-deep/30 flex items-center justify-center">
-                            <span className="w-6 h-6 rounded-full bg-gold text-anchor-bg-deep text-[10px] flex items-center justify-center">
-                              ▶
-                            </span>
-                          </div>
-                        )}
-                      </div>
-                      <div className="flex flex-col justify-center space-y-1 min-w-0">
-                        <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[11px] text-text-muted">
-                          <NewsCategoryBadge category={item.category} />
-                          <span aria-hidden="true">·</span>
-                          <span>{formatDate(item.createdAt, lang, true)}</span>
+                    <div className="aspect-[16/9] bg-bg-alt overflow-hidden mb-4 sm:mb-5 rounded-sm relative">
+                      {getNewsCoverUrl(featuredNews) ? (
+                        <img
+                          src={getNewsCoverUrl(featuredNews) || ''}
+                          alt={featuredTitleRes.text}
+                          decoding="async"
+                          fetchPriority="high"
+                          className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.04]"
+                        />
+                      ) : (
+                        <div className="w-full h-full bg-brand-soft flex items-center justify-center text-accent">
+                          <Emblem size={64} />
                         </div>
-                        <h4 className="font-serif text-sm font-semibold text-heading group-hover:text-accent transition-colors line-clamp-2">
-                          {item.title}
-                        </h4>
+                      )}
+
+                      {(featuredNews.category === 'video' || getNewsYouTubeUrl(featuredNews)) && (
+                        <div className="absolute inset-0 bg-anchor-bg-deep/25 flex items-center justify-center">
+                          <div className="w-12 h-12 rounded-full bg-gold text-anchor-bg-deep flex items-center justify-center shadow-lg">
+                            ▶
+                          </div>
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="space-y-2">
+                      <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-text-muted">
+                        <NewsCategoryBadge category={featuredNews.category} />
+                        <span aria-hidden="true">·</span>
+                        <span>{formatDate(featuredNews.createdAt, lang)}</span>
+                        <span aria-hidden="true">·</span>
+                        <span>{t('site.viewsCount', { count: formatNumber(featuredNews.views, lang) })}</span>
+                        <FallbackLangBadge show={featuredTitleRes.isFallback} />
                       </div>
-                    </LocLink>
-                  );
-                })
-              ) : (
-                <div className="p-8 text-center border border-dashed border-gold-border/25 rounded-sm text-xs text-text-muted">
-                  {t('home.waitingMoreNews')}
+
+                      <h3 className="font-serif text-lg sm:text-xl md:text-2xl font-semibold text-heading group-hover:text-accent transition-colors line-clamp-2">
+                        {featuredTitleRes.text}
+                      </h3>
+
+                      <p className="text-xs md:text-sm text-text-muted line-clamp-2 leading-relaxed">
+                        {featuredExcerptRes.text || t('home.defaultExcerpt')}
+                      </p>
+                    </div>
+                  </LocLink>
                 </div>
-              )}
-            </div>
-          </div>
+
+                <div className="lg:col-span-5 flex flex-col justify-between space-y-3 sm:space-y-4">
+                  {recentNews.length > 0 ? (
+                    recentNews.map((item) => {
+                      const thumb = getNewsCoverUrl(item);
+                      const hasVideo = item.category === 'video' || Boolean(getNewsYouTubeUrl(item));
+                      const itemTitleRes = pickL10n(item.title, item.titleEn, lang);
+                      return (
+                        <LocLink
+                          key={item.id}
+                          to={`/news/read/${item.id}`}
+                          className="group flex gap-3 sm:gap-4 p-3 sm:p-3.5 border border-gold-border/15 hover:border-gold bg-surface rounded-sm transition-all duration-300"
+                        >
+                          <div className="w-20 h-16 sm:w-24 sm:h-20 bg-bg-alt rounded-sm shrink-0 overflow-hidden relative">
+                            {thumb ? (
+                              <img
+                                src={thumb}
+                                alt={itemTitleRes.text}
+                                loading="lazy"
+                                decoding="async"
+                                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                              />
+                            ) : (
+                              <div className="w-full h-full bg-brand-soft flex items-center justify-center text-accent/60">
+                                <Emblem size={28} />
+                              </div>
+                            )}
+                            {hasVideo && (
+                              <div className="absolute inset-0 bg-anchor-bg-deep/30 flex items-center justify-center">
+                                <span className="w-6 h-6 rounded-full bg-gold text-anchor-bg-deep text-[10px] flex items-center justify-center">
+                                  ▶
+                                </span>
+                              </div>
+                            )}
+                          </div>
+                          <div className="flex flex-col justify-center space-y-1 min-w-0">
+                            <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[11px] text-text-muted">
+                              <NewsCategoryBadge category={item.category} />
+                              <span aria-hidden="true">·</span>
+                              <span>{formatDate(item.createdAt, lang, true)}</span>
+                              <FallbackLangBadge show={itemTitleRes.isFallback} />
+                            </div>
+                            <h4 className="font-serif text-sm font-semibold text-heading group-hover:text-accent transition-colors line-clamp-2">
+                              {itemTitleRes.text}
+                            </h4>
+                          </div>
+                        </LocLink>
+                      );
+                    })
+                  ) : (
+                    <div className="p-8 text-center border border-dashed border-gold-border/25 rounded-sm text-xs text-text-muted">
+                      {t('home.waitingMoreNews')}
+                    </div>
+                  )}
+                </div>
+              </div>
+            );
+          })()
         ) : (
           <div className="p-12 text-center border border-dashed border-gold-border/30 rounded-sm bg-surface/50">
             <p className="font-serif text-lg text-heading mb-2">{t('home.noNewsTitle')}</p>
@@ -590,6 +624,9 @@ export const Home: React.FC = () => {
                 const startKey = getEventDateKey(evt.startAt);
                 const endKey = getEventDateKey(evt.endAt);
                 const hasDateRange = Boolean(evt.endAt && endKey > startKey);
+                const titleRes = pickL10n(evt.title, evt.titleEn, lang);
+                const descRes = pickL10n(evt.description, evt.descriptionEn, lang);
+                const locRes = pickL10n(evt.location, evt.locationEn, lang);
                 return (
                   <div
                     key={evt.id}
@@ -605,26 +642,29 @@ export const Home: React.FC = () => {
                             {dateParts.monthShort}
                           </div>
                         </div>
-                        <div className="min-w-0 flex-1">
-                          {scheduleStatus === 'ongoing' && (
-                            <div className="mb-1">
-                              <span className="px-1.5 py-0.5 rounded-sm bg-success-bg border border-success/30 text-success text-[10px] font-medium">
-                                {t('home.ongoingBadge')}
-                              </span>
+                        <div className="min-w-0 flex-1 space-y-1">
+                          {(scheduleStatus === 'ongoing' || titleRes.isFallback) && (
+                            <div className="flex flex-wrap items-center gap-1.5">
+                              {scheduleStatus === 'ongoing' && (
+                                <span className="px-1.5 py-0.5 rounded-sm bg-success-bg border border-success/30 text-success text-[10px] font-medium">
+                                  {t('home.ongoingBadge')}
+                                </span>
+                              )}
+                              <FallbackLangBadge show={titleRes.isFallback} />
                             </div>
                           )}
                           <h3 className="font-serif text-lg font-semibold text-heading line-clamp-2">
-                            {evt.title}
+                            {titleRes.text}
                           </h3>
                         </div>
                       </div>
                       <p className="text-xs text-text-muted line-clamp-2 mb-4 leading-relaxed">
-                        {evt.description || t('home.noEventDesc')}
+                        {descRes.text || t('home.noEventDesc')}
                       </p>
                     </div>
 
                     <div className="pt-3 border-t border-gold-border/15 text-xs text-text-muted flex items-center justify-between gap-2">
-                      <span className="truncate">📍 {evt.location || t('home.defaultLocation')}</span>
+                      <span className="truncate">📍 {locRes.text || t('home.defaultLocation')}</span>
                       <span className="text-gold-text shrink-0">
                         {hasDateRange && evt.endAt
                           ? t('home.untilDate', { date: formatDate(evt.endAt, lang, true) })
@@ -661,34 +701,40 @@ export const Home: React.FC = () => {
           </div>
 
           <div className="grid grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4">
-            {galleryPhotos.map((photo, index) => (
-              <div
-                key={index}
-                onClick={() => {
-                  setLightboxIndex(index);
-                  setLightboxOpen(true);
-                }}
-                className="cursor-pointer group relative overflow-hidden bg-bg-alt border border-gold-border/20 rounded-sm aspect-[4/3]"
-              >
-                <img
-                  src={photo.src}
-                  alt={photo.title}
-                  loading="lazy"
-                  decoding="async"
-                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                />
-                <div className="absolute inset-0 bg-anchor-bg/70 opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-3 sm:p-4 text-anchor-text text-xs">
-                  <span className="line-clamp-2 font-medium">{photo.title}</span>
+            {galleryPhotos.map((photo, index) => {
+              const photoTitle = pickL10n(photo.title, photo.titleEn, lang).text;
+              return (
+                <div
+                  key={index}
+                  onClick={() => {
+                    setLightboxIndex(index);
+                    setLightboxOpen(true);
+                  }}
+                  className="cursor-pointer group relative overflow-hidden bg-bg-alt border border-gold-border/20 rounded-sm aspect-[4/3]"
+                >
+                  <img
+                    src={photo.src}
+                    alt={photoTitle}
+                    loading="lazy"
+                    decoding="async"
+                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                  />
+                  <div className="absolute inset-0 bg-anchor-bg/70 opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-3 sm:p-4 text-anchor-text text-xs">
+                    <span className="line-clamp-2 font-medium">{photoTitle}</span>
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
 
           <Lightbox
             open={lightboxOpen}
             close={() => setLightboxOpen(false)}
             index={lightboxIndex}
-            slides={galleryPhotos.map(p => ({ src: p.src, title: p.title }))}
+            slides={galleryPhotos.map((p) => ({
+              src: p.src,
+              title: pickL10n(p.title, p.titleEn, lang).text,
+            }))}
           />
         </section>
       )}
@@ -707,7 +753,7 @@ export const Home: React.FC = () => {
                 {president?.photo?.url || president?.photoUrl ? (
                   <img
                     src={president.photo?.url || president.photoUrl}
-                    alt={president.name}
+                    alt={presidentNameRes.text}
                     loading="lazy"
                     decoding="async"
                     className="w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-500"
@@ -722,18 +768,19 @@ export const Home: React.FC = () => {
             </div>
 
             <div className="md:col-span-8 space-y-3 sm:space-y-4">
-              <SectionEyebrow number="05" enText={t('home.presidentEyebrowEn')} thText={t('home.presidentEyebrowTh')} />
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <SectionEyebrow number="05" enText={t('home.presidentEyebrowEn')} thText={t('home.presidentEyebrowTh')} />
+                <FallbackLangBadge show={headlineRes.isFallback || presidentMsgRes.isFallback} />
+              </div>
               <h2 className="font-serif text-xl sm:text-2xl md:text-3xl text-heading font-semibold leading-snug">
-                {displayHeadline}
+                {headlineRes.text}
               </h2>
               <p className="text-sm md:text-base text-text/85 leading-relaxed font-sans whitespace-pre-line">
-                {presidentMessage?.trim() ||
-                  president?.quote ||
-                  t('home.defaultPresidentMessage')}
+                {presidentMsgRes.text || t('home.defaultPresidentMessage')}
               </p>
               <div className="pt-2 border-t border-gold-border/15">
                 <div className="font-serif text-base font-semibold text-accent">
-                  {president?.name || t('home.presidentRoleFallback')}
+                  {presidentNameRes.text || t('home.presidentRoleFallback')}
                 </div>
                 <div className="text-xs text-gold-text">
                   {t('home.presidentRoleWithYear', { year: displayPresidentYear })}

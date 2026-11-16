@@ -8,6 +8,8 @@ import { useTranslation } from 'react-i18next';
 import useEmblaCarousel from 'embla-carousel-react';
 import { BannerItem } from '../../types';
 import { LocLink } from '../common/LocLink';
+import { useLanguage } from '../../context/LanguageContext';
+import { pickL10n } from '../../lib/l10n';
 
 interface HeroBannerSliderProps {
   banners: BannerItem[];
@@ -15,6 +17,7 @@ interface HeroBannerSliderProps {
 
 export const HeroBannerSlider: React.FC<HeroBannerSliderProps> = ({ banners }) => {
   const { t } = useTranslation();
+  const { lang } = useLanguage();
   const [emblaRef, emblaApi] = useEmblaCarousel({ loop: true, duration: 25 });
   const [selectedIndex, setSelectedIndex] = useState(0);
 
@@ -68,12 +71,14 @@ export const HeroBannerSlider: React.FC<HeroBannerSliderProps> = ({ banners }) =
         <div className="overflow-hidden" ref={emblaRef}>
           <div className="flex">
             {displayBanners.map((banner, index) => {
-              const hasText = Boolean(banner.title?.trim() || banner.subtitle?.trim());
+              const titleText = pickL10n(banner.title, banner.titleEn, lang).text;
+              const subtitleText = pickL10n(banner.subtitle, banner.subtitleEn, lang).text;
+              const hasText = Boolean(titleText || subtitleText);
               const BannerContent = (
                 <div className="relative w-full aspect-[16/9] sm:aspect-[16/8] lg:aspect-[21/9] sm:min-h-[380px] lg:min-h-[540px] max-h-[680px] overflow-hidden bg-anchor-bg flex items-center justify-center">
                   <img
                     src={banner.imageUrl}
-                    alt={banner.title || t('banner.defaultAlt')}
+                    alt={titleText || t('banner.defaultAlt')}
                     loading={index === 0 ? 'eager' : 'lazy'}
                     decoding="async"
                     fetchPriority={index === 0 ? 'high' : 'auto'}
@@ -82,14 +87,14 @@ export const HeroBannerSlider: React.FC<HeroBannerSliderProps> = ({ banners }) =
                   {hasText && (
                     <div className="absolute inset-0 bg-gradient-to-t from-anchor-bg-deep/80 via-anchor-bg-deep/20 to-transparent flex flex-col justify-end px-4 py-4 sm:px-10 sm:py-10 md:px-14 md:py-12 pointer-events-none">
                       <div className="max-w-[1240px] w-full mx-auto space-y-1 sm:space-y-2">
-                        {banner.title?.trim() && (
+                        {titleText && (
                           <h2 className="font-serif text-base sm:text-3xl md:text-4xl font-bold text-anchor-text drop-shadow-md line-clamp-2 max-w-3xl">
-                            {banner.title}
+                            {titleText}
                           </h2>
                         )}
-                        {banner.subtitle?.trim() && (
+                        {subtitleText && (
                           <p className="text-[11px] sm:text-base text-anchor-text/90 drop-shadow line-clamp-1 sm:line-clamp-2 max-w-3xl">
-                            {banner.subtitle}
+                            {subtitleText}
                           </p>
                         )}
                       </div>

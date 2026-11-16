@@ -12,6 +12,8 @@ import { useSiteSettings } from '../context/SiteSettingsContext';
 import { ADVISOR_GROUPS, getAdvisorGroupLabel, resolveAdvisorGroup } from '../config/site';
 import { SuccessFeedbackModal } from '../components/common/SuccessFeedbackModal';
 import { invalidatePublicDataCache } from '../lib/publicDataService';
+import { hasAnyEnTranslation } from '../lib/l10n';
+import { AdminLangTabs, AdminEnStatusBadge, AdminLangMode } from './AdminLangTabs';
 
 export const AdminPeople: React.FC = () => {
   const { academicYearTH } = useSiteSettings();
@@ -22,14 +24,19 @@ export const AdminPeople: React.FC = () => {
   const [editingItem, setEditingItem] = useState<PersonItem | null>(null);
   const [successModalTitle, setSuccessModalTitle] = useState('');
 
-  // Form Fields
+  // ฟิลด์ข้อมูลฟอร์ม 2 ภาษา
+  const [editLang, setEditLang] = useState<AdminLangMode>('th');
   const [name, setName] = useState('');
+  const [nameEn, setNameEn] = useState('');
   const [role, setRole] = useState<PersonRole>('board');
   const [advisorGroup, setAdvisorGroup] = useState<AdvisorGroup>('teacher');
   const [position, setPosition] = useState('');
+  const [positionEn, setPositionEn] = useState('');
   const [grade, setGrade] = useState('');
+  const [gradeEn, setGradeEn] = useState('');
   const [yearTH, setYearTH] = useState(academicYearTH);
   const [quote, setQuote] = useState('');
+  const [quoteEn, setQuoteEn] = useState('');
   const [order, setOrder] = useState(1);
   const [photo, setPhoto] = useState<ImageAsset>({ url: '', alt: '' });
   const [saving, setSaving] = useState(false);
@@ -57,13 +64,18 @@ export const AdminPeople: React.FC = () => {
 
   const handleOpenCreate = () => {
     setEditingItem(null);
+    setEditLang('th');
     setName('');
+    setNameEn('');
     setRole(selectedRole);
     setAdvisorGroup('teacher');
     setPosition(selectedRole === 'president' ? 'นายกองค์การนักเรียน' : '');
+    setPositionEn(selectedRole === 'president' ? 'Student Union President' : '');
     setGrade('');
+    setGradeEn('');
     setYearTH(academicYearTH);
     setQuote('');
+    setQuoteEn('');
     setOrder(people.filter(p => p.role === selectedRole).length + 1);
     setPhoto({ url: '', alt: '' });
     setIsModalOpen(true);
@@ -71,13 +83,18 @@ export const AdminPeople: React.FC = () => {
 
   const handleOpenEdit = (item: PersonItem) => {
     setEditingItem(item);
+    setEditLang('th');
     setName(item.name);
+    setNameEn(item.nameEn || '');
     setRole(item.role);
     setAdvisorGroup(resolveAdvisorGroup(item));
     setPosition(item.position);
+    setPositionEn(item.positionEn || '');
     setGrade(item.grade || '');
+    setGradeEn(item.gradeEn || '');
     setYearTH(item.yearTH || academicYearTH);
     setQuote(item.quote || '');
+    setQuoteEn(item.quoteEn || '');
     setOrder(item.order || 1);
     setPhoto(item.photo || (item.photoUrl ? { url: item.photoUrl, alt: item.name } : { url: '', alt: '' }));
     setIsModalOpen(true);
@@ -93,12 +110,16 @@ export const AdminPeople: React.FC = () => {
       const now = new Date().toISOString();
       const personDoc: PersonItem = {
         name: name.trim(),
+        nameEn: nameEn.trim(),
         role,
         ...(role === 'advisor' ? { advisorGroup } : {}),
         position: position.trim(),
+        positionEn: positionEn.trim(),
         grade: grade.trim(),
+        gradeEn: gradeEn.trim(),
         yearTH: yearTH.trim() || academicYearTH,
         quote: quote.trim(),
+        quoteEn: quoteEn.trim(),
         order: Number(order) || 1,
         photo,
         photoUrl: photo.url,
@@ -188,6 +209,7 @@ export const AdminPeople: React.FC = () => {
                 <tr>
                   <th className="py-3 px-4">รูปภาพ</th>
                   <th className="py-3 px-4">ชื่อ-นามสกุล</th>
+                  <th className="py-3 px-4">ภาษา</th>
                   <th className="py-3 px-4">ตำแหน่ง</th>
                   <th className="py-3 px-4">ปีการศึกษา</th>
                   <th className="py-3 px-4">ชั้น/ห้อง</th>
@@ -214,7 +236,20 @@ export const AdminPeople: React.FC = () => {
                       </div>
                     </td>
                     <td className="py-3 px-4 font-medium text-text">
-                      {item.name}
+                      <div>{item.name}</div>
+                      {item.nameEn && (
+                        <div className="text-[10px] text-text-muted mt-0.5">EN: {item.nameEn}</div>
+                      )}
+                    </td>
+                    <td className="py-3 px-4 whitespace-nowrap">
+                      <AdminEnStatusBadge
+                        translated={hasAnyEnTranslation(
+                          item.nameEn,
+                          item.positionEn,
+                          item.gradeEn,
+                          item.quoteEn
+                        )}
+                      />
                     </td>
                     <td className="py-3 px-4 text-accent font-medium">
                       <div>{item.position}</div>
@@ -319,44 +354,89 @@ export const AdminPeople: React.FC = () => {
                 </div>
               )}
 
-              <div>
-                <label className="block font-semibold text-heading mb-1">ชื่อ-นามสกุล *</label>
-                <input
-                  type="text"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  placeholder="เช่น นายธนภัทร สุขสมบูรณ์"
-                  className="w-full input-underline"
-                  required
-                />
-              </div>
+              <AdminLangTabs
+                value={editLang}
+                onChange={setEditLang}
+                enReady={hasAnyEnTranslation(nameEn, positionEn, gradeEn, quoteEn)}
+              />
 
-              <div className="grid grid-cols-2 gap-3">
+              <div className={editLang === 'th' ? 'space-y-4' : 'hidden'}>
                 <div>
-                  <label className="block font-semibold text-heading mb-1">ตำแหน่ง *</label>
+                  <label className="block font-semibold text-heading mb-1">ชื่อ-นามสกุล (ภาษาไทย) *</label>
                   <input
                     type="text"
-                    value={position}
-                    onChange={(e) => setPosition(e.target.value)}
-                    placeholder="เช่น นายกองค์การนักเรียน, อุปนายกองค์การนักเรียน, ฝ่ายเลขานุการ, ฝ่ายกิจกรรมนักเรียน"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    placeholder="เช่น นายธนภัทร สุขสมบูรณ์"
                     className="w-full input-underline"
                     required
                   />
                 </div>
 
-                <div>
-                  <label className="block font-semibold text-heading mb-1">ระดับชั้น / ห้องเรียน</label>
-                  <input
-                    type="text"
-                    value={grade}
-                    onChange={(e) => setGrade(e.target.value)}
-                    placeholder="เช่น ม.6/1 (ถ้ามี)"
-                    className="w-full input-underline"
-                  />
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="block font-semibold text-heading mb-1">ตำแหน่ง (ภาษาไทย) *</label>
+                    <input
+                      type="text"
+                      value={position}
+                      onChange={(e) => setPosition(e.target.value)}
+                      placeholder="เช่น นายกองค์การนักเรียน, อุปนายกองค์การนักเรียน, ฝ่ายเลขานุการ"
+                      className="w-full input-underline"
+                      required
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block font-semibold text-heading mb-1">ระดับชั้น / ห้องเรียน (ภาษาไทย)</label>
+                    <input
+                      type="text"
+                      value={grade}
+                      onChange={(e) => setGrade(e.target.value)}
+                      placeholder="เช่น ม.6/1 (ถ้ามี)"
+                      className="w-full input-underline"
+                    />
+                  </div>
                 </div>
               </div>
 
-              {/* Photo ImageUploader */}
+              <div className={editLang === 'en' ? 'space-y-4' : 'hidden'}>
+                <div>
+                  <label className="block font-semibold text-heading mb-1">Full Name (English — Optional)</label>
+                  <input
+                    type="text"
+                    value={nameEn}
+                    onChange={(e) => setNameEn(e.target.value)}
+                    placeholder="e.g., Mr. Thanaphat Suksamboon"
+                    className="w-full input-underline"
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="block font-semibold text-heading mb-1">Position / Title (English — Optional)</label>
+                    <input
+                      type="text"
+                      value={positionEn}
+                      onChange={(e) => setPositionEn(e.target.value)}
+                      placeholder="e.g., Student Union President, Secretary"
+                      className="w-full input-underline"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block font-semibold text-heading mb-1">Grade / Class (English — Optional)</label>
+                    <input
+                      type="text"
+                      value={gradeEn}
+                      onChange={(e) => setGradeEn(e.target.value)}
+                      placeholder="e.g., M.6/1"
+                      className="w-full input-underline"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* อัปโหลดรูปถ่ายบุคคล (ใช้ร่วมกันทั้งสองภาษา) */}
               <div>
                 <label className="block font-semibold text-heading mb-1">
                   รูปถ่ายบุคคล (อัปโหลดจากเครื่อง หรือระบุลิงก์)
@@ -370,15 +450,28 @@ export const AdminPeople: React.FC = () => {
                 />
               </div>
 
-              <div>
+              <div className={editLang === 'th' ? 'block' : 'hidden'}>
                 <label className="block font-semibold text-heading mb-1">
-                  คติประจำใจ / สารประจำตัว (Quote — ใช้แสดงหน้าแรกหากเป็นนายกองค์การนักเรียน)
+                  คติประจำใจ / สารประจำตัว — ภาษาไทย (ใช้แสดงหน้าแรกหากเป็นนายกองค์การนักเรียน)
                 </label>
                 <textarea
                   value={quote}
                   onChange={(e) => setQuote(e.target.value)}
                   rows={3}
                   placeholder="เช่น พวกเราพร้อมเป็นตัวแทนและรับฟังทุกเสียงของเพื่อนนักเรียนสาธิต มพ."
+                  className="w-full input-underline"
+                />
+              </div>
+
+              <div className={editLang === 'en' ? 'block' : 'hidden'}>
+                <label className="block font-semibold text-heading mb-1">
+                  Motto / Quote — English (Optional)
+                </label>
+                <textarea
+                  value={quoteEn}
+                  onChange={(e) => setQuoteEn(e.target.value)}
+                  rows={3}
+                  placeholder="e.g., We are ready to represent and listen to every student's voice."
                   className="w-full input-underline"
                 />
               </div>

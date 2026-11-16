@@ -12,8 +12,11 @@ import { ComplaintStatsSummary, ServiceLink, SiteContactInfo } from '../types';
 export interface SiteSettingsContextValue {
   academicYearTH: string;
   presidentHeadline: string;
+  presidentHeadlineEn: string;
   presidentMessage: string;
+  presidentMessageEn: string;
   ticker: string[];
+  tickerEn: string[];
   links: ServiceLink[];
   contactInfo: Required<SiteContactInfo>;
   totalVisits: number;
@@ -23,12 +26,17 @@ export interface SiteSettingsContextValue {
 }
 
 const DEFAULT_HEADLINE = '"พวกเราพร้อมเป็นตัวแทนและรับฟังทุกเสียงของเพื่อนนักเรียนสาธิต มพ."';
+const DEFAULT_ADDRESS_EN =
+  'Demonstration School, University of Phayao, 19 Moo 2, Maeka, Mueang Phayao, Phayao 56000';
+const DEFAULT_FACEBOOK_EN = 'Demonstration School of University of Phayao Student Union';
 
 const DEFAULT_CONTACT: Required<SiteContactInfo> = {
   address: SITE_CONFIG.contact.address,
+  addressEn: DEFAULT_ADDRESS_EN,
   phone: SITE_CONFIG.contact.phone,
   email: SITE_CONFIG.contact.email,
   facebook: SITE_CONFIG.contact.facebook,
+  facebookEn: DEFAULT_FACEBOOK_EN,
   facebookUrl: SITE_CONFIG.contact.facebookUrl,
 };
 
@@ -41,8 +49,11 @@ const DEFAULT_COMPLAINT_STATS: ComplaintStatsSummary = {
 const SiteSettingsContext = createContext<SiteSettingsContextValue>({
   academicYearTH: SITE_CONFIG.currentAcademicYearTH,
   presidentHeadline: DEFAULT_HEADLINE,
+  presidentHeadlineEn: '',
   presidentMessage: '',
+  presidentMessageEn: '',
   ticker: [],
+  tickerEn: [],
   links: RELATED_SYSTEM_LINKS,
   contactInfo: DEFAULT_CONTACT,
   totalVisits: 0,
@@ -54,8 +65,11 @@ const SiteSettingsContext = createContext<SiteSettingsContextValue>({
 export const SiteSettingsProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [academicYearTH, setAcademicYearTH] = useState<string>(SITE_CONFIG.currentAcademicYearTH);
   const [presidentHeadline, setPresidentHeadline] = useState<string>(DEFAULT_HEADLINE);
+  const [presidentHeadlineEn, setPresidentHeadlineEn] = useState<string>('');
   const [presidentMessage, setPresidentMessage] = useState<string>('');
+  const [presidentMessageEn, setPresidentMessageEn] = useState<string>('');
   const [ticker, setTicker] = useState<string[]>([]);
+  const [tickerEn, setTickerEn] = useState<string[]>([]);
   const [links, setLinks] = useState<ServiceLink[]>(RELATED_SYSTEM_LINKS);
   const [contactInfo, setContactInfo] = useState<Required<SiteContactInfo>>(DEFAULT_CONTACT);
   const [totalVisits, setTotalVisits] = useState<number>(0);
@@ -70,11 +84,20 @@ export const SiteSettingsProvider: React.FC<{ children: React.ReactNode }> = ({ 
     if (typeof data.presidentHeadline === 'string' && data.presidentHeadline.trim()) {
       setPresidentHeadline(data.presidentHeadline.trim());
     }
+    if (typeof data.presidentHeadlineEn === 'string') {
+      setPresidentHeadlineEn(data.presidentHeadlineEn.trim());
+    }
     if (typeof data.presidentMessage === 'string') {
       setPresidentMessage(data.presidentMessage);
     }
+    if (typeof data.presidentMessageEn === 'string') {
+      setPresidentMessageEn(data.presidentMessageEn);
+    }
     if (Array.isArray(data.ticker)) {
       setTicker(data.ticker);
+    }
+    if (Array.isArray(data.tickerEn)) {
+      setTickerEn(data.tickerEn);
     }
     if (Array.isArray(data.links) && data.links.length > 0) {
       setLinks(data.links);
@@ -82,8 +105,24 @@ export const SiteSettingsProvider: React.FC<{ children: React.ReactNode }> = ({ 
     if (data.contactInfo && typeof data.contactInfo === 'object') {
       const rawPhone = String(data.contactInfo.phone || '').trim();
       const rawEmail = String(data.contactInfo.email || '').trim();
+      const resolvedAddress = data.contactInfo.address || DEFAULT_CONTACT.address;
+      const resolvedAddressEn =
+        typeof data.contactInfo.addressEn === 'string' && data.contactInfo.addressEn.trim()
+          ? data.contactInfo.addressEn.trim()
+          : resolvedAddress === DEFAULT_CONTACT.address
+          ? DEFAULT_ADDRESS_EN
+          : '';
+      const resolvedFacebook = data.contactInfo.facebook || DEFAULT_CONTACT.facebook;
+      const resolvedFacebookEn =
+        typeof data.contactInfo.facebookEn === 'string' && data.contactInfo.facebookEn.trim()
+          ? data.contactInfo.facebookEn.trim()
+          : resolvedFacebook === DEFAULT_CONTACT.facebook
+          ? DEFAULT_FACEBOOK_EN
+          : '';
+
       setContactInfo({
-        address: data.contactInfo.address || DEFAULT_CONTACT.address,
+        address: resolvedAddress,
+        addressEn: resolvedAddressEn,
         phone:
           !rawPhone || rawPhone === '054-466-666 ต่อ 1450-1452'
             ? DEFAULT_CONTACT.phone
@@ -94,7 +133,8 @@ export const SiteSettingsProvider: React.FC<{ children: React.ReactNode }> = ({ 
           rawEmail.toLowerCase() === 'satit.su@up.ac.th'
             ? DEFAULT_CONTACT.email
             : rawEmail,
-        facebook: data.contactInfo.facebook || DEFAULT_CONTACT.facebook,
+        facebook: resolvedFacebook,
+        facebookEn: resolvedFacebookEn,
         facebookUrl: data.contactInfo.facebookUrl || DEFAULT_CONTACT.facebookUrl,
       });
     }
@@ -128,7 +168,7 @@ export const SiteSettingsProvider: React.FC<{ children: React.ReactNode }> = ({ 
     void testConnection();
     const settingsRef = doc(db, 'settings', 'site');
 
-    // Hydrate from IndexedDB cache immediately so ticker/links/year paint without waiting for network
+    // โหลดข้อมูลเริ่มต้นจากแคช IndexedDB เพื่อแสดงผลทันทีโดยไม่ต้องรอเครือข่าย
     getDocFromCache(settingsRef)
       .then((snap) => {
         if (snap.exists()) {
@@ -160,8 +200,11 @@ export const SiteSettingsProvider: React.FC<{ children: React.ReactNode }> = ({ 
       value={{
         academicYearTH,
         presidentHeadline,
+        presidentHeadlineEn,
         presidentMessage,
+        presidentMessageEn,
         ticker,
+        tickerEn,
         links,
         contactInfo,
         totalVisits,

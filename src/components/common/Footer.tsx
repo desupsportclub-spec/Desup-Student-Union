@@ -12,23 +12,28 @@ import { useSiteSettings } from '../../context/SiteSettingsContext';
 import { useLanguage } from '../../context/LanguageContext';
 import { LocLink } from './LocLink';
 import { formatAcademicYear } from '../../lib/format';
+import { pickL10n } from '../../lib/l10n';
+import { ServiceLink } from '../../types';
 
 export const Footer: React.FC = () => {
   const { contactInfo, links, academicYearTH } = useSiteSettings();
   const { lang } = useLanguage();
   const { t } = useTranslation();
 
-  const relatedLinks = links && links.length > 0 ? links : RELATED_SYSTEM_LINKS;
+  const relatedLinks: ServiceLink[] = links && links.length > 0 ? links : RELATED_SYSTEM_LINKS;
   const displayAcademicYear = formatAcademicYear(academicYearTH, lang);
   const currentYear = lang === 'en' ? new Date().getFullYear() : new Date().getFullYear() + 543;
+  const addressText = pickL10n(contactInfo.address, contactInfo.addressEn, lang).text;
 
-  // แปลงชื่อลิงก์ระบบที่เกี่ยวข้องเริ่มต้นให้สอดคล้องกับภาษาที่เลือก
-  const resolveRelatedLinkTitle = (title: string) => {
-    if (lang !== 'en') return title;
+  // แปลงชื่อลิงก์ระบบที่เกี่ยวข้องให้สอดคล้องกับภาษาที่เลือก โดยให้สิทธิ์คำแปลจากฐานข้อมูลก่อน
+  const resolveRelatedLinkTitle = (title: string, titleEn?: string) => {
+    const picked = pickL10n(title, titleEn, lang);
+    if (lang !== 'en') return picked.text;
+    if (!picked.isFallback) return picked.text;
     if (title === 'ระบบบริหารงานวิชาการ') return t('footer.academicSystem');
     if (title === 'ระบบบริหารงานกิจการนักเรียน') return t('footer.studentAffairsSystem');
     if (title === 'เพจ Facebook องค์การนักเรียน') return t('footer.facebookPage');
-    return title;
+    return picked.text;
   };
 
   const handleOpenCookieSettings = () => {
@@ -63,7 +68,7 @@ export const Footer: React.FC = () => {
             </p>
 
             <div className="pt-2 text-xs text-anchor-text/80 space-y-1.5">
-              <p><span className="text-anchor-gold">{t('footer.addressLabel')}</span> {contactInfo.address}</p>
+              <p><span className="text-anchor-gold">{t('footer.addressLabel')}</span> {addressText}</p>
               <p><span className="text-anchor-gold">{t('footer.emailLabel')}</span> {contactInfo.email}</p>
             </div>
           </div>
@@ -111,12 +116,12 @@ export const Footer: React.FC = () => {
                         rel="noopener noreferrer"
                         className="hover:text-anchor-text transition-colors inline-flex items-start gap-1"
                       >
-                        <span>{resolveRelatedLinkTitle(lnk.title)}</span>
+                        <span>{resolveRelatedLinkTitle(lnk.title, lnk.titleEn)}</span>
                         <span aria-hidden="true">↗</span>
                       </a>
                     ) : (
                       <LocLink to={lnk.url} className="hover:text-anchor-text transition-colors">
-                        {resolveRelatedLinkTitle(lnk.title)}
+                        {resolveRelatedLinkTitle(lnk.title, lnk.titleEn)}
                       </LocLink>
                     )}
                   </li>

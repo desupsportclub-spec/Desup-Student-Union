@@ -16,6 +16,8 @@ import { getNewsCoverUrl, getNewsYouTubeUrl } from '../components/news/SocialMed
 import { LocLink } from '../components/common/LocLink';
 import { SeoHead } from '../components/common/SeoHead';
 import { useLanguage } from '../context/LanguageContext';
+import { pickL10n } from '../lib/l10n';
+import { FallbackLangBadge } from '../components/common/FallbackLangBadge';
 
 const CATEGORY_IDS = ['all', 'pr', 'activity', 'regulation', 'knowledge', 'video'] as const;
 
@@ -83,7 +85,9 @@ export const News: React.FC = () => {
       if (!term) return true;
       return (
         item.title.toLowerCase().includes(term) ||
-        item.excerpt?.toLowerCase().includes(term)
+        (item.titleEn || '').toLowerCase().includes(term) ||
+        (item.excerpt || '').toLowerCase().includes(term) ||
+        (item.excerptEn || '').toLowerCase().includes(term)
       );
     });
   }, [allNews, selectedCat, debouncedSearch]);
@@ -166,64 +170,68 @@ export const News: React.FC = () => {
         </div>
       ) : visibleNews.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-8">
-          {visibleNews.map((item, idx) => (
-            <LocLink
-              key={item.id}
-              to={`/news/read/${item.id}`}
-              className="group block relative border border-gold-border/20 bg-surface p-4 sm:p-5 rounded-sm shadow-editorial transition-all duration-300 hover:border-gold flex flex-col justify-between"
-            >
-              <CornerBracket position="top-left" />
-              <CornerBracket position="top-right" />
-              <CornerBracket position="bottom-left" />
-              <CornerBracket position="bottom-right" />
+          {visibleNews.map((item, idx) => {
+            const titleRes = pickL10n(item.title, item.titleEn, lang);
+            const excerptRes = pickL10n(item.excerpt, item.excerptEn, lang);
+            return (
+              <LocLink
+                key={item.id}
+                to={`/news/read/${item.id}`}
+                className="group block relative border border-gold-border/20 bg-surface p-4 sm:p-5 rounded-sm shadow-editorial transition-all duration-300 hover:border-gold flex flex-col justify-between"
+              >
+                <CornerBracket position="top-left" />
+                <CornerBracket position="top-right" />
+                <CornerBracket position="bottom-left" />
+                <CornerBracket position="bottom-right" />
 
-              <div>
-                <div className="aspect-[16/9] bg-bg-alt overflow-hidden mb-4 rounded-sm relative">
-                  {getNewsCoverUrl(item) ? (
-                    <img
-                      src={getNewsCoverUrl(item) || ''}
-                      alt={item.title}
-                      className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.04]"
-                      loading={idx < 3 ? 'eager' : 'lazy'}
-                      decoding="async"
-                    />
-                  ) : (
-                    <div className="w-full h-full bg-brand-soft flex items-center justify-center text-accent">
-                      <Emblem size={44} />
-                    </div>
-                  )}
-
-                  {(item.category === 'video' || getNewsYouTubeUrl(item)) && (
-                    <div className="absolute inset-0 bg-anchor-bg-deep/25 flex items-center justify-center">
-                      <div className="w-10 h-10 rounded-full bg-gold text-anchor-bg-deep flex items-center justify-center shadow-lg">
-                        ▶
+                <div>
+                  <div className="aspect-[16/9] bg-bg-alt overflow-hidden mb-4 rounded-sm relative">
+                    {getNewsCoverUrl(item) ? (
+                      <img
+                        src={getNewsCoverUrl(item) || ''}
+                        alt={titleRes.text}
+                        className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.04]"
+                        loading={idx < 3 ? 'eager' : 'lazy'}
+                        decoding="async"
+                      />
+                    ) : (
+                      <div className="w-full h-full bg-brand-soft flex items-center justify-center text-accent">
+                        <Emblem size={44} />
                       </div>
-                    </div>
-                  )}
-                </div>
-
-                <div className="space-y-2">
-                  <div className="flex flex-wrap items-center gap-2 text-[11px] text-text-muted">
-                    {item.pinned && (
-                      <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-sm bg-brand text-brand-contrast text-[10px] font-medium">
-                        <PinIcon className="w-3 h-3 text-gold-light" />
-                        <span>{t('home.pinnedTag')}</span>
-                      </span>
                     )}
-                    <NewsCategoryBadge category={item.category} />
-                    <span aria-hidden="true">·</span>
-                    <span>{formatDate(item.createdAt, lang, true)}</span>
+
+                    {(item.category === 'video' || getNewsYouTubeUrl(item)) && (
+                      <div className="absolute inset-0 bg-anchor-bg-deep/25 flex items-center justify-center">
+                        <div className="w-10 h-10 rounded-full bg-gold text-anchor-bg-deep flex items-center justify-center shadow-lg">
+                          ▶
+                        </div>
+                      </div>
+                    )}
                   </div>
 
-                  <h3 className="font-serif text-lg font-semibold text-heading group-hover:text-accent transition-colors line-clamp-2 leading-snug">
-                    {item.title}
-                  </h3>
+                  <div className="space-y-2">
+                    <div className="flex flex-wrap items-center gap-2 text-[11px] text-text-muted">
+                      {item.pinned && (
+                        <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-sm bg-brand text-brand-contrast text-[10px] font-medium">
+                          <PinIcon className="w-3 h-3 text-gold-light" />
+                          <span>{t('home.pinnedTag')}</span>
+                        </span>
+                      )}
+                      <NewsCategoryBadge category={item.category} />
+                      <span aria-hidden="true">·</span>
+                      <span>{formatDate(item.createdAt, lang, true)}</span>
+                      <FallbackLangBadge show={titleRes.isFallback} />
+                    </div>
 
-                  <p className="text-xs text-text-muted line-clamp-2 leading-relaxed">
-                    {item.excerpt || t('news.cardFallbackExcerpt')}
-                  </p>
+                    <h3 className="font-serif text-lg font-semibold text-heading group-hover:text-accent transition-colors line-clamp-2 leading-snug">
+                      {titleRes.text}
+                    </h3>
+
+                    <p className="text-xs text-text-muted line-clamp-2 leading-relaxed">
+                      {excerptRes.text || t('news.cardFallbackExcerpt')}
+                    </p>
+                  </div>
                 </div>
-              </div>
 
               <div className="pt-4 mt-4 border-t border-gold-border/15 flex items-center justify-between text-[11px] text-text-muted">
                 <span>{t('site.viewsCount', { count: formatNumber(item.views, lang) })}</span>
@@ -232,7 +240,8 @@ export const News: React.FC = () => {
                 </span>
               </div>
             </LocLink>
-          ))}
+            );
+          })}
         </div>
       ) : (
         <div className="p-16 text-center border border-dashed border-gold-border/30 rounded-sm bg-surface/50 space-y-2">

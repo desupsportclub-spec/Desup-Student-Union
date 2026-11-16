@@ -17,6 +17,8 @@ import { Emblem } from '../components/common/Emblem';
 import { LocLink } from '../components/common/LocLink';
 import { SeoHead } from '../components/common/SeoHead';
 import { useLanguage } from '../context/LanguageContext';
+import { pickL10n, pickHtmlL10n } from '../lib/l10n';
+import { UntranslatedBanner, FallbackLangBadge } from '../components/common/FallbackLangBadge';
 import {
   SocialMediaEmbed,
   SocialMediaList,
@@ -150,10 +152,13 @@ export const NewsDetail: React.FC = () => {
     );
   }
 
-  const galleryImages = news.gallery || (news.galleryUrls?.map(url => ({ url, alt: news.title })) || []);
+  const titleRes = pickL10n(news.title, news.titleEn, lang);
+  const excerptRes = pickL10n(news.excerpt, news.excerptEn, lang);
+  const contentRes = pickHtmlL10n(news.content, news.contentEn, lang);
+  const galleryImages = news.gallery || (news.galleryUrls?.map(url => ({ url, alt: titleRes.text })) || []);
 
   const extractedSocialUrls: string[] = [];
-  const sanitizedContent = (news.content || '').replace(
+  const sanitizedContent = contentRes.html.replace(
     /<iframe[^>]+src=["']([^"']*(?:facebook\.com|fb\.watch|instagram\.com|tiktok\.com)[^"']*)["'][^>]*>[\s\S]*?<\/iframe>/gi,
     (_match, src: string) => {
       if (src) extractedSocialUrls.push(src);
@@ -179,8 +184,8 @@ export const NewsDetail: React.FC = () => {
   return (
     <article className="py-6 sm:py-12">
       <SeoHead
-        title={news.title}
-        description={news.excerpt || t('seo.pages.news.desc')}
+        title={titleRes.text}
+        description={excerptRes.text || t('seo.pages.news.desc')}
       />
 
       <div className="max-w-[760px] mx-auto px-4 sm:px-6 space-y-6 sm:space-y-8">
@@ -193,10 +198,13 @@ export const NewsDetail: React.FC = () => {
           <NewsCategoryBadge category={news.category} />
         </div>
 
+        {/* แจ้งผู้เข้าชมโหมดภาษาอังกฤษอย่างสุภาพเมื่อบทความยังไม่มีคำแปลภาษาอังกฤษ */}
+        <UntranslatedBanner show={titleRes.isFallback || contentRes.isFallback} />
+
         {/* ส่วนหัวบทความ */}
         <div className="space-y-4 border-b border-gold-border/30 pb-6">
           <h1 className="font-serif text-2xl sm:text-3xl md:text-4xl font-semibold text-heading leading-tight">
-            {news.title}
+            {titleRes.text}
           </h1>
 
           <div className="flex flex-wrap items-center justify-between text-xs text-text-muted gap-4 pt-2">
@@ -235,12 +243,12 @@ export const NewsDetail: React.FC = () => {
 
         {/* สื่อหลัก (วิดีโอ YouTube หรือภาพปก) */}
         {showHeroYouTube && primaryYouTubeUrl ? (
-          <SocialMediaEmbed url={primaryYouTubeUrl} title={news.title} eagerYouTube />
+          <SocialMediaEmbed url={primaryYouTubeUrl} title={titleRes.text} eagerYouTube />
         ) : explicitCover ? (
           <div className="aspect-[16/9] overflow-hidden rounded-sm border border-gold-border/25 shadow-editorial bg-bg-alt">
             <img
               src={explicitCover}
-              alt={news.coverImage?.alt || news.title}
+              alt={news.coverImage?.alt || titleRes.text}
               decoding="async"
               fetchPriority="high"
               className="w-full h-full object-cover"
@@ -248,9 +256,9 @@ export const NewsDetail: React.FC = () => {
           </div>
         ) : null}
 
-        {news.excerpt && (
+        {excerptRes.text && (
           <div className="text-base font-serif italic text-accent bg-brand-soft/45 p-4 border-l-2 border-gold rounded-r-sm">
-            {news.excerpt}
+            {excerptRes.text}
           </div>
         )}
 
@@ -264,7 +272,7 @@ export const NewsDetail: React.FC = () => {
             <SocialMediaList
               videoUrl={news.videoUrl}
               socialLinks={combinedSocialLinks}
-              title={news.title}
+              title={titleRes.text}
               excludeUrl={showHeroYouTube ? primaryYouTubeUrl || undefined : undefined}
             />
           </div>
@@ -336,35 +344,41 @@ export const NewsDetail: React.FC = () => {
           <div className="space-y-6 pt-2">
             <SectionEyebrow enText={t('news.relatedEn')} thText={t('news.relatedTh')} />
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-              {related.map((item) => (
-                <LocLink
-                  key={item.id}
-                  to={`/news/read/${item.id}`}
-                  className="group block border border-gold-border/20 bg-surface p-3 rounded-sm hover:border-gold transition-colors"
-                >
-                  <div className="aspect-[16/9] bg-bg-alt rounded-sm overflow-hidden mb-2">
-                    {getNewsCoverUrl(item) ? (
-                      <img
-                        src={getNewsCoverUrl(item) || ''}
-                        alt={item.title}
-                        loading="lazy"
-                        decoding="async"
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform"
-                      />
-                    ) : (
-                      <div className="w-full h-full bg-brand-soft flex items-center justify-center">
-                        <Emblem size={24} />
-                      </div>
-                    )}
-                  </div>
-                  <h4 className="font-serif text-xs font-semibold text-heading group-hover:text-accent line-clamp-2">
-                    {item.title}
-                  </h4>
-                  <p className="text-[10px] text-text-muted mt-1">
-                    {formatDate(item.createdAt, lang, true)}
-                  </p>
-                </LocLink>
-              ))}
+              {related.map((item) => {
+                const relTitleRes = pickL10n(item.title, item.titleEn, lang);
+                return (
+                  <LocLink
+                    key={item.id}
+                    to={`/news/read/${item.id}`}
+                    className="group block border border-gold-border/20 bg-surface p-3 rounded-sm hover:border-gold transition-colors"
+                  >
+                    <div className="aspect-[16/9] bg-bg-alt rounded-sm overflow-hidden mb-2">
+                      {getNewsCoverUrl(item) ? (
+                        <img
+                          src={getNewsCoverUrl(item) || ''}
+                          alt={relTitleRes.text}
+                          loading="lazy"
+                          decoding="async"
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+                        />
+                      ) : (
+                        <div className="w-full h-full bg-brand-soft flex items-center justify-center">
+                          <Emblem size={24} />
+                        </div>
+                      )}
+                    </div>
+                    <h4 className="font-serif text-xs font-semibold text-heading group-hover:text-accent line-clamp-2">
+                      {relTitleRes.text}
+                    </h4>
+                    <div className="flex items-center justify-between gap-2 mt-1">
+                      <p className="text-[10px] text-text-muted">
+                        {formatDate(item.createdAt, lang, true)}
+                      </p>
+                      <FallbackLangBadge show={relTitleRes.isFallback} />
+                    </div>
+                  </LocLink>
+                );
+              })}
             </div>
           </div>
         )}

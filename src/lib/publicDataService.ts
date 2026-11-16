@@ -41,7 +41,10 @@ let downloadsInFlight: Promise<DownloadItem[]> | null = null;
 
 function buildNewsSignature(items: NewsItem[]): string {
   return items
-    .map((n) => `${n.id ?? ''}:${n.updatedAt ?? ''}:${n.views ?? 0}:${n.pinned ? 1 : 0}`)
+    .map(
+      (n) =>
+        `${n.id ?? ''}:${n.updatedAt ?? ''}:${n.views ?? 0}:${n.pinned ? 1 : 0}:${n.titleEn ?? ''}`
+    )
     .join('|');
 }
 
@@ -50,22 +53,35 @@ function sortNews(items: NewsItem[]): NewsItem[] {
 }
 
 function buildBannerSignature(items: BannerItem[]): string {
-  return items.map((b) => `${b.id ?? ''}:${b.order ?? 0}:${b.title ?? ''}`).join('|');
+  return items
+    .map((b) => `${b.id ?? ''}:${b.order ?? 0}:${b.title ?? ''}:${b.titleEn ?? ''}:${b.subtitleEn ?? ''}`)
+    .join('|');
 }
 
 function buildEventSignature(items: EventItem[]): string {
-  return items.map((e) => `${e.id ?? ''}:${e.startAt ?? ''}:${e.endAt ?? ''}:${e.title ?? ''}`).join('|');
+  return items
+    .map(
+      (e) =>
+        `${e.id ?? ''}:${e.startAt ?? ''}:${e.endAt ?? ''}:${e.title ?? ''}:${e.titleEn ?? ''}`
+    )
+    .join('|');
 }
 
 function buildPeopleSignature(items: PersonItem[]): string {
   return items
-    .map((p) => `${p.id ?? ''}:${p.yearTH ?? ''}:${p.updatedAt ?? ''}:${p.order ?? 0}`)
+    .map(
+      (p) =>
+        `${p.id ?? ''}:${p.yearTH ?? ''}:${p.updatedAt ?? ''}:${p.order ?? 0}:${p.nameEn ?? ''}`
+    )
     .join('|');
 }
 
 function buildDownloadSignature(items: DownloadItem[]): string {
   return items
-    .map((d) => `${d.id ?? ''}:${d.downloads ?? 0}:${d.createdAt ?? ''}:${d.title ?? ''}`)
+    .map(
+      (d) =>
+        `${d.id ?? ''}:${d.downloads ?? 0}:${d.createdAt ?? ''}:${d.title ?? ''}:${d.titleEn ?? ''}`
+    )
     .join('|');
 }
 

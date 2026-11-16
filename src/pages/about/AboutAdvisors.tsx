@@ -11,6 +11,9 @@ import { Emblem } from '../../components/common/Emblem';
 import { SeoHead } from '../../components/common/SeoHead';
 import { getCachedPeopleSync, loadPeopleList } from '../../lib/publicDataService';
 import { ADVISOR_GROUPS, resolveAdvisorGroup } from '../../config/site';
+import { useLanguage } from '../../context/LanguageContext';
+import { pickL10n } from '../../lib/l10n';
+import { FallbackLangBadge } from '../../components/common/FallbackLangBadge';
 
 function filterAdvisors(list: PersonItem[]): PersonItem[] {
   return list
@@ -20,6 +23,7 @@ function filterAdvisors(list: PersonItem[]): PersonItem[] {
 
 export const AboutAdvisors: React.FC = () => {
   const { t } = useTranslation();
+  const { lang } = useLanguage();
   const initialPeople = getCachedPeopleSync();
   const [advisors, setAdvisors] = useState<PersonItem[]>(
     initialPeople ? filterAdvisors(initialPeople) : []
@@ -102,53 +106,64 @@ export const AboutAdvisors: React.FC = () => {
 
                 {members.length > 0 ? (
                   <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5 sm:gap-8">
-                    {members.map((advisor) => (
-                      <div
-                        key={advisor.id}
-                        className="bg-surface border border-gold-border/20 p-5 sm:p-6 rounded-sm shadow-editorial text-center relative space-y-4 hover:border-gold transition-colors"
-                      >
-                        <CornerBracket position="top-left" />
-                        <CornerBracket position="top-right" />
-                        <CornerBracket position="bottom-left" />
-                        <CornerBracket position="bottom-right" />
+                    {members.map((advisor) => {
+                      const nameRes = pickL10n(advisor.name, advisor.nameEn, lang);
+                      const posRes = pickL10n(advisor.position, advisor.positionEn, lang);
+                      const gradeRes = pickL10n(advisor.grade, advisor.gradeEn, lang);
+                      const quoteRes = pickL10n(advisor.quote, advisor.quoteEn, lang);
+                      return (
+                        <div
+                          key={advisor.id}
+                          className="bg-surface border border-gold-border/20 p-5 sm:p-6 rounded-sm shadow-editorial text-center relative space-y-4 hover:border-gold transition-colors"
+                        >
+                          <CornerBracket position="top-left" />
+                          <CornerBracket position="top-right" />
+                          <CornerBracket position="bottom-left" />
+                          <CornerBracket position="bottom-right" />
 
-                        <div className="w-40 h-48 mx-auto bg-bg-alt rounded-sm overflow-hidden border border-gold-border/20">
-                          {advisor.photo?.url || advisor.photoUrl ? (
-                            <img
-                              src={advisor.photo?.url || advisor.photoUrl}
-                              alt={advisor.name}
-                              loading="lazy"
-                              decoding="async"
-                              className="w-full h-full object-cover"
-                            />
-                          ) : (
-                            <div className="w-full h-full bg-brand-soft flex flex-col items-center justify-center p-3 text-text-muted">
-                              <Emblem size={44} />
-                              <span className="text-[11px] text-accent mt-2 font-medium text-center">
-                                {groupShortLabel}
-                              </span>
-                            </div>
-                          )}
-                        </div>
+                          <div className="w-40 h-48 mx-auto bg-bg-alt rounded-sm overflow-hidden border border-gold-border/20">
+                            {advisor.photo?.url || advisor.photoUrl ? (
+                              <img
+                                src={advisor.photo?.url || advisor.photoUrl}
+                                alt={nameRes.text}
+                                loading="lazy"
+                                decoding="async"
+                                className="w-full h-full object-cover"
+                              />
+                            ) : (
+                              <div className="w-full h-full bg-brand-soft flex flex-col items-center justify-center p-3 text-text-muted">
+                                <Emblem size={44} />
+                                <span className="text-[11px] text-accent mt-2 font-medium text-center">
+                                  {groupShortLabel}
+                                </span>
+                              </div>
+                            )}
+                          </div>
 
-                        <div>
-                          <span className="text-[10px] uppercase tracking-wider text-gold-text font-semibold block mb-1">
-                            {advisor.position}
-                          </span>
-                          <h3 className="font-serif text-lg font-semibold text-heading">
-                            {advisor.name}
-                          </h3>
-                          {advisor.grade && (
-                            <p className="text-xs text-text-muted mt-0.5">{advisor.grade}</p>
-                          )}
-                          {advisor.quote && (
-                            <p className="text-xs text-text-muted italic mt-2 font-serif">
-                              "{advisor.quote}"
-                            </p>
-                          )}
+                          <div>
+                            <span className="text-[10px] uppercase tracking-wider text-gold-text font-semibold block mb-1">
+                              {posRes.text}
+                            </span>
+                            <h3 className="font-serif text-lg font-semibold text-heading">
+                              {nameRes.text}
+                            </h3>
+                            {gradeRes.text && (
+                              <p className="text-xs text-text-muted mt-0.5">{gradeRes.text}</p>
+                            )}
+                            {quoteRes.text && (
+                              <p className="text-xs text-text-muted italic mt-2 font-serif">
+                                "{quoteRes.text}"
+                              </p>
+                            )}
+                            {(nameRes.isFallback || posRes.isFallback) && (
+                              <div className="mt-2 flex justify-center">
+                                <FallbackLangBadge show />
+                              </div>
+                            )}
+                          </div>
                         </div>
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 ) : (
                   <div className="p-8 text-center border border-dashed border-gold-border/25 rounded-sm bg-surface/60 text-xs text-text-muted">
