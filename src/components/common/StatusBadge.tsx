@@ -15,23 +15,23 @@ export const ComplaintStatusBadge: React.FC<StatusBadgeProps> = ({ status, class
   const config: Record<ComplaintStatus, { label: string; dotColor: string; textColor: string }> = {
     received: {
       label: 'รับเรื่องแล้ว',
-      dotColor: 'bg-[#6B3FA0]/70',
-      textColor: 'text-[#4B1F7A]'
+      dotColor: 'bg-accent/70',
+      textColor: 'text-accent'
     },
     considering: {
       label: 'กำลังพิจารณา',
-      dotColor: 'bg-[#B8923A]',
-      textColor: 'text-[#9C7A2B]'
+      dotColor: 'bg-gold',
+      textColor: 'text-gold-text'
     },
     in_progress: {
       label: 'กำลังดำเนินการ',
-      dotColor: 'bg-[#6B3FA0]',
-      textColor: 'text-[#4B1F7A]'
+      dotColor: 'bg-accent',
+      textColor: 'text-accent'
     },
     resolved: {
       label: 'ดำเนินการเสร็จสิ้น',
-      dotColor: 'bg-[#2F6B4F]',
-      textColor: 'text-[#2F6B4F]'
+      dotColor: 'bg-success',
+      textColor: 'text-success'
     }
   };
 
@@ -56,7 +56,7 @@ export const NewsCategoryBadge: React.FC<{ category: NewsCategory; className?: s
   };
 
   return (
-    <span className={`text-[11px] uppercase tracking-[0.16em] font-medium text-[#9C7A2B] ${className}`}>
+    <span className={`text-[11px] uppercase tracking-[0.16em] font-medium text-gold-text ${className}`}>
       {map[category] || 'ข่าวสาร'}
     </span>
   );

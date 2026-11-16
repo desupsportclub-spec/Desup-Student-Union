@@ -154,32 +154,32 @@ const PLATFORM_META: Record<
 > = {
   youtube: {
     name: 'YouTube',
-    colorClass: 'text-red-700',
-    badgeBg: 'bg-red-50 border-red-200 text-red-700',
+    colorClass: 'text-error',
+    badgeBg: 'bg-error-bg border-error/30 text-error',
     ctaLabel: 'เปิดดูบน YouTube ↗',
   },
   facebook: {
     name: 'Facebook',
-    colorClass: 'text-[#1877F2]',
-    badgeBg: 'bg-[#1877F2]/10 border-[#1877F2]/30 text-[#1877F2]',
+    colorClass: 'text-[var(--social-fb)]',
+    badgeBg: 'bg-[var(--social-fb)]/10 border-[var(--social-fb)]/30 text-[var(--social-fb)]',
     ctaLabel: 'เปิดดูโพสต์/วิดีโอบน Facebook ↗',
   },
   instagram: {
     name: 'Instagram',
-    colorClass: 'text-[#C13584]',
-    badgeBg: 'bg-[#C13584]/10 border-[#C13584]/30 text-[#C13584]',
+    colorClass: 'text-[var(--social-ig)]',
+    badgeBg: 'bg-[var(--social-ig)]/10 border-[var(--social-ig)]/30 text-[var(--social-ig)]',
     ctaLabel: 'เปิดดูบน Instagram ↗',
   },
   tiktok: {
     name: 'TikTok',
-    colorClass: 'text-[#1B1226]',
-    badgeBg: 'bg-stone-900 text-white border-stone-900',
+    colorClass: 'text-heading',
+    badgeBg: 'bg-anchor-bg-deep text-anchor-text border-gold/30',
     ctaLabel: 'เปิดดูบน TikTok ↗',
   },
   other: {
     name: 'ลิงก์ภายนอก',
-    colorClass: 'text-[#4B1F7A]',
-    badgeBg: 'bg-[#EDE6F5] border-[#4B1F7A]/20 text-[#4B1F7A]',
+    colorClass: 'text-accent',
+    badgeBg: 'bg-brand-soft border-gold-border/25 text-accent',
     ctaLabel: 'เปิดลิงก์ต้นทาง ↗',
   },
 };
@@ -236,7 +236,7 @@ export const YouTubeLitePlayer: React.FC<{
   const embedSrc = getYouTubeEmbedUrl(url, !eagerEmbed && playing);
 
   return (
-    <div className={`aspect-video w-full rounded-sm overflow-hidden border border-[#B8923A]/40 shadow-editorial bg-black relative ${className}`}>
+    <div className={`aspect-video w-full rounded-sm overflow-hidden border border-gold-border/40 shadow-editorial bg-anchor-bg-deep relative ${className}`}>
       {playing && embedSrc ? (
         <iframe
           src={embedSrc}
@@ -259,15 +259,15 @@ export const YouTubeLitePlayer: React.FC<{
             decoding="async"
             className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-black/15 to-black/10 group-hover:bg-black/30 transition-colors flex items-center justify-center">
-            <div className="w-14 h-10 sm:w-16 sm:h-11 rounded-xl bg-[#FF0000]/95 group-hover:bg-[#FF0000] group-hover:scale-105 transition-all flex items-center justify-center shadow-xl border border-white/25">
-              <svg viewBox="0 0 24 24" className="w-6 h-6 text-white fill-current ml-0.5" aria-hidden="true">
+          <div className="absolute inset-0 bg-gradient-to-t from-anchor-bg-deep/65 via-anchor-bg-deep/15 to-anchor-bg-deep/10 group-hover:bg-anchor-bg-deep/35 transition-colors flex items-center justify-center">
+            <div className="w-14 h-10 sm:w-16 sm:h-11 rounded-xl bg-[var(--social-yt)]/95 group-hover:bg-[var(--social-yt)] group-hover:scale-105 transition-all flex items-center justify-center shadow-xl border border-anchor-text/25">
+              <svg viewBox="0 0 24 24" className="w-6 h-6 text-anchor-text fill-current ml-0.5" aria-hidden="true">
                 <path d="M8 5v14l11-7z" />
               </svg>
             </div>
           </div>
-          <span className="absolute top-2.5 left-2.5 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-sm bg-black/75 text-white text-[10px] font-medium tracking-wide border border-white/15">
-            <span className="w-1.5 h-1.5 rounded-full bg-red-500" />
+          <span className="absolute top-2.5 left-2.5 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-sm bg-anchor-bg-deep/80 text-anchor-text text-[10px] font-medium tracking-wide border border-anchor-text/15">
+            <span className="w-1.5 h-1.5 rounded-full bg-[var(--social-yt)]" />
             YouTube
           </span>
         </button>
@@ -309,7 +309,7 @@ export const SocialMediaEmbed: React.FC<SocialMediaEmbedProps> = ({
               href={cleanUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-xs text-[#9C7A2B] hover:underline"
+              className="text-xs text-gold-text hover:underline"
             >
               {meta.ctaLabel}
             </a>
@@ -324,7 +324,7 @@ export const SocialMediaEmbed: React.FC<SocialMediaEmbedProps> = ({
     const tikTokSrc = getTikTokEmbedUrl(cleanUrl);
     if (tikTokSrc) {
       return (
-        <div className="bg-[#FAF7F0] border border-[#B8923A]/40 rounded-sm p-4 shadow-editorial space-y-3">
+        <div className="bg-surface border border-gold-border/40 rounded-sm p-4 shadow-editorial space-y-3">
           <div className="flex items-center justify-between gap-3">
             <div className={`inline-flex items-center gap-2 px-3 py-1 rounded-sm border text-xs font-semibold ${meta.badgeBg}`}>
               <PlatformIcon platform="tiktok" />
@@ -334,12 +334,12 @@ export const SocialMediaEmbed: React.FC<SocialMediaEmbedProps> = ({
               href={cleanUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-xs font-medium text-[#4B1F7A] hover:underline"
+              className="text-xs font-medium text-accent hover:underline"
             >
               {meta.ctaLabel}
             </a>
           </div>
-          <div className="max-w-[340px] mx-auto aspect-[9/16] rounded-sm overflow-hidden bg-black">
+          <div className="max-w-[340px] mx-auto aspect-[9/16] rounded-sm overflow-hidden bg-anchor-bg-deep">
             <iframe
               src={tikTokSrc}
               title={title}
@@ -358,7 +358,7 @@ export const SocialMediaEmbed: React.FC<SocialMediaEmbedProps> = ({
     const igSrc = getInstagramEmbedUrl(cleanUrl);
     if (igSrc) {
       return (
-        <div className="bg-[#FAF7F0] border border-[#B8923A]/40 rounded-sm p-4 shadow-editorial space-y-3">
+        <div className="bg-surface border border-gold-border/40 rounded-sm p-4 shadow-editorial space-y-3">
           <div className="flex items-center justify-between gap-3">
             <div className={`inline-flex items-center gap-2 px-3 py-1 rounded-sm border text-xs font-semibold ${meta.badgeBg}`}>
               <PlatformIcon platform="instagram" />
@@ -368,12 +368,12 @@ export const SocialMediaEmbed: React.FC<SocialMediaEmbedProps> = ({
               href={cleanUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-xs font-medium text-[#4B1F7A] hover:underline"
+              className="text-xs font-medium text-accent hover:underline"
             >
               {meta.ctaLabel}
             </a>
           </div>
-          <div className="max-w-[460px] mx-auto rounded-sm overflow-hidden border border-stone-200 bg-white">
+          <div className="max-w-[460px] mx-auto rounded-sm overflow-hidden border border-gold-border/25 bg-surface-elevated">
             <iframe
               src={igSrc}
               title={title}
@@ -392,7 +392,7 @@ export const SocialMediaEmbed: React.FC<SocialMediaEmbedProps> = ({
       href={cleanUrl}
       target="_blank"
       rel="noopener noreferrer"
-      className="group block bg-[#FAF7F0] border border-[#B8923A]/50 hover:border-[#4B1F7A] p-5 rounded-sm shadow-editorial transition-all"
+      className="group block bg-surface border border-gold-border/40 hover:border-accent p-5 rounded-sm shadow-editorial transition-all"
     >
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="flex items-start gap-3.5 min-w-0">
@@ -403,16 +403,16 @@ export const SocialMediaEmbed: React.FC<SocialMediaEmbedProps> = ({
             <span className={`text-[11px] uppercase tracking-wider font-semibold ${meta.colorClass}`}>
               {meta.name}
             </span>
-            <h4 className="font-serif text-base font-semibold text-[#1B1226] group-hover:text-[#4B1F7A] transition-colors">
+            <h4 className="font-serif text-base font-semibold text-heading group-hover:text-accent transition-colors">
               {label || `ติดตามรายละเอียดเพิ่มเติมบน ${meta.name}`}
             </h4>
-            <p className="text-xs text-[#1B1226]/55 truncate font-mono">
+            <p className="text-xs text-text-muted truncate font-mono">
               {cleanUrl}
             </p>
           </div>
         </div>
 
-        <span className="shrink-0 inline-flex items-center justify-center px-5 py-2.5 bg-[#4B1F7A] group-hover:bg-[#2A1245] text-[#FAF7F0] text-xs font-medium rounded-full border border-[#D9B867]/40 transition-colors">
+        <span className="shrink-0 inline-flex items-center justify-center px-5 py-2.5 bg-brand group-hover:bg-brand-hover text-brand-contrast text-xs font-medium rounded-full border border-gold-light/40 transition-colors">
           {meta.ctaLabel}
         </span>
       </div>

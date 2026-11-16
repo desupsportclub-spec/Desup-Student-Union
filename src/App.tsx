@@ -9,6 +9,7 @@ import { HelmetProvider } from 'react-helmet-async';
 import { MainLayout } from './components/layout/MainLayout';
 import { AdminAuthProvider } from './admin/AdminAuthContext';
 import { SiteSettingsProvider } from './context/SiteSettingsContext';
+import { ThemeProvider } from './context/ThemeContext';
 import { Emblem } from './components/common/Emblem';
 
 // Lazy-load all pages for optimal performance & code splitting
@@ -43,7 +44,7 @@ const AdminSettings = lazy(() => import('./admin/AdminSettings').then(m => ({ de
 const PageFallback: React.FC = () => (
   <div className="min-h-[60vh] flex flex-col items-center justify-center p-12">
     <Emblem size={44} animate />
-    <span className="text-xs text-[#9C7A2B] mt-4 font-serif tracking-wider">กำลังโหลด...</span>
+    <span className="text-xs text-gold-text mt-4 font-serif tracking-wider">กำลังโหลด...</span>
   </div>
 );
 
@@ -263,12 +264,14 @@ const router = createBrowserRouter([
 
 export default function App() {
   return (
-    <HelmetProvider>
-      <AdminAuthProvider>
-        <SiteSettingsProvider>
-          <RouterProvider router={router} />
-        </SiteSettingsProvider>
-      </AdminAuthProvider>
-    </HelmetProvider>
+    <ThemeProvider>
+      <HelmetProvider>
+        <AdminAuthProvider>
+          <SiteSettingsProvider>
+            <RouterProvider router={router} />
+          </SiteSettingsProvider>
+        </AdminAuthProvider>
+      </HelmetProvider>
+    </ThemeProvider>
   );
 }

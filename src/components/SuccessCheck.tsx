@@ -20,13 +20,13 @@ export function SuccessCheck({ size = 120, className = '' }: SuccessCheckProps) 
         height={size}
         viewBox="0 0 120 120"
         fill="none"
-        className={className}
+        className={`text-success ${className}`}
         aria-label="สำเร็จ"
         role="img"
       >
         <path
           d="M 38 62 L 54 78 L 86 44"
-          stroke="#2F9E6B"
+          stroke="currentColor"
           strokeWidth={10}
           strokeLinecap="round"
           strokeLinejoin="round"
@@ -41,14 +41,14 @@ export function SuccessCheck({ size = 120, className = '' }: SuccessCheckProps) 
       height={size}
       viewBox="0 0 120 120"
       fill="none"
-      className={className}
+      className={`text-success ${className}`}
       aria-label="สำเร็จ"
       role="img"
     >
       {/* 1. เครื่องหมายถูกสีเขียว วาดจากซ้ายไปขวา ใช้ 0.5 วิ */}
       <motion.path
         d="M 38 62 L 54 78 L 86 44"
-        stroke="#2F9E6B"
+        stroke="currentColor"
         strokeWidth={10}
         strokeLinecap="round"
         strokeLinejoin="round"
@@ -65,7 +65,7 @@ export function SuccessCheck({ size = 120, className = '' }: SuccessCheckProps) 
         cx="60"
         cy="60"
         r="50"
-        stroke="#2F9E6B"
+        stroke="currentColor"
         strokeWidth={7}
         strokeLinecap="round"
         fill="none"

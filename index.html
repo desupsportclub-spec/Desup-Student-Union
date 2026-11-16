@@ -9,6 +9,23 @@
     <meta property="og:description" content="เว็บไซต์ทางการ องค์การนักเรียน โรงเรียนสาธิตมหาวิทยาลัยพะเยา (สธ.มพ) ข่าวสาร กิจกรรม เอกสาร และระบบรับเรื่องร้องเรียน" />
     <meta property="og:type" content="website" />
     <meta name="twitter:card" content="summary_large_image" />
+    <meta name="theme-color" content="#F5EEDC" />
+    <script>
+      (function () {
+        try {
+          var saved = localStorage.getItem('theme') || 'system';
+          var prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+          var resolved = saved === 'dark' || (saved === 'system' && prefersDark) ? 'dark' : 'light';
+          var root = document.documentElement;
+          root.dataset.theme = resolved;
+          root.style.colorScheme = resolved;
+          var meta = document.querySelector('meta[name="theme-color"]');
+          if (meta) {
+            meta.setAttribute('content', resolved === 'dark' ? '#12081D' : '#F5EEDC');
+          }
+        } catch (e) {}
+      })();
+    </script>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link

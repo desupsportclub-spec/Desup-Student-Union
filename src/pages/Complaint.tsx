@@ -349,38 +349,38 @@ export const Complaint: React.FC = () => {
   return (
     <div className="max-w-[800px] mx-auto px-4 sm:px-6 py-6 sm:py-10 space-y-6 sm:space-y-10">
       {/* Header */}
-      <div className="border-b border-[#B8923A]/30 pb-5 sm:pb-6 text-center max-w-xl mx-auto space-y-2">
+      <div className="border-b border-gold-border/30 pb-5 sm:pb-6 text-center max-w-xl mx-auto space-y-2">
         <SectionEyebrow enText="STUDENT VOICE" thText="รับเรื่องร้องเรียนและข้อเสนอแนะ" />
-        <h1 className="font-serif text-3xl md:text-4xl font-semibold text-[#1B1226]">
+        <h1 className="font-serif text-3xl md:text-4xl font-semibold text-heading">
           DeSUP CARE
         </h1>
-        <p className="text-xs md:text-sm text-[#1B1226]/70">
+        <p className="text-xs md:text-sm text-text-muted">
           ช่องทางสื่อสารโดยตรง ปลอดภัย สามารถส่งแบบไม่ระบุตัวตนได้
         </p>
       </div>
 
       {/* Stepper (Only show on steps 1-3) */}
       {step < 4 && (
-        <div className="flex items-center justify-between max-w-md mx-auto text-[11px] sm:text-xs pb-4 border-b border-[#4B1F7A]/10 gap-1 sm:gap-2">
+        <div className="flex items-center justify-between max-w-md mx-auto text-[11px] sm:text-xs pb-4 border-b border-gold-border/15 gap-1 sm:gap-2">
           <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
-            <span className={`w-6 h-6 rounded-full flex items-center justify-center font-bold ${step >= 1 ? 'bg-[#4B1F7A] text-[#FAF7F0]' : 'bg-stone-200 text-stone-600'}`}>
+            <span className={`w-6 h-6 rounded-full flex items-center justify-center font-bold ${step >= 1 ? 'bg-brand text-brand-contrast' : 'bg-bg-alt text-text-muted'}`}>
               1
             </span>
-            <span className={step === 1 ? 'font-semibold text-[#2A1245]' : 'text-stone-500'}>ประเภทเรื่อง</span>
+            <span className={step === 1 ? 'font-semibold text-heading' : 'text-text-muted'}>ประเภทเรื่อง</span>
           </div>
-          <div className="h-[1px] flex-1 mx-1 sm:mx-2 bg-stone-300" />
+          <div className="h-[1px] flex-1 mx-1 sm:mx-2 bg-gold-border/25" />
           <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
-            <span className={`w-6 h-6 rounded-full flex items-center justify-center font-bold ${step >= 2 ? 'bg-[#4B1F7A] text-[#FAF7F0]' : 'bg-stone-200 text-stone-600'}`}>
+            <span className={`w-6 h-6 rounded-full flex items-center justify-center font-bold ${step >= 2 ? 'bg-brand text-brand-contrast' : 'bg-bg-alt text-text-muted'}`}>
               2
             </span>
-            <span className={step === 2 ? 'font-semibold text-[#2A1245]' : 'text-stone-500'}>รายละเอียด</span>
+            <span className={step === 2 ? 'font-semibold text-heading' : 'text-text-muted'}>รายละเอียด</span>
           </div>
-          <div className="h-[1px] flex-1 mx-1 sm:mx-2 bg-stone-300" />
+          <div className="h-[1px] flex-1 mx-1 sm:mx-2 bg-gold-border/25" />
           <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
-            <span className={`w-6 h-6 rounded-full flex items-center justify-center font-bold ${step >= 3 ? 'bg-[#4B1F7A] text-[#FAF7F0]' : 'bg-stone-200 text-stone-600'}`}>
+            <span className={`w-6 h-6 rounded-full flex items-center justify-center font-bold ${step >= 3 ? 'bg-brand text-brand-contrast' : 'bg-bg-alt text-text-muted'}`}>
               3
             </span>
-            <span className={step === 3 ? 'font-semibold text-[#2A1245]' : 'text-stone-500'}>ข้อมูลผู้ส่ง</span>
+            <span className={step === 3 ? 'font-semibold text-heading' : 'text-text-muted'}>ข้อมูลผู้ส่ง</span>
           </div>
         </div>
       )}
@@ -397,7 +397,7 @@ export const Complaint: React.FC = () => {
       />
 
       {errorMsg && (
-        <div className="p-3 bg-red-50 border-l-2 border-[#9B1C31] text-xs text-[#9B1C31]">
+        <div className="p-3 bg-error-bg border-l-2 border-error text-xs text-error">
           {errorMsg}
         </div>
       )}
@@ -405,7 +405,7 @@ export const Complaint: React.FC = () => {
       {/* STEP 1: Select Complaint Type */}
       {step === 1 && (
         <div className="space-y-6">
-          <h2 className="font-serif text-xl font-semibold text-[#2A1245]">
+          <h2 className="font-serif text-xl font-semibold text-heading">
             ขั้นตอนที่ ๑: เลือกประเภทเรื่องที่ต้องการส่ง
           </h2>
 
@@ -416,12 +416,12 @@ export const Complaint: React.FC = () => {
                 onClick={() => setType(t.id)}
                 className={`p-4 border rounded-sm cursor-pointer transition-all flex flex-col justify-between ${
                   type === t.id
-                    ? 'border-[#B8923A] bg-[#EDE6F5]/50 ring-1 ring-[#B8923A]'
-                    : 'border-[#4B1F7A]/15 bg-white hover:border-[#B8923A]/50'
+                    ? 'border-gold bg-brand-soft/60 ring-1 ring-gold'
+                    : 'border-gold-border/20 bg-surface-elevated hover:border-gold/60'
                 }`}
               >
                 <div className="flex items-start justify-between">
-                  <h3 className="font-serif text-base font-semibold text-[#1B1226]">
+                  <h3 className="font-serif text-base font-semibold text-heading">
                     {t.title}
                   </h3>
                   <input
@@ -429,10 +429,10 @@ export const Complaint: React.FC = () => {
                     name="complaintType"
                     checked={type === t.id}
                     onChange={() => setType(t.id)}
-                    className="accent-[#4B1F7A]"
+                    className="accent-brand"
                   />
                 </div>
-                <p className="text-xs text-[#1B1226]/70 mt-2 leading-relaxed">
+                <p className="text-xs text-text-muted mt-2 leading-relaxed">
                   {t.desc}
                 </p>
               </label>
@@ -443,7 +443,7 @@ export const Complaint: React.FC = () => {
             <button
               type="button"
               onClick={handleNextStep1}
-              className="px-8 py-2.5 bg-[#4B1F7A] text-[#FAF7F0] text-xs font-medium rounded-full border border-[#D9B867]/40 hover:bg-[#2A1245] transition-colors"
+              className="px-8 py-2.5 bg-brand text-brand-contrast text-xs font-medium rounded-full border border-gold-light/40 hover:bg-brand-hover transition-colors"
             >
               ถัดไป: กรอกรายละเอียด →
             </button>
@@ -454,18 +454,18 @@ export const Complaint: React.FC = () => {
       {/* STEP 2: Details & Attachments */}
       {step === 2 && (
         <div className="space-y-6">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 border-b border-[#4B1F7A]/10 pb-2">
-            <h2 className="font-serif text-xl font-semibold text-[#2A1245]">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 border-b border-gold-border/15 pb-2">
+            <h2 className="font-serif text-xl font-semibold text-heading">
               ขั้นตอนที่ ๒: กรอกรายละเอียดเรื่อง
             </h2>
-            <span className="text-xs text-[#9C7A2B]">
+            <span className="text-xs text-gold-text">
               ประเภท: {COMPLAINT_TYPES.find(t => t.id === type)?.title}
             </span>
           </div>
 
           <div className="space-y-4">
             <div>
-              <label className="block text-xs font-semibold text-[#2A1245] mb-1">
+              <label className="block text-xs font-semibold text-heading mb-1">
                 หัวข้อเรื่อง (โปรดระบุให้ชัดเจนและกระชับ) *
               </label>
               <input
@@ -479,7 +479,7 @@ export const Complaint: React.FC = () => {
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-[#2A1245] mb-1">
+              <label className="block text-xs font-semibold text-heading mb-1">
                 สถานที่หรือฝ่ายที่เกี่ยวข้อง (ถ้ามี)
               </label>
               <input
@@ -492,7 +492,7 @@ export const Complaint: React.FC = () => {
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-[#2A1245] mb-1">
+              <label className="block text-xs font-semibold text-heading mb-1">
                 รายละเอียดเนื้อหา (อย่างน้อย 10 ตัวอักษร) *
               </label>
               <textarea
@@ -507,18 +507,18 @@ export const Complaint: React.FC = () => {
 
             {/* Photo Attachments (Max 2, private subcollection) */}
             <div className="pt-2">
-              <label className="block text-xs font-semibold text-[#2A1245] mb-1">
+              <label className="block text-xs font-semibold text-heading mb-1">
                 แนบภาพถ่ายประกอบ (ไม่บังคับ สูงสุด 2 รูป)
               </label>
 
-              <div className="bg-amber-50/70 border border-amber-200 p-2.5 rounded-sm text-[11px] text-amber-900 mb-2">
+              <div className="bg-warning-bg border border-warning/30 p-2.5 rounded-sm text-[11px] text-warning mb-2">
                 ⚠️ คำเตือน: หลีกเลี่ยงการแนบรูปที่เห็นใบหน้าหรือข้อมูลส่วนตัวของผู้อื่นโดยไม่จำเป็น
                 รูปถ่ายจะถูกบีบอัดและเปิดดูได้เฉพาะคณะกรรมการแอดมินเท่านั้น
               </div>
 
               {attachedImages.length < 2 && (
                 <div className="flex items-center gap-2">
-                  <label className="cursor-pointer px-4 py-2 bg-white border border-[#4B1F7A]/20 hover:border-[#B8923A] rounded-sm text-xs text-[#2A1245] inline-flex items-center gap-2">
+                  <label className="cursor-pointer px-4 py-2 bg-surface-elevated border border-gold-border/25 hover:border-gold rounded-sm text-xs text-heading inline-flex items-center gap-2 transition-colors">
                     <span>📷 เพิ่มรูปภาพ / ถ่ายภาพ</span>
                     <input
                       type="file"
@@ -529,7 +529,7 @@ export const Complaint: React.FC = () => {
                     />
                   </label>
                   {imageCompressing && (
-                    <span className="text-xs text-stone-500">กำลังบีบอัดรูปภาพ...</span>
+                    <span className="text-xs text-text-muted">กำลังบีบอัดรูปภาพ...</span>
                   )}
                 </div>
               )}
@@ -538,12 +538,12 @@ export const Complaint: React.FC = () => {
               {attachedImages.length > 0 && (
                 <div className="flex gap-4 mt-3">
                   {attachedImages.map((img, idx) => (
-                    <div key={idx} className="relative w-24 h-24 border border-stone-300 rounded-sm overflow-hidden bg-stone-100">
+                    <div key={idx} className="relative w-24 h-24 border border-gold-border/30 rounded-sm overflow-hidden bg-bg-alt">
                       <img src={img.url} alt="รูปแนบ" className="w-full h-full object-cover" />
                       <button
                         type="button"
                         onClick={() => handleRemoveImage(idx)}
-                        className="absolute top-1 right-1 w-5 h-5 bg-black/70 text-white rounded-full flex items-center justify-center text-[10px]"
+                        className="absolute top-1 right-1 w-5 h-5 bg-anchor-bg-deep/80 text-anchor-text rounded-full flex items-center justify-center text-[10px]"
                       >
                         ✕
                       </button>
@@ -558,14 +558,14 @@ export const Complaint: React.FC = () => {
             <button
               type="button"
               onClick={() => setStep(1)}
-              className="text-xs text-stone-600 hover:text-[#4B1F7A]"
+              className="text-xs text-text-muted hover:text-accent"
             >
               ← ย้อนกลับ
             </button>
             <button
               type="button"
               onClick={handleNextStep2}
-              className="px-8 py-2.5 bg-[#4B1F7A] text-[#FAF7F0] text-xs font-medium rounded-full border border-[#D9B867]/40 hover:bg-[#2A1245] transition-colors"
+              className="px-8 py-2.5 bg-brand text-brand-contrast text-xs font-medium rounded-full border border-gold-light/40 hover:bg-brand-hover transition-colors"
             >
               ถัดไป: ข้อมูลผู้ส่ง →
             </button>
@@ -576,49 +576,49 @@ export const Complaint: React.FC = () => {
       {/* STEP 3: Submitter Identity & PDPA */}
       {step === 3 && (
         <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="border-b border-[#4B1F7A]/10 pb-2">
-            <h2 className="font-serif text-xl font-semibold text-[#2A1245]">
+          <div className="border-b border-gold-border/15 pb-2">
+            <h2 className="font-serif text-xl font-semibold text-heading">
               ขั้นตอนที่ ๓: ข้อมูลผู้ส่งเรื่อง
             </h2>
-            <p className="text-xs text-[#1B1226]/60">
+            <p className="text-xs text-text-muted">
               ท่านสามารถเลือกที่จะไม่เปิดเผยตัวตนได้ โดยระบบจะไม่บันทึกชื่อของท่าน
             </p>
           </div>
 
           <div className="space-y-4">
             {/* Anonymous Toggle */}
-            <div className="space-y-3 bg-white p-4 border border-[#4B1F7A]/15 rounded-sm">
+            <div className="space-y-3 bg-surface-elevated p-4 border border-gold-border/20 rounded-sm">
               <label className="flex items-center gap-3 cursor-pointer">
                 <input
                   type="radio"
                   name="identity"
                   checked={anonymous}
                   onChange={() => setAnonymous(true)}
-                  className="accent-[#4B1F7A]"
+                  className="accent-brand"
                 />
                 <div>
-                  <span className="font-serif text-sm font-semibold text-[#2A1245]">
+                  <span className="font-serif text-sm font-semibold text-heading">
                     ส่งแบบไม่ระบุตัวตน (ค่าเริ่มต้น - ปลอดภัยสูงสุด)
                   </span>
-                  <p className="text-xs text-[#1B1226]/60">
+                  <p className="text-xs text-text-muted">
                     ข้อมูลผู้ส่งจะไม่ถูกบันทึกในระบบ สามารถติดตามความคืบหน้าด้วยรหัสติดตามเท่านั้น
                   </p>
                 </div>
               </label>
 
-              <label className="flex items-center gap-3 cursor-pointer pt-3 border-t border-stone-100">
+              <label className="flex items-center gap-3 cursor-pointer pt-3 border-t border-gold-border/15">
                 <input
                   type="radio"
                   name="identity"
                   checked={!anonymous}
                   onChange={() => setAnonymous(false)}
-                  className="accent-[#4B1F7A]"
+                  className="accent-brand"
                 />
                 <div>
-                  <span className="font-serif text-sm font-semibold text-[#2A1245]">
+                  <span className="font-serif text-sm font-semibold text-heading">
                     ระบุตัวตน (เพื่อความสะดวกรวดเร็วในการประสานงานกลับ)
                   </span>
-                  <p className="text-xs text-[#1B1226]/60">
+                  <p className="text-xs text-text-muted">
                     ข้อมูลจะถูกเก็บเป็นความลับและเห็นได้เฉพาะคณะกรรมการแอดมินขององค์การนักเรียนเท่านั้น
                   </p>
                 </div>
@@ -627,9 +627,9 @@ export const Complaint: React.FC = () => {
 
             {/* Submitter details if not anonymous */}
             {!anonymous && (
-              <div className="space-y-4 p-4 bg-[#EDE6F5]/30 border border-[#4B1F7A]/15 rounded-sm">
+              <div className="space-y-4 p-4 bg-brand-soft/35 border border-gold-border/20 rounded-sm">
                 <div>
-                  <label className="block text-xs font-semibold text-[#2A1245] mb-1">
+                  <label className="block text-xs font-semibold text-heading mb-1">
                     ชื่อ-นามสกุล (ผู้ส่ง) *
                   </label>
                   <input
@@ -643,7 +643,7 @@ export const Complaint: React.FC = () => {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-[#2A1245] mb-1">
+                  <label className="block text-xs font-semibold text-heading mb-1">
                     ระดับชั้น / ห้องเรียน
                   </label>
                   <input
@@ -656,7 +656,7 @@ export const Complaint: React.FC = () => {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-[#2A1245] mb-1">
+                  <label className="block text-xs font-semibold text-heading mb-1">
                     ช่องทางติดต่อกลับ (LINE ID หรือ อีเมล) *
                   </label>
                   <input
@@ -670,12 +670,12 @@ export const Complaint: React.FC = () => {
                 </div>
 
                 <div className="pt-2">
-                  <label className="flex items-start gap-2 text-xs text-[#1B1226]/80 cursor-pointer">
+                  <label className="flex items-start gap-2 text-xs text-text cursor-pointer">
                     <input
                       type="checkbox"
                       checked={pdpaConsent}
                       onChange={(e) => setPdpaConsent(e.target.checked)}
-                      className="mt-0.5 accent-[#4B1F7A]"
+                      className="mt-0.5 accent-brand"
                       required={!anonymous}
                     />
                     <span>
@@ -686,20 +686,20 @@ export const Complaint: React.FC = () => {
               </div>
             )}
             {/* Anti-Loss Tracking Options (Local Auto-Save + Optional Recovery PIN + Google Sync) */}
-            <div className="p-4 sm:p-5 bg-[#FAF7F0] border border-[#B8923A]/40 rounded-sm space-y-4">
+            <div className="p-4 sm:p-5 bg-surface border border-gold-border/40 rounded-sm space-y-4">
               <div className="space-y-1">
-                <h3 className="font-serif text-sm font-semibold text-[#2A1245]">
+                <h3 className="font-serif text-sm font-semibold text-heading">
                   ระบบช่วยจำและติดตามผล (ป้องกันรหัสหาย)
                 </h3>
-                <p className="text-xs text-[#1B1226]/70 leading-relaxed">
+                <p className="text-xs text-text-muted leading-relaxed">
                   ✓ ระบบจะบันทึกรายการเรื่องนี้ไว้บนเครื่องนี้ให้อัตโนมัติเมื่อเปิดหน้าติดตามสถานะ
                   และท่านสามารถตั้งรหัสกันลืมหรือเชื่อมบัญชี Google เพื่อเปิดดูจากเครื่องอื่นได้
                 </p>
               </div>
 
               {/* Option A: Personal Recovery Keyword + PIN */}
-              <div className="pt-2 border-t border-[#4B1F7A]/10 space-y-2">
-                <label className="block text-xs font-semibold text-[#2A1245]">
+              <div className="pt-2 border-t border-gold-border/15 space-y-2">
+                <label className="block text-xs font-semibold text-heading">
                   ตั้งคำจำส่วนตัว + รหัส PIN (ไม่บังคับ — เผื่อใช้ค้นหาคืนเมื่อเปลี่ยนเครื่องหรือล้างประวัติ)
                 </label>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -708,7 +708,7 @@ export const Complaint: React.FC = () => {
                     value={recoveryKeyword}
                     onChange={(e) => setRecoveryKeyword(e.target.value)}
                     placeholder="คำจำส่วนตัว เช่น รหัสนักเรียน หรือชื่อเล่น"
-                    className="w-full text-xs input-underline bg-white px-2.5"
+                    className="w-full text-xs input-underline bg-surface-elevated px-2.5"
                     maxLength={50}
                   />
                   <input
@@ -717,24 +717,24 @@ export const Complaint: React.FC = () => {
                     value={recoveryPin}
                     onChange={(e) => setRecoveryPin(e.target.value)}
                     placeholder="รหัส PIN 4-6 หลัก (เช่น 1234)"
-                    className="w-full text-xs input-underline bg-white px-2.5"
+                    className="w-full text-xs input-underline bg-surface-elevated px-2.5"
                     maxLength={12}
                   />
                 </div>
-                <p className="text-[11px] text-[#1B1226]/55">
+                <p className="text-[11px] text-text-muted">
                   ข้อมูลนี้จะถูกเข้ารหัสแบบทางเดียว (SHA-256) ก่อนจัดเก็บ จึงไม่เปิดเผยตัวตนของผู้ส่ง
                 </p>
               </div>
 
               {/* Option B: Optional Google Account Cross-Device Sync */}
-              <div className="pt-2 border-t border-[#4B1F7A]/10 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+              <div className="pt-2 border-t border-gold-border/15 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                 {currentUser ? (
-                  <label className="flex items-center gap-2 text-xs text-[#2A1245] cursor-pointer">
+                  <label className="flex items-center gap-2 text-xs text-heading cursor-pointer">
                     <input
                       type="checkbox"
                       checked={linkGoogleAccount}
                       onChange={(e) => setLinkGoogleAccount(e.target.checked)}
-                      className="accent-[#4B1F7A]"
+                      className="accent-brand"
                     />
                     <span>
                       ผูกกับบัญชี Google (<strong>{currentUser.email}</strong>) เพื่อดูสถานะข้ามเครื่อง
@@ -742,14 +742,14 @@ export const Complaint: React.FC = () => {
                   </label>
                 ) : (
                   <>
-                    <span className="text-xs text-[#1B1226]/70">
+                    <span className="text-xs text-text-muted">
                       หรือเชื่อมบัญชี Google เพื่อซิงค์ประวัติข้ามมือถือ / ไอแพด / คอม (ไม่เปิดเผยชื่อต่อผู้ดูแลหากเลือกไม่ระบุตัวตน)
                     </span>
                     <button
                       type="button"
                       onClick={handleConnectGoogle}
                       disabled={authLoading}
-                      className="px-3.5 py-1.5 bg-white border border-[#4B1F7A]/25 hover:border-[#B8923A] text-xs font-medium text-[#2A1245] rounded-sm shrink-0 transition-colors"
+                      className="px-3.5 py-1.5 bg-surface-elevated border border-gold-border/25 hover:border-gold text-xs font-medium text-heading rounded-sm shrink-0 transition-colors"
                     >
                       {authLoading ? 'กำลังเชื่อมต่อ...' : 'เชื่อมบัญชี Google'}
                     </button>
@@ -763,14 +763,14 @@ export const Complaint: React.FC = () => {
             <button
               type="button"
               onClick={() => setStep(2)}
-              className="text-xs text-stone-600 hover:text-[#4B1F7A]"
+              className="text-xs text-text-muted hover:text-accent"
             >
               ← ย้อนกลับ
             </button>
             <button
               type="submit"
               disabled={submitting}
-              className="px-8 py-3 bg-[#4B1F7A] text-[#FAF7F0] text-xs font-medium rounded-full border border-[#D9B867]/40 hover:bg-[#2A1245] transition-colors shadow-editorial"
+              className="px-8 py-3 bg-brand text-brand-contrast text-xs font-medium rounded-full border border-gold-light/40 hover:bg-brand-hover transition-colors shadow-editorial"
             >
               {submitting ? 'กำลังส่งเรื่อง...' : 'ยืนยันและส่งเรื่องร้องเรียน ✓'}
             </button>
@@ -780,7 +780,7 @@ export const Complaint: React.FC = () => {
 
       {/* STEP 4: Success View & Tracking Code */}
       {step === 4 && (
-        <div className="bg-[#FAF7F0] border border-[#B8923A]/50 p-5 sm:p-8 md:p-12 rounded-sm shadow-editorial text-center space-y-6 relative">
+        <div className="bg-surface border border-gold-border/50 p-5 sm:p-8 md:p-12 rounded-sm shadow-editorial text-center space-y-6 relative">
           <CornerBracket position="top-left" />
           <CornerBracket position="top-right" />
           <CornerBracket position="bottom-left" />
@@ -797,21 +797,21 @@ export const Complaint: React.FC = () => {
             className="space-y-6"
           >
             <div className="space-y-2">
-              <h2 className="font-serif text-2xl md:text-3xl font-semibold text-[#2A1245]">
+              <h2 className="font-serif text-2xl md:text-3xl font-semibold text-heading">
                 องค์การนักเรียนได้รับเรื่องของท่านแล้ว
               </h2>
-              <p className="text-xs md:text-sm text-[#1B1226]/70 max-w-md mx-auto">
+              <p className="text-xs md:text-sm text-text-muted max-w-md mx-auto">
                 ระบบได้บันทึกเรื่องนี้ไว้ในหน้า "ติดตามสถานะ" บนอุปกรณ์นี้ให้อัตโนมัติแล้ว
                 หรือบันทึกรูปบัตร/ลิงก์ด้านล่างเพื่อเก็บไว้เปิดดูจากเครื่องอื่น
               </p>
             </div>
 
             {/* Large Tracking Code Display */}
-            <div className="p-5 sm:p-6 bg-white border border-[#B8923A] rounded-sm max-w-md mx-auto space-y-4">
-              <span className="text-[11px] uppercase tracking-widest text-[#9C7A2B] font-semibold block">
+            <div className="p-5 sm:p-6 bg-surface-elevated border border-gold rounded-sm max-w-md mx-auto space-y-4">
+              <span className="text-[11px] uppercase tracking-widest text-gold-text font-semibold block">
                 รหัสติดตามเรื่องร้องเรียน (TRACKING CODE)
               </span>
-              <div className="font-serif text-2xl sm:text-3xl md:text-4xl font-bold text-[#4B1F7A] tracking-wider font-mono">
+              <div className="font-serif text-2xl sm:text-3xl md:text-4xl font-bold text-accent tracking-wider font-mono">
                 {generatedCode}
               </div>
 
@@ -820,21 +820,21 @@ export const Complaint: React.FC = () => {
                   type="button"
                   onClick={handleDownloadTicketImage}
                   disabled={downloadingTicket}
-                  className="px-4 py-2 bg-[#4B1F7A] text-[#FAF7F0] text-xs font-medium rounded-sm hover:bg-[#2A1245] transition-colors"
+                  className="px-4 py-2 bg-brand text-brand-contrast text-xs font-medium rounded-sm hover:bg-brand-hover transition-colors"
                 >
                   {downloadingTicket ? 'กำลังสร้างรูปบัตร...' : '🖼️ บันทึกรูปบัตรติดตามเรื่อง'}
                 </button>
                 <button
                   type="button"
                   onClick={handleCopyTrackLink}
-                  className="px-3.5 py-2 bg-[#FAF7F0] border border-[#B8923A]/60 text-xs text-[#2A1245] rounded-sm hover:bg-[#EDE6F5] transition-colors"
+                  className="px-3.5 py-2 bg-surface border border-gold/60 text-xs text-heading rounded-sm hover:bg-brand-soft transition-colors"
                 >
                   {copiedLink ? 'คัดลอกลิงก์แล้ว ✓' : '🔗 คัดลอกลิงก์ติดตาม'}
                 </button>
                 <button
                   type="button"
                   onClick={handleCopyCode}
-                  className="px-3.5 py-2 bg-[#FAF7F0] border border-stone-300 text-xs text-[#2A1245] rounded-sm hover:bg-stone-100 transition-colors"
+                  className="px-3.5 py-2 bg-surface border border-gold-border/30 text-xs text-heading rounded-sm hover:bg-bg-alt transition-colors"
                 >
                   {copied ? 'คัดลอกรหัสแล้ว ✓' : '📋 คัดลอกรหัส'}
                 </button>
@@ -844,13 +844,13 @@ export const Complaint: React.FC = () => {
             <div className="pt-2 flex flex-wrap justify-center gap-3 sm:gap-4">
               <Link
                 to={`/track?code=${generatedCode}`}
-                className="px-6 py-2.5 bg-[#4B1F7A] text-[#FAF7F0] text-xs font-medium rounded-full border border-[#D9B867]/40 hover:bg-[#2A1245] transition-colors"
+                className="px-6 py-2.5 bg-brand text-brand-contrast text-xs font-medium rounded-full border border-gold-light/40 hover:bg-brand-hover transition-colors"
               >
                 ติดตามสถานะเรื่องนี้ →
               </Link>
               <Link
                 to="/"
-                className="px-6 py-2.5 border border-stone-300 text-[#1B1226] text-xs font-medium rounded-full hover:bg-white transition-colors"
+                className="px-6 py-2.5 border border-gold-border/30 text-heading text-xs font-medium rounded-full hover:bg-surface-elevated transition-colors"
               >
                 กลับสู่หน้าหลัก
               </Link>

@@ -142,19 +142,19 @@ export const AdminBanners: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[#4B1F7A]/15">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-gold-border/20">
         <div>
-          <h1 className="font-serif text-2xl font-bold text-[#2A1245]">
+          <h1 className="font-serif text-2xl font-bold text-heading">
             จัดการแบนเนอร์หน้าแรก (Hero Banner Slider)
           </h1>
-          <p className="text-xs text-[#1B1226]/60 mt-1">
+          <p className="text-xs text-text-muted mt-1">
             เพิ่ม แก้ไข และจัดลำดับแบนเนอร์ภาพสไลด์กว้างด้านบนสุดของหน้าหลักแบบเดียวกับ DSA UP
           </p>
         </div>
         <div className="flex items-center gap-3">
           <button
             onClick={handleOpenCreate}
-            className="text-xs px-4 py-2 bg-[#4B1F7A] text-[#FAF7F0] font-medium hover:bg-[#2A1245] rounded-sm shadow-editorial transition-all"
+            className="text-xs px-4 py-2 bg-brand text-brand-contrast font-medium hover:bg-brand-hover rounded-sm shadow-editorial transition-all"
           >
             + เพิ่มแบนเนอร์ใหม่
           </button>
@@ -162,16 +162,16 @@ export const AdminBanners: React.FC = () => {
       </div>
 
       {loading ? (
-        <div className="py-16 text-center text-xs text-[#9C7A2B]">กำลังโหลดข้อมูลแบนเนอร์...</div>
+        <div className="py-16 text-center text-xs text-gold-text">กำลังโหลดข้อมูลแบนเนอร์...</div>
       ) : banners.length === 0 ? (
-        <div className="p-12 text-center border-2 border-dashed border-[#4B1F7A]/20 bg-white rounded-sm space-y-4">
-          <p className="font-serif text-lg text-[#2A1245]">ยังไม่มีแบนเนอร์ในระบบ</p>
-          <p className="text-xs text-[#1B1226]/60 max-w-md mx-auto">
+        <div className="p-12 text-center border-2 border-dashed border-gold-border/30 bg-surface-elevated rounded-sm space-y-4">
+          <p className="font-serif text-lg text-heading">ยังไม่มีแบนเนอร์ในระบบ</p>
+          <p className="text-xs text-text-muted max-w-md mx-auto">
             กดปุ่ม "+ เพิ่มแบนเนอร์ใหม่" เพื่ออัปโหลดรูปภาพแบนเนอร์สำหรับแสดงบนหน้าแรกของเว็บไซต์
           </p>
           <button
             onClick={handleOpenCreate}
-            className="text-xs px-5 py-2.5 bg-[#4B1F7A] text-[#FAF7F0] rounded-sm hover:bg-[#2A1245]"
+            className="text-xs px-5 py-2.5 bg-brand text-brand-contrast rounded-sm hover:bg-brand-hover transition-colors"
           >
             + เพิ่มแบนเนอร์ใหม่
           </button>
@@ -181,24 +181,24 @@ export const AdminBanners: React.FC = () => {
           {banners.map((item) => (
             <div
               key={item.id}
-              className={`border bg-white rounded-sm overflow-hidden shadow-editorial transition-all flex flex-col justify-between ${
-                item.active ? 'border-[#4B1F7A]/20' : 'border-stone-200 opacity-60'
+              className={`border bg-surface-elevated rounded-sm overflow-hidden shadow-editorial transition-all flex flex-col justify-between ${
+                item.active ? 'border-gold-border/25' : 'border-gold-border/15 opacity-60'
               }`}
             >
               <div>
-                <div className="aspect-[21/9] bg-stone-100 relative overflow-hidden">
+                <div className="aspect-[21/9] bg-bg-alt relative overflow-hidden">
                   <img
                     src={item.imageUrl}
                     alt={item.title}
                     className="w-full h-full object-cover"
                   />
                   <div className="absolute top-2 left-2 flex gap-1.5">
-                    <span className="text-[10px] px-2 py-0.5 bg-[#2A1245]/90 text-white rounded font-medium">
+                    <span className="text-[10px] px-2 py-0.5 bg-anchor-bg/90 text-anchor-text rounded font-medium">
                       ลำดับ {item.order}
                     </span>
                     <span
                       className={`text-[10px] px-2 py-0.5 rounded font-medium ${
-                        item.active ? 'bg-emerald-600 text-white' : 'bg-stone-500 text-white'
+                        item.active ? 'bg-success text-anchor-text' : 'bg-bg-alt text-text-muted border border-gold-border/20'
                       }`}
                     >
                       {item.active ? 'แสดงผล' : 'ซ่อน'}
@@ -207,30 +207,30 @@ export const AdminBanners: React.FC = () => {
                 </div>
 
                 <div className="p-4 space-y-2">
-                  <h3 className="font-serif text-base font-semibold text-[#1B1226] line-clamp-2">
+                  <h3 className="font-serif text-base font-semibold text-heading line-clamp-2">
                     {item.title}
                   </h3>
                   {item.subtitle && (
-                    <p className="text-xs text-[#1B1226]/70 line-clamp-2">
+                    <p className="text-xs text-text-muted line-clamp-2">
                       {item.subtitle}
                     </p>
                   )}
                   {item.linkUrl && (
-                    <div className="text-[11px] text-[#9C7A2B] truncate">
+                    <div className="text-[11px] text-gold-text truncate">
                       🔗 ลิงก์: {item.linkUrl}
                     </div>
                   )}
                 </div>
               </div>
 
-              <div className="p-3 bg-[#FAF7F0] border-t border-stone-100 flex items-center justify-between text-xs">
+              <div className="p-3 bg-surface border-t border-gold-border/15 flex items-center justify-between text-xs">
                 <button
                   type="button"
                   onClick={() => handleToggleActive(item)}
                   className={`text-xs px-2.5 py-1 rounded transition-colors ${
                     item.active
-                      ? 'text-amber-700 hover:bg-amber-50'
-                      : 'text-emerald-700 hover:bg-emerald-50'
+                      ? 'text-warning hover:bg-warning-bg'
+                      : 'text-success hover:bg-success-bg'
                   }`}
                 >
                   {item.active ? 'ซ่อนจากหน้าเว็บ' : 'เปิดแสดงผล'}
@@ -238,13 +238,13 @@ export const AdminBanners: React.FC = () => {
                 <div className="flex items-center gap-2">
                   <button
                     onClick={() => handleOpenEdit(item)}
-                    className="px-3 py-1 bg-stone-100 hover:bg-stone-200 text-[#1B1226] rounded text-xs transition-colors"
+                    className="px-3 py-1 bg-bg-alt hover:bg-brand-soft text-text rounded text-xs transition-colors"
                   >
                     แก้ไข
                   </button>
                   <button
                     onClick={() => handleDelete(item.id)}
-                    className="px-3 py-1 bg-red-50 hover:bg-red-100 text-[#9B1C31] rounded text-xs transition-colors"
+                    className="px-3 py-1 bg-error-bg hover:bg-error/15 text-error rounded text-xs transition-colors"
                   >
                     ลบ
                   </button>
@@ -257,20 +257,20 @@ export const AdminBanners: React.FC = () => {
 
       {/* Modal Add / Edit */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm overflow-y-auto">
-          <div className="bg-[#FAF7F0] border border-[#B8923A]/50 w-full max-w-2xl rounded-sm p-6 md:p-8 shadow-2xl relative my-8">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-overlay-backdrop backdrop-blur-sm overflow-y-auto">
+          <div className="bg-surface border border-gold-border/50 w-full max-w-2xl rounded-sm p-6 md:p-8 shadow-2xl relative my-8">
             <CornerBracket position="top-left" />
             <CornerBracket position="top-right" />
             <CornerBracket position="bottom-left" />
             <CornerBracket position="bottom-right" />
 
-            <div className="flex items-center justify-between pb-4 border-b border-[#4B1F7A]/15 mb-6">
-              <h2 className="font-serif text-xl font-bold text-[#2A1245]">
+            <div className="flex items-center justify-between pb-4 border-b border-gold-border/20 mb-6">
+              <h2 className="font-serif text-xl font-bold text-heading">
                 {editingItem ? 'แก้ไขแบนเนอร์' : 'เพิ่มแบนเนอร์ใหม่'}
               </h2>
               <button
                 onClick={() => setIsModalOpen(false)}
-                className="text-stone-400 hover:text-stone-700 text-lg"
+                className="text-text-muted hover:text-heading text-lg"
               >
                 ✕
               </button>
@@ -278,12 +278,12 @@ export const AdminBanners: React.FC = () => {
 
             <form onSubmit={handleSave} className="space-y-4">
               {errorMsg && (
-                <div className="p-3 bg-red-50 border-l-2 border-[#9B1C31] text-xs text-[#9B1C31]">
+                <div className="p-3 bg-error-bg border-l-2 border-error text-xs text-error">
                   {errorMsg}
                 </div>
               )}
               <div>
-                <label className="block text-xs font-medium text-[#2A1245] mb-1">
+                <label className="block text-xs font-medium text-heading mb-1">
                   หัวข้อ / ข้อความหลักบนแบนเนอร์ (ปล่อยว่างได้หากไม่ต้องการข้อความทับภาพ)
                 </label>
                 <input
@@ -296,7 +296,7 @@ export const AdminBanners: React.FC = () => {
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-[#2A1245] mb-1">
+                <label className="block text-xs font-medium text-heading mb-1">
                   ข้อความรอง / คำบรรยาย (Subtitle)
                 </label>
                 <input
@@ -309,7 +309,7 @@ export const AdminBanners: React.FC = () => {
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-[#2A1245] mb-2">
+                <label className="block text-xs font-medium text-heading mb-2">
                   รูปภาพแบนเนอร์ (สัดส่วนแนวกว้าง 21:9 หรือ 16:9 แนะนำขนาดกว้าง 1600px ขึ้นไป) *
                 </label>
                 <ImageUploader
@@ -323,7 +323,7 @@ export const AdminBanners: React.FC = () => {
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-medium text-[#2A1245] mb-1">
+                  <label className="block text-xs font-medium text-heading mb-1">
                     ลิงก์เมื่อคลิกแบนเนอร์ (ถ้ามี)
                   </label>
                   <input
@@ -335,7 +335,7 @@ export const AdminBanners: React.FC = () => {
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-medium text-[#2A1245] mb-1">
+                  <label className="block text-xs font-medium text-heading mb-1">
                     ลำดับการแสดงผล (เรียงจากน้อยไปมาก)
                   </label>
                   <input
@@ -354,25 +354,25 @@ export const AdminBanners: React.FC = () => {
                   id="activeToggle"
                   checked={active}
                   onChange={(e) => setActive(e.target.checked)}
-                  className="accent-[#4B1F7A] rounded"
+                  className="accent-accent rounded"
                 />
-                <label htmlFor="activeToggle" className="text-xs text-[#1B1226] font-medium cursor-pointer">
+                <label htmlFor="activeToggle" className="text-xs text-text font-medium cursor-pointer">
                   เปิดให้แสดงผลบนหน้าหลักทันที
                 </label>
               </div>
 
-              <div className="flex items-center justify-end gap-3 pt-6 border-t border-[#4B1F7A]/15">
+              <div className="flex items-center justify-end gap-3 pt-6 border-t border-gold-border/20">
                 <button
                   type="button"
                   onClick={() => setIsModalOpen(false)}
-                  className="px-4 py-2 border border-stone-300 text-xs text-[#1B1226]/80 hover:bg-stone-100 rounded-sm"
+                  className="px-4 py-2 border border-gold-border/30 text-xs text-text hover:bg-bg-alt rounded-sm transition-colors"
                 >
                   ยกเลิก
                 </button>
                 <button
                   type="submit"
                   disabled={saving}
-                  className="px-6 py-2 bg-[#4B1F7A] text-[#FAF7F0] text-xs font-medium hover:bg-[#2A1245] rounded-sm shadow-editorial transition-colors"
+                  className="px-6 py-2 bg-brand text-brand-contrast text-xs font-medium hover:bg-brand-hover rounded-sm shadow-editorial transition-colors"
                 >
                   {saving ? 'กำลังบันทึก...' : 'บันทึกแบนเนอร์'}
                 </button>

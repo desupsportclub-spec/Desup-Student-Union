@@ -135,26 +135,26 @@ export const AdminPeople: React.FC = () => {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#4B1F7A]/15 pb-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-gold-border/20 pb-4">
         <div>
-          <h1 className="font-serif text-2xl font-semibold text-[#2A1245]">
+          <h1 className="font-serif text-2xl font-semibold text-heading">
             จัดการบุคลากรและทำเนียบ
           </h1>
-          <p className="text-xs text-[#1B1226]/60">
+          <p className="text-xs text-text-muted">
             คณะกรรมการองค์การนักเรียน คณะกรรมการที่ปรึกษา และทำเนียบนายกองค์การนักเรียน
           </p>
         </div>
 
         <button
           onClick={handleOpenCreate}
-          className="px-5 py-2.5 bg-[#4B1F7A] text-[#FAF7F0] text-xs font-medium rounded-sm hover:bg-[#2A1245] transition-colors shadow-sm self-start sm:self-auto"
+          className="px-5 py-2.5 bg-brand text-brand-contrast text-xs font-medium rounded-sm hover:bg-brand-hover transition-colors shadow-sm self-start sm:self-auto"
         >
           + เพิ่มข้อมูลบุคคล
         </button>
       </div>
 
       {/* Role Tabs */}
-      <div className="flex items-center gap-6 border-b border-[#4B1F7A]/10 text-xs font-medium pb-2">
+      <div className="flex items-center gap-6 border-b border-gold-border/15 text-xs font-medium pb-2">
         {[
           { id: 'board', label: 'คณะกรรมการองค์การนักเรียน' },
           { id: 'advisor', label: 'คณะกรรมการที่ปรึกษา' },
@@ -165,26 +165,26 @@ export const AdminPeople: React.FC = () => {
             onClick={() => setSelectedRole(t.id as PersonRole)}
             className={`pb-2 whitespace-nowrap transition-colors relative ${
               selectedRole === t.id
-                ? 'text-[#4B1F7A] font-semibold'
-                : 'text-[#1B1226]/60 hover:text-[#2A1245]'
+                ? 'text-accent font-semibold'
+                : 'text-text-muted hover:text-heading'
             }`}
           >
             <span>{t.label}</span>
             {selectedRole === t.id && (
-              <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-[#B8923A]" />
+              <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-gold" />
             )}
           </button>
         ))}
       </div>
 
       {/* People Table */}
-      <div className="bg-white border border-[#4B1F7A]/15 rounded-sm shadow-editorial-sm overflow-hidden">
+      <div className="bg-surface-elevated border border-gold-border/20 rounded-sm shadow-editorial-sm overflow-hidden">
         {loading ? (
-          <div className="p-8 text-center text-xs text-stone-500">กำลังโหลด...</div>
+          <div className="p-8 text-center text-xs text-text-muted">กำลังโหลด...</div>
         ) : filteredPeople.length > 0 ? (
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs">
-              <thead className="bg-[#FAF7F0] border-b border-[#4B1F7A]/10 text-[#9C7A2B] uppercase tracking-wider font-medium">
+              <thead className="bg-surface border-b border-gold-border/15 text-gold-text uppercase tracking-wider font-medium">
                 <tr>
                   <th className="py-3 px-4">รูปภาพ</th>
                   <th className="py-3 px-4">ชื่อ-นามสกุล</th>
@@ -195,11 +195,11 @@ export const AdminPeople: React.FC = () => {
                   <th className="py-3 px-4 text-center">การจัดการ</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-stone-100">
+              <tbody className="divide-y divide-gold-border/10">
                 {filteredPeople.map((item) => (
-                  <tr key={item.id} className="hover:bg-stone-50">
+                  <tr key={item.id} className="hover:bg-bg-alt/60 transition-colors">
                     <td className="py-2.5 px-4">
-                      <div className="w-10 h-12 bg-stone-100 rounded-sm overflow-hidden border border-stone-200">
+                      <div className="w-10 h-12 bg-bg-alt rounded-sm overflow-hidden border border-gold-border/20">
                         {item.photo?.url || item.photoUrl ? (
                           <img
                             src={item.photo?.url || item.photoUrl}
@@ -207,42 +207,42 @@ export const AdminPeople: React.FC = () => {
                             className="w-full h-full object-cover"
                           />
                         ) : (
-                          <div className="w-full h-full bg-[#EDE6F5] flex items-center justify-center text-[10px] text-[#4B1F7A]">
+                          <div className="w-full h-full bg-brand-soft flex items-center justify-center text-[10px] text-accent">
                             สธ
                           </div>
                         )}
                       </div>
                     </td>
-                    <td className="py-3 px-4 font-medium text-[#1B1226]">
+                    <td className="py-3 px-4 font-medium text-text">
                       {item.name}
                     </td>
-                    <td className="py-3 px-4 text-[#4B1F7A] font-medium">
+                    <td className="py-3 px-4 text-accent font-medium">
                       <div>{item.position}</div>
                       {item.role === 'advisor' && (
-                        <div className="text-[10px] text-[#9C7A2B] font-normal mt-0.5">
+                        <div className="text-[10px] text-gold-text font-normal mt-0.5">
                           {getAdvisorGroupLabel(resolveAdvisorGroup(item), true)}
                         </div>
                       )}
                     </td>
-                    <td className="py-3 px-4 text-[#9C7A2B]">
+                    <td className="py-3 px-4 text-gold-text">
                       {item.yearTH}
                     </td>
-                    <td className="py-3 px-4 text-[#1B1226]/60">
+                    <td className="py-3 px-4 text-text-muted">
                       {item.grade || '-'}
                     </td>
-                    <td className="py-3 px-4 font-mono">
+                    <td className="py-3 px-4 font-mono text-text">
                       {item.order}
                     </td>
                     <td className="py-3 px-4 text-center space-x-2">
                       <button
                         onClick={() => handleOpenEdit(item)}
-                        className="text-[#4B1F7A] hover:underline"
+                        className="text-accent hover:underline"
                       >
                         แก้ไข
                       </button>
                       <button
                         onClick={() => handleDelete(item.id!, item.name)}
-                        className="text-[#9B1C31] hover:underline"
+                        className="text-error hover:underline"
                       >
                         ลบ
                       </button>
@@ -253,7 +253,7 @@ export const AdminPeople: React.FC = () => {
             </table>
           </div>
         ) : (
-          <div className="p-12 text-center text-xs text-[#1B1226]/60">
+          <div className="p-12 text-center text-xs text-text-muted">
             ยังไม่มีข้อมูลในหมวดหมู่นี้ กดปุ่ม "เพิ่มข้อมูลบุคคล" เพื่อเริ่มบันทึก
           </div>
         )}
@@ -261,13 +261,13 @@ export const AdminPeople: React.FC = () => {
 
       {/* Modal */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
-          <div className="bg-white rounded-sm border border-[#B8923A]/40 max-w-lg w-full max-h-[90vh] overflow-y-auto p-6 space-y-5 shadow-editorial my-8">
-            <div className="flex items-center justify-between border-b border-[#4B1F7A]/15 pb-3">
-              <h2 className="font-serif text-lg font-semibold text-[#2A1245]">
+        <div className="fixed inset-0 z-50 bg-overlay-backdrop backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
+          <div className="bg-surface-elevated rounded-sm border border-gold-border/40 max-w-lg w-full max-h-[90vh] overflow-y-auto p-6 space-y-5 shadow-editorial my-8">
+            <div className="flex items-center justify-between border-b border-gold-border/20 pb-3">
+              <h2 className="font-serif text-lg font-semibold text-heading">
                 {editingItem ? 'แก้ไขข้อมูลบุคคล' : 'เพิ่มข้อมูลบุคคลใหม่'}
               </h2>
-              <button onClick={() => setIsModalOpen(false)} className="text-stone-400 hover:text-stone-800">
+              <button onClick={() => setIsModalOpen(false)} className="text-text-muted hover:text-heading">
                 ✕
               </button>
             </div>
@@ -275,11 +275,11 @@ export const AdminPeople: React.FC = () => {
             <form onSubmit={handleSave} className="space-y-4 text-xs">
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block font-semibold text-[#2A1245] mb-1">หมวดหมู่ *</label>
+                  <label className="block font-semibold text-heading mb-1">หมวดหมู่ *</label>
                   <select
                     value={role}
                     onChange={(e) => setRole(e.target.value as PersonRole)}
-                    className="w-full border p-2 rounded-sm"
+                    className="w-full border border-gold-border/30 bg-surface text-text p-2 rounded-sm focus:outline-none focus:border-gold"
                   >
                     <option value="board">คณะกรรมการ</option>
                     <option value="advisor">คณะกรรมการที่ปรึกษา</option>
@@ -288,7 +288,7 @@ export const AdminPeople: React.FC = () => {
                 </div>
 
                 <div>
-                  <label className="block font-semibold text-[#2A1245] mb-1">ปีการศึกษา (พ.ศ.) *</label>
+                  <label className="block font-semibold text-heading mb-1">ปีการศึกษา (พ.ศ.) *</label>
                   <input
                     type="text"
                     value={yearTH}
@@ -302,13 +302,13 @@ export const AdminPeople: React.FC = () => {
 
               {role === 'advisor' && (
                 <div>
-                  <label className="block font-semibold text-[#2A1245] mb-1">
+                  <label className="block font-semibold text-heading mb-1">
                     ฝ่ายในคณะกรรมการที่ปรึกษา *
                   </label>
                   <select
                     value={advisorGroup}
                     onChange={(e) => setAdvisorGroup(e.target.value as AdvisorGroup)}
-                    className="w-full border p-2 rounded-sm bg-[#FAF7F0]"
+                    className="w-full border border-gold-border/30 p-2 rounded-sm bg-surface text-text focus:outline-none focus:border-gold"
                   >
                     {ADVISOR_GROUPS.map((grp) => (
                       <option key={grp.id} value={grp.id}>
@@ -320,7 +320,7 @@ export const AdminPeople: React.FC = () => {
               )}
 
               <div>
-                <label className="block font-semibold text-[#2A1245] mb-1">ชื่อ-นามสกุล *</label>
+                <label className="block font-semibold text-heading mb-1">ชื่อ-นามสกุล *</label>
                 <input
                   type="text"
                   value={name}
@@ -333,7 +333,7 @@ export const AdminPeople: React.FC = () => {
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block font-semibold text-[#2A1245] mb-1">ตำแหน่ง *</label>
+                  <label className="block font-semibold text-heading mb-1">ตำแหน่ง *</label>
                   <input
                     type="text"
                     value={position}
@@ -345,7 +345,7 @@ export const AdminPeople: React.FC = () => {
                 </div>
 
                 <div>
-                  <label className="block font-semibold text-[#2A1245] mb-1">ระดับชั้น / ห้องเรียน</label>
+                  <label className="block font-semibold text-heading mb-1">ระดับชั้น / ห้องเรียน</label>
                   <input
                     type="text"
                     value={grade}
@@ -358,7 +358,7 @@ export const AdminPeople: React.FC = () => {
 
               {/* Photo ImageUploader */}
               <div>
-                <label className="block font-semibold text-[#2A1245] mb-1">
+                <label className="block font-semibold text-heading mb-1">
                   รูปถ่ายบุคคล (อัปโหลดจากเครื่อง หรือระบุลิงก์)
                 </label>
                 <ImageUploader
@@ -371,7 +371,7 @@ export const AdminPeople: React.FC = () => {
               </div>
 
               <div>
-                <label className="block font-semibold text-[#2A1245] mb-1">
+                <label className="block font-semibold text-heading mb-1">
                   คติประจำใจ / สารประจำตัว (Quote — ใช้แสดงหน้าแรกหากเป็นนายกองค์การนักเรียน)
                 </label>
                 <textarea
@@ -384,7 +384,7 @@ export const AdminPeople: React.FC = () => {
               </div>
 
               <div>
-                <label className="block font-semibold text-[#2A1245] mb-1">ลำดับการแสดงผล</label>
+                <label className="block font-semibold text-heading mb-1">ลำดับการแสดงผล</label>
                 <input
                   type="number"
                   value={order}
@@ -394,18 +394,18 @@ export const AdminPeople: React.FC = () => {
                 />
               </div>
 
-              <div className="flex justify-end gap-3 pt-4 border-t">
+              <div className="flex justify-end gap-3 pt-4 border-t border-gold-border/20">
                 <button
                   type="button"
                   onClick={() => setIsModalOpen(false)}
-                  className="px-4 py-2 border rounded-sm hover:bg-stone-50"
+                  className="px-4 py-2 border border-gold-border/30 text-text rounded-sm hover:bg-bg-alt transition-colors"
                 >
                   ยกเลิก
                 </button>
                 <button
                   type="submit"
                   disabled={saving}
-                  className="px-6 py-2 bg-[#4B1F7A] text-[#FAF7F0] rounded-sm hover:bg-[#2A1245]"
+                  className="px-6 py-2 bg-brand text-brand-contrast rounded-sm hover:bg-brand-hover transition-colors"
                 >
                   {saving ? 'กำลังบันทึก...' : 'บันทึก'}
                 </button>

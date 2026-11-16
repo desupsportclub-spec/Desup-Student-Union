@@ -124,6 +124,7 @@ export async function findComplaintsByRecoveryKey(
 /**
  * Generates an official PNG ticket card image that students can save directly to
  * iPhone/iPad Photos or device storage so they never lose their tracking code.
+ * หมายเหตุ: สีบน Canvas รูปภาพบัตรรับเรื่องถูกตั้งคงที่แบบกระดาษสว่างเพื่อความคมชัดในการบันทึก/พิมพ์
  */
 export async function generateTicketReceiptBlob(params: {
   trackingCode: string;
@@ -139,7 +140,7 @@ export async function generateTicketReceiptBlob(params: {
   const ctx = canvas.getContext('2d');
   if (!ctx) return null;
 
-  // Paper background
+  // พื้นหลังกระดาษบัตรสำหรับพิมพ์/บันทึก
   ctx.fillStyle = '#FAF7F0';
   ctx.fillRect(0, 0, width, height);
 

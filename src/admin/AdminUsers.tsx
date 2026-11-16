@@ -173,57 +173,57 @@ export const AdminUsers: React.FC = () => {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#4B1F7A]/15 pb-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-gold-border/20 pb-4">
         <div>
-          <h1 className="font-serif text-2xl font-semibold text-[#2A1245]">
+          <h1 className="font-serif text-2xl font-semibold text-heading">
             ผู้ดูแลระบบและสิทธิ์การเข้าถึง (RBAC)
           </h1>
-          <p className="text-xs text-[#1B1226]/60">
+          <p className="text-xs text-text-muted">
             จัดการบัญชี Google ที่ได้รับสิทธิ์บริหารจัดการเว็บไซต์องค์การนักเรียน
           </p>
         </div>
 
         <button
           onClick={() => setIsAddModalOpen(true)}
-          className="px-5 py-2.5 bg-[#4B1F7A] text-[#FAF7F0] text-xs font-medium rounded-sm hover:bg-[#2A1245] transition-colors shadow-sm self-start sm:self-auto"
+          className="px-5 py-2.5 bg-brand text-brand-contrast text-xs font-medium rounded-sm hover:bg-brand-hover transition-colors shadow-sm self-start sm:self-auto"
         >
           + เพิ่มผู้ดูแลระบบใหม่
         </button>
       </div>
 
       {/* Tabs */}
-      <div className="flex items-center gap-6 border-b border-[#4B1F7A]/10 text-xs font-medium pb-2">
+      <div className="flex items-center gap-6 border-b border-gold-border/15 text-xs font-medium pb-2">
         <button
           onClick={() => setTab('users')}
           className={`pb-2 transition-colors relative ${
-            tab === 'users' ? 'text-[#4B1F7A] font-semibold' : 'text-stone-500 hover:text-stone-800'
+            tab === 'users' ? 'text-accent font-semibold' : 'text-text-muted hover:text-heading'
           }`}
         >
           <span>รายชื่อผู้ดูแลระบบ ({admins.length})</span>
-          {tab === 'users' && <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-[#B8923A]" />}
+          {tab === 'users' && <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-gold" />}
         </button>
 
         {isSuperAdmin && (
           <button
             onClick={() => setTab('audit')}
             className={`pb-2 transition-colors relative ${
-              tab === 'audit' ? 'text-[#4B1F7A] font-semibold' : 'text-stone-500 hover:text-stone-800'
+              tab === 'audit' ? 'text-accent font-semibold' : 'text-text-muted hover:text-heading'
             }`}
           >
             <span>ประวัติการเปลี่ยนแปลงสิทธิ์ (Audit Log)</span>
-            {tab === 'audit' && <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-[#B8923A]" />}
+            {tab === 'audit' && <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-gold" />}
           </button>
         )}
       </div>
 
       {tab === 'users' && (
-        <div className="bg-white border border-[#4B1F7A]/15 rounded-sm shadow-editorial-sm overflow-hidden">
+        <div className="bg-surface-elevated border border-gold-border/20 rounded-sm shadow-editorial-sm overflow-hidden">
           {loading ? (
-            <div className="p-8 text-center text-xs text-stone-500">กำลังโหลด...</div>
+            <div className="p-8 text-center text-xs text-text-muted">กำลังโหลด...</div>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs">
-                <thead className="bg-[#FAF7F0] border-b border-[#4B1F7A]/10 text-[#9C7A2B] uppercase tracking-wider font-medium">
+                <thead className="bg-surface border-b border-gold-border/15 text-gold-text uppercase tracking-wider font-medium">
                   <tr>
                     <th className="py-3 px-4">ชื่อ</th>
                     <th className="py-3 px-4">อีเมล Google</th>
@@ -233,26 +233,26 @@ export const AdminUsers: React.FC = () => {
                     <th className="py-3 px-4 text-center">การจัดการ</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-stone-100">
+                <tbody className="divide-y divide-gold-border/10">
                   {admins.map((adm) => {
                     const isSelf = adm.email.toLowerCase() === user?.email?.toLowerCase();
                     return (
-                      <tr key={adm.email} className="hover:bg-stone-50">
-                        <td className="py-3 px-4 font-medium text-[#1B1226]">
+                      <tr key={adm.email} className="hover:bg-bg-alt/60 transition-colors">
+                        <td className="py-3 px-4 font-medium text-text">
                           {adm.displayName || adm.email.split('@')[0]}
-                          {isSelf && <span className="ml-2 text-[10px] text-stone-400">(คุณ)</span>}
+                          {isSelf && <span className="ml-2 text-[10px] text-text-muted">(คุณ)</span>}
                         </td>
-                        <td className="py-3 px-4 font-mono text-[#4B1F7A]">
+                        <td className="py-3 px-4 font-mono text-accent">
                           {adm.email}
                         </td>
                         <td className="py-3 px-4">
                           <span
                             className={`text-[10px] px-2 py-0.5 rounded font-medium ${
                               adm.role === 'super_admin'
-                                ? 'bg-[#4B1F7A] text-white'
+                                ? 'bg-brand text-brand-contrast'
                                 : adm.role === 'admin'
-                                ? 'bg-[#B8923A] text-white'
-                                : 'bg-[#EDE6F5] text-[#4B1F7A]'
+                                ? 'bg-gold text-anchor-bg'
+                                : 'bg-brand-soft text-accent'
                             }`}
                           >
                             {adm.role === 'super_admin' ? 'Super Admin' : adm.role === 'admin' ? 'Admin' : 'Editor'}
@@ -260,12 +260,12 @@ export const AdminUsers: React.FC = () => {
                         </td>
                         <td className="py-3 px-4">
                           {adm.active ? (
-                            <span className="text-emerald-700 font-medium">ใช้งานอยู่</span>
+                            <span className="text-success font-medium">ใช้งานอยู่</span>
                           ) : (
-                            <span className="text-red-600 font-medium">ระงับชั่วคราว</span>
+                            <span className="text-error font-medium">ระงับชั่วคราว</span>
                           )}
                         </td>
-                        <td className="py-3 px-4 text-stone-500">
+                        <td className="py-3 px-4 text-text-muted">
                           {adm.addedBy}
                         </td>
                         <td className="py-3 px-4 text-center space-x-2">
@@ -273,14 +273,14 @@ export const AdminUsers: React.FC = () => {
                             <>
                               <button
                                 onClick={() => handleToggleActive(adm)}
-                                className="text-stone-600 hover:underline text-xs"
+                                className="text-text-muted hover:text-heading hover:underline text-xs"
                               >
                                 {adm.active ? 'ระงับ' : 'เปิดใช้'}
                               </button>
                               {isSuperAdmin && (
                                 <button
                                   onClick={() => handleRevokeAdmin(adm)}
-                                  className="text-[#9B1C31] hover:underline text-xs"
+                                  className="text-error hover:underline text-xs"
                                 >
                                   ถอนสิทธิ์
                                 </button>
@@ -299,10 +299,10 @@ export const AdminUsers: React.FC = () => {
       )}
 
       {tab === 'audit' && isSuperAdmin && (
-        <div className="bg-white border border-[#4B1F7A]/15 rounded-sm shadow-editorial-sm overflow-hidden">
+        <div className="bg-surface-elevated border border-gold-border/20 rounded-sm shadow-editorial-sm overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs">
-              <thead className="bg-[#FAF7F0] border-b border-[#4B1F7A]/10 text-[#9C7A2B] uppercase tracking-wider font-medium">
+              <thead className="bg-surface border-b border-gold-border/15 text-gold-text uppercase tracking-wider font-medium">
                 <tr>
                   <th className="py-3 px-4">วันเวลา</th>
                   <th className="py-3 px-4">การกระทำ</th>
@@ -311,22 +311,22 @@ export const AdminUsers: React.FC = () => {
                   <th className="py-3 px-4">ผู้ดำเนินการ</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-stone-100">
+              <tbody className="divide-y divide-gold-border/10">
                 {auditLogs.map((log) => (
-                  <tr key={log.id} className="hover:bg-stone-50">
-                    <td className="py-2.5 px-4 text-stone-500">
+                  <tr key={log.id} className="hover:bg-bg-alt/60 transition-colors">
+                    <td className="py-2.5 px-4 text-text-muted">
                       {formatThaiDateTime(log.at)}
                     </td>
-                    <td className="py-2.5 px-4 font-semibold text-[#2A1245]">
+                    <td className="py-2.5 px-4 font-semibold text-heading">
                       {log.action === 'grant' ? 'เพิ่ม/เปิดสิทธิ์' : log.action === 'change_role' ? 'เปลี่ยนบทบาท' : 'ถอนสิทธิ์'}
                     </td>
-                    <td className="py-2.5 px-4 font-mono text-[#4B1F7A]">
+                    <td className="py-2.5 px-4 font-mono text-accent">
                       {log.targetEmail}
                     </td>
-                    <td className="py-2.5 px-4 text-stone-600">
+                    <td className="py-2.5 px-4 text-text-muted">
                       {log.toRole || '-'}
                     </td>
-                    <td className="py-2.5 px-4 text-stone-500">
+                    <td className="py-2.5 px-4 text-text-muted">
                       {log.byEmail}
                     </td>
                   </tr>
@@ -339,26 +339,26 @@ export const AdminUsers: React.FC = () => {
 
       {/* Add Admin Modal */}
       {isAddModalOpen && (
-        <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white rounded-sm border border-[#B8923A]/40 max-w-md w-full p-6 space-y-5 shadow-editorial">
-            <div className="flex items-center justify-between border-b border-[#4B1F7A]/15 pb-3">
-              <h2 className="font-serif text-lg font-semibold text-[#2A1245]">
+        <div className="fixed inset-0 z-50 bg-overlay-backdrop backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-surface-elevated rounded-sm border border-gold-border/40 max-w-md w-full p-6 space-y-5 shadow-editorial">
+            <div className="flex items-center justify-between border-b border-gold-border/20 pb-3">
+              <h2 className="font-serif text-lg font-semibold text-heading">
                 เพิ่มผู้ดูแลระบบใหม่
               </h2>
-              <button onClick={() => setIsAddModalOpen(false)} className="text-stone-400 hover:text-stone-800">
+              <button onClick={() => setIsAddModalOpen(false)} className="text-text-muted hover:text-heading">
                 ✕
               </button>
             </div>
 
             {errorMsg && (
-              <div className="p-3 bg-red-50 text-red-700 text-xs border-l-2 border-red-700">
+              <div className="p-3 bg-error-bg text-error text-xs border-l-2 border-error">
                 {errorMsg}
               </div>
             )}
 
             <form onSubmit={handleAddAdmin} className="space-y-4 text-xs">
               <div>
-                <label className="block font-semibold text-[#2A1245] mb-1">
+                <label className="block font-semibold text-heading mb-1">
                   อีเมล Google ของผู้ใช้ *
                 </label>
                 <input
@@ -369,13 +369,13 @@ export const AdminUsers: React.FC = () => {
                   className="w-full input-underline"
                   required
                 />
-                <p className="text-[11px] text-stone-500 mt-1">
+                <p className="text-[11px] text-text-muted mt-1">
                   เมื่อเพิ่มแล้ว บุคคลนี้จะสามารถล็อกอินด้วย Google Account เพื่อเข้าสู่ระบบได้ทันที
                 </p>
               </div>
 
               <div>
-                <label className="block font-semibold text-[#2A1245] mb-1">
+                <label className="block font-semibold text-heading mb-1">
                   ชื่อที่แสดง (Display Name)
                 </label>
                 <input
@@ -388,13 +388,13 @@ export const AdminUsers: React.FC = () => {
               </div>
 
               <div>
-                <label className="block font-semibold text-[#2A1245] mb-1">
+                <label className="block font-semibold text-heading mb-1">
                   บทบาท (Role) *
                 </label>
                 <select
                   value={newRole}
                   onChange={(e) => setNewRole(e.target.value as AdminRole)}
-                  className="w-full border p-2 rounded-sm"
+                  className="w-full border border-gold-border/30 bg-surface text-text p-2 rounded-sm focus:outline-none focus:border-gold"
                 >
                   <option value="editor">Editor (จัดการข่าว, กิจกรรม, เอกสาร และตอบเรื่องร้องเรียน)</option>
                   {isSuperAdmin && <option value="admin">Admin (จัดการเนื้อหาทั้งหมด + เพิ่ม/ถอน Editor)</option>}
@@ -402,18 +402,18 @@ export const AdminUsers: React.FC = () => {
                 </select>
               </div>
 
-              <div className="flex justify-end gap-3 pt-4 border-t">
+              <div className="flex justify-end gap-3 pt-4 border-t border-gold-border/20">
                 <button
                   type="button"
                   onClick={() => setIsAddModalOpen(false)}
-                  className="px-4 py-2 border rounded-sm hover:bg-stone-50"
+                  className="px-4 py-2 border border-gold-border/30 text-text rounded-sm hover:bg-bg-alt transition-colors"
                 >
                   ยกเลิก
                 </button>
                 <button
                   type="submit"
                   disabled={saving}
-                  className="px-6 py-2 bg-[#4B1F7A] text-[#FAF7F0] rounded-sm hover:bg-[#2A1245]"
+                  className="px-6 py-2 bg-brand text-brand-contrast rounded-sm hover:bg-brand-hover transition-colors"
                 >
                   {saving ? 'กำลังบันทึก...' : 'เพิ่มสิทธิ์ผู้ดูแล'}
                 </button>

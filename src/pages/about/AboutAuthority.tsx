@@ -60,42 +60,42 @@ export const AboutAuthority: React.FC = () => {
   return (
     <div className="max-w-[1040px] mx-auto px-4 sm:px-6 py-6 sm:py-10 space-y-8 sm:space-y-12">
       {/* Header */}
-      <div className="border-b border-[#B8923A]/30 pb-6 sm:pb-8 text-center max-w-2xl mx-auto space-y-2.5">
+      <div className="border-b border-gold-border/30 pb-6 sm:pb-8 text-center max-w-2xl mx-auto space-y-2.5">
         <SectionEyebrow enText="CHARTER & POWERS" thText="อำนาจหน้าที่" />
-        <h1 className="font-serif text-3xl md:text-4xl font-semibold text-[#1B1226]">
+        <h1 className="font-serif text-3xl md:text-4xl font-semibold text-heading">
           อำนาจหน้าที่องค์การนักเรียน
         </h1>
-        <p className="text-xs md:text-sm text-[#1B1226]/70">
+        <p className="text-xs md:text-sm text-text-muted">
           ตามประกาศโรงเรียนสาธิตมหาวิทยาลัยพะเยา เรื่อง องค์การนักเรียน พ.ศ. ๒๕๖๙
         </p>
       </div>
 
       {/* Section 1: อำนาจหน้าที่ขององค์การนักเรียน */}
-      <section className="bg-[#FAF7F0] border border-[#B8923A]/40 p-6 sm:p-8 md:p-10 rounded-sm shadow-editorial relative space-y-6">
+      <section className="bg-surface border border-gold-border/40 p-6 sm:p-8 md:p-10 rounded-sm shadow-editorial relative space-y-6">
         <CornerBracket position="top-left" />
         <CornerBracket position="top-right" />
         <CornerBracket position="bottom-left" />
         <CornerBracket position="bottom-right" />
 
-        <div className="border-b border-[#B8923A]/30 pb-4 flex items-baseline gap-3">
-          <span className="font-serif text-sm sm:text-base font-bold text-[#9C7A2B] shrink-0">
+        <div className="border-b border-gold-border/30 pb-4 flex items-baseline gap-3">
+          <span className="font-serif text-sm sm:text-base font-bold text-gold-text shrink-0">
             01
           </span>
-          <h2 className="font-serif text-xl sm:text-2xl font-semibold text-[#4B1F7A]">
+          <h2 className="font-serif text-xl sm:text-2xl font-semibold text-accent">
             อำนาจหน้าที่ขององค์การนักเรียน
           </h2>
         </div>
 
-        <ol className="divide-y divide-[#4B1F7A]/10">
+        <ol className="divide-y divide-gold-border/15">
           {DUTIES.map((item) => (
             <li
               key={item.num}
               className="py-4 first:pt-1 last:pb-1 flex items-start gap-4 sm:gap-5"
             >
-              <span className="w-9 h-8 rounded-sm bg-[#4B1F7A] text-[#FAF7F0] border border-[#B8923A]/60 font-serif text-sm font-semibold flex items-center justify-center shrink-0 mt-0.5">
+              <span className="w-9 h-8 rounded-sm bg-brand text-brand-contrast border border-gold-border/60 font-serif text-sm font-semibold flex items-center justify-center shrink-0 mt-0.5">
                 {item.num}
               </span>
-              <p className="text-sm sm:text-[15px] text-[#1B1226]/85 leading-relaxed pt-1">
+              <p className="text-sm sm:text-[15px] text-text leading-relaxed pt-1">
                 {item.text}
               </p>
             </li>
@@ -104,17 +104,17 @@ export const AboutAuthority: React.FC = () => {
       </section>
 
       {/* Section 2: แนวทางที่องค์การนักเรียนพึงดำเนิน */}
-      <section className="bg-[#FAF7F0] border border-[#B8923A]/40 p-6 sm:p-8 md:p-10 rounded-sm shadow-editorial relative space-y-6">
+      <section className="bg-surface border border-gold-border/40 p-6 sm:p-8 md:p-10 rounded-sm shadow-editorial relative space-y-6">
         <CornerBracket position="top-left" />
         <CornerBracket position="top-right" />
         <CornerBracket position="bottom-left" />
         <CornerBracket position="bottom-right" />
 
-        <div className="border-b border-[#B8923A]/30 pb-4 flex items-baseline gap-3">
-          <span className="font-serif text-sm sm:text-base font-bold text-[#9C7A2B] shrink-0">
+        <div className="border-b border-gold-border/30 pb-4 flex items-baseline gap-3">
+          <span className="font-serif text-sm sm:text-base font-bold text-gold-text shrink-0">
             02
           </span>
-          <h2 className="font-serif text-xl sm:text-2xl font-semibold text-[#4B1F7A]">
+          <h2 className="font-serif text-xl sm:text-2xl font-semibold text-accent">
             แนวทางที่องค์การนักเรียนพึงดำเนิน
           </h2>
         </div>
@@ -123,12 +123,12 @@ export const AboutAuthority: React.FC = () => {
           {GUIDELINES.map((item) => (
             <li
               key={item.num}
-              className="p-4 sm:p-5 bg-white/75 border border-[#B8923A]/30 rounded-sm flex items-start gap-3.5"
+              className="p-4 sm:p-5 bg-surface-elevated border border-gold-border/30 rounded-sm flex items-start gap-3.5"
             >
-              <span className="w-9 h-8 rounded-sm bg-[#4B1F7A] text-[#FAF7F0] border border-[#B8923A]/60 font-serif text-sm font-semibold flex items-center justify-center shrink-0 mt-0.5">
+              <span className="w-9 h-8 rounded-sm bg-brand text-brand-contrast border border-gold-border/60 font-serif text-sm font-semibold flex items-center justify-center shrink-0 mt-0.5">
                 {item.num}
               </span>
-              <p className="text-sm sm:text-[15px] text-[#1B1226]/85 leading-relaxed pt-0.5">
+              <p className="text-sm sm:text-[15px] text-text leading-relaxed pt-0.5">
                 {item.text}
               </p>
             </li>

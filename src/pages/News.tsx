@@ -101,18 +101,18 @@ export const News: React.FC = () => {
   return (
     <div className="max-w-[1240px] mx-auto px-4 sm:px-6 md:px-12 py-6 sm:py-10 space-y-6 sm:space-y-10">
       {/* Page Header */}
-      <div className="border-b border-[#B8923A]/30 pb-5 sm:pb-6">
+      <div className="border-b border-gold-border/30 pb-5 sm:pb-6">
         <SectionEyebrow enText="PRESS & UPDATES" thText="ข่าวสารและประกาศ" />
-        <h1 className="font-serif text-3xl md:text-4xl font-semibold text-[#1B1226] mt-2">
+        <h1 className="font-serif text-3xl md:text-4xl font-semibold text-heading mt-2">
           ข่าวสารองค์การนักเรียน
         </h1>
-        <p className="text-xs md:text-sm text-[#1B1226]/70 mt-1">
+        <p className="text-xs md:text-sm text-text-muted mt-1">
           รวมข่าวประชาสัมพันธ์ กิจกรรม ข้อบังคับ ประกาศ และสาระน่ารู้
         </p>
       </div>
 
       {/* Filter Tabs & Live Search */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-[#4B1F7A]/10">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-gold-border/15">
         {/* Underline tabs */}
         <div className="flex items-center gap-6 overflow-x-auto pb-2 scrollbar-none text-xs font-medium">
           {CATEGORIES.map((cat) => (
@@ -124,13 +124,13 @@ export const News: React.FC = () => {
               }}
               className={`pb-2 whitespace-nowrap transition-colors relative ${
                 selectedCat === cat.id
-                  ? 'text-[#4B1F7A] font-semibold'
-                  : 'text-[#1B1226]/60 hover:text-[#2A1245]'
+                  ? 'text-accent font-semibold'
+                  : 'text-text-muted hover:text-heading'
               }`}
             >
               <span>{cat.label}</span>
               {selectedCat === cat.id && (
-                <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-[#B8923A]" />
+                <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-gold" />
               )}
             </button>
           ))}
@@ -148,7 +148,7 @@ export const News: React.FC = () => {
           {searchTerm && (
             <button
               onClick={() => setSearchTerm('')}
-              className="absolute right-1 top-2.5 text-xs text-stone-400 hover:text-stone-700"
+              className="absolute right-1 top-2.5 text-xs text-text-muted hover:text-heading"
             >
               ✕
             </button>
@@ -160,11 +160,11 @@ export const News: React.FC = () => {
       {loading && allNews.length === 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-8">
           {[1, 2, 3, 4, 5, 6].map((i) => (
-            <div key={i} className="animate-pulse space-y-3 p-4 border border-stone-200 rounded-sm">
-              <div className="aspect-[16/9] bg-stone-200 rounded-sm" />
-              <div className="h-4 bg-stone-200 rounded w-1/3" />
-              <div className="h-5 bg-stone-200 rounded w-3/4" />
-              <div className="h-3 bg-stone-200 rounded w-full" />
+            <div key={i} className="animate-pulse space-y-3 p-4 border border-gold-border/15 rounded-sm bg-surface">
+              <div className="aspect-[16/9] bg-bg-alt rounded-sm" />
+              <div className="h-4 bg-bg-alt rounded w-1/3" />
+              <div className="h-5 bg-bg-alt rounded w-3/4" />
+              <div className="h-3 bg-bg-alt rounded w-full" />
             </div>
           ))}
         </div>
@@ -174,7 +174,7 @@ export const News: React.FC = () => {
             <Link
               key={item.id}
               to={`/news/read/${item.id}`}
-              className="group block relative border border-[#4B1F7A]/15 bg-[#FAF7F0] p-4 sm:p-5 rounded-sm shadow-editorial transition-all duration-300 hover:border-[#B8923A]/70 flex flex-col justify-between"
+              className="group block relative border border-gold-border/20 bg-surface p-4 sm:p-5 rounded-sm shadow-editorial transition-all duration-300 hover:border-gold flex flex-col justify-between"
             >
               <CornerBracket position="top-left" />
               <CornerBracket position="top-right" />
@@ -182,7 +182,7 @@ export const News: React.FC = () => {
               <CornerBracket position="bottom-right" />
 
               <div>
-                <div className="aspect-[16/9] bg-stone-100 overflow-hidden mb-4 rounded-sm relative">
+                <div className="aspect-[16/9] bg-bg-alt overflow-hidden mb-4 rounded-sm relative">
                   {getNewsCoverUrl(item) ? (
                     <img
                       src={getNewsCoverUrl(item) || ''}
@@ -192,14 +192,14 @@ export const News: React.FC = () => {
                       decoding="async"
                     />
                   ) : (
-                    <div className="w-full h-full bg-[#EDE6F5] flex items-center justify-center text-[#4B1F7A]">
+                    <div className="w-full h-full bg-brand-soft flex items-center justify-center text-accent">
                       <Emblem size={44} />
                     </div>
                   )}
 
                   {(item.category === 'video' || getNewsYouTubeUrl(item)) && (
-                    <div className="absolute inset-0 bg-black/25 flex items-center justify-center">
-                      <div className="w-10 h-10 rounded-full bg-[#B8923A] text-white flex items-center justify-center shadow-lg">
+                    <div className="absolute inset-0 bg-anchor-bg-deep/25 flex items-center justify-center">
+                      <div className="w-10 h-10 rounded-full bg-gold text-anchor-bg-deep flex items-center justify-center shadow-lg">
                         ▶
                       </div>
                     </div>
@@ -207,10 +207,10 @@ export const News: React.FC = () => {
                 </div>
 
                 <div className="space-y-2">
-                  <div className="flex flex-wrap items-center gap-2 text-[11px] text-[#1B1226]/60">
+                  <div className="flex flex-wrap items-center gap-2 text-[11px] text-text-muted">
                     {item.pinned && (
-                      <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-sm bg-[#4B1F7A] text-[#FAF7F0] text-[10px] font-medium">
-                        <PinIcon className="w-3 h-3 text-[#D9B867]" />
+                      <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-sm bg-brand text-brand-contrast text-[10px] font-medium">
+                        <PinIcon className="w-3 h-3 text-gold-light" />
                         <span>ปักหมุด</span>
                       </span>
                     )}
@@ -219,19 +219,19 @@ export const News: React.FC = () => {
                     <span>{formatThaiDate(item.createdAt, true)}</span>
                   </div>
 
-                  <h3 className="font-serif text-lg font-semibold text-[#1B1226] group-hover:text-[#4B1F7A] transition-colors line-clamp-2 leading-snug">
+                  <h3 className="font-serif text-lg font-semibold text-heading group-hover:text-accent transition-colors line-clamp-2 leading-snug">
                     {item.title}
                   </h3>
 
-                  <p className="text-xs text-[#1B1226]/70 line-clamp-2 leading-relaxed">
+                  <p className="text-xs text-text-muted line-clamp-2 leading-relaxed">
                     {item.excerpt || 'คลิกเพื่ออ่านรายละเอียดเนื้อหาข่าว'}
                   </p>
                 </div>
               </div>
 
-              <div className="pt-4 mt-4 border-t border-[#4B1F7A]/10 flex items-center justify-between text-[11px] text-[#1B1226]/60">
+              <div className="pt-4 mt-4 border-t border-gold-border/15 flex items-center justify-between text-[11px] text-text-muted">
                 <span>อ่าน {formatNumber(item.views)} ครั้ง</span>
-                <span className="text-[#9C7A2B] group-hover:translate-x-1 transition-transform">
+                <span className="text-gold-text group-hover:translate-x-1 transition-transform">
                   อ่านต่อ →
                 </span>
               </div>
@@ -239,13 +239,13 @@ export const News: React.FC = () => {
           ))}
         </div>
       ) : (
-        <div className="p-16 text-center border border-dashed border-[#4B1F7A]/25 rounded-sm bg-white/30 space-y-2">
-          <p className="font-serif text-lg text-[#2A1245]">
+        <div className="p-16 text-center border border-dashed border-gold-border/30 rounded-sm bg-surface/50 space-y-2">
+          <p className="font-serif text-lg text-heading">
             {searchTerm
               ? `ไม่พบข่าวที่ตรงกับคำค้นหา "${searchTerm}"`
               : 'ยังไม่มีข่าวในหมวดหมู่นี้ในขณะนี้'}
           </p>
-          <p className="text-xs text-[#1B1226]/60">
+          <p className="text-xs text-text-muted">
             โปรดลองเลือกหมวดหมู่อื่น หรือกลับมาตรวจสอบอีกครั้งในภายหลัง
           </p>
         </div>
@@ -256,7 +256,7 @@ export const News: React.FC = () => {
         <div className="text-center pt-8">
           <button
             onClick={() => setDisplayCount((prev) => prev + 9)}
-            className="px-8 py-2.5 border border-[#B8923A] text-xs font-medium text-[#2A1245] hover:bg-[#4B1F7A] hover:text-[#FAF7F0] transition-colors duration-300 rounded-sm"
+            className="px-8 py-2.5 border border-gold text-xs font-medium text-heading hover:bg-brand hover:text-brand-contrast transition-colors duration-300 rounded-sm"
           >
             โหลดข่าวสารเพิ่มเติม
           </button>

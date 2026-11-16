@@ -145,7 +145,7 @@ export const FirstLoginAlertsModal: React.FC = () => {
 
   return (
     <div
-      className="fixed inset-0 z-[70] bg-[#1E0C38]/75 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 overflow-y-auto"
+      className="fixed inset-0 z-[70] bg-anchor-bg-deep/75 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 overflow-y-auto"
       onClick={(e) => {
         if (e.target === e.currentTarget) dismissFirstLoginModal();
       }}
@@ -156,46 +156,46 @@ export const FirstLoginAlertsModal: React.FC = () => {
         role="alertdialog"
         aria-modal="true"
         aria-label="มีเรื่องร้องเรียนรอดำเนินการ"
-        className="w-full max-w-lg my-auto bg-[#B8923A] p-[1.5px] shadow-2xl chamfered-frame-outer"
+        className="w-full max-w-lg my-auto bg-gold p-[1.5px] shadow-2xl chamfered-frame-outer"
       >
-        <div className="bg-[#FAF7F0] p-[3px] chamfered-frame-mid">
+        <div className="bg-surface p-[3px] chamfered-frame-mid">
           {/* Inner chamfered gold frame */}
-          <div className="bg-[#D9B867] p-[1px] chamfered-frame-inner">
-            <div className="bg-[#FAF7F0] px-4 py-5 sm:px-7 sm:py-6 chamfered-frame-body space-y-5">
+          <div className="bg-gold-light p-[1px] chamfered-frame-inner">
+            <div className="bg-surface px-4 py-5 sm:px-7 sm:py-6 chamfered-frame-body space-y-5">
               {/* Top Icon + Heading */}
               <div className="flex flex-col items-center text-center space-y-2.5">
-                <div className="w-12 h-12 rounded-full bg-[#EDE6F5] border border-[#B8923A]/45 flex items-center justify-center text-[#4B1F7A]">
+                <div className="w-12 h-12 rounded-full bg-brand-soft border border-gold-border/45 flex items-center justify-center text-accent">
                   <Bell size={26} weight="light" className="animate-bell-swing origin-top" />
                 </div>
 
                 <div className="space-y-1">
-                  <span className="text-[10px] tracking-[0.2em] uppercase text-[#9C7A2B] font-semibold block">
+                  <span className="text-[10px] tracking-[0.2em] uppercase text-gold-text font-semibold block">
                     แจ้งเตือนผู้ดูแลระบบ
                   </span>
-                  <h2 className="font-serif text-xl sm:text-2xl font-semibold text-[#2A1245]">
+                  <h2 className="font-serif text-xl sm:text-2xl font-semibold text-heading">
                     มีเรื่องร้องเรียนรอดำเนินการ
                   </h2>
                 </div>
 
                 {/* Count-up total */}
                 <div className="pt-1 flex items-baseline justify-center gap-2">
-                  <span className="font-serif text-4xl sm:text-5xl font-bold text-[#4B1F7A] tabular-numbers leading-none">
+                  <span className="font-serif text-4xl sm:text-5xl font-bold text-accent tabular-numbers leading-none">
                     {displayCount}
                   </span>
-                  <span className="text-xs sm:text-sm text-[#1B1226]/70 font-medium">
+                  <span className="text-xs sm:text-sm text-text-muted font-medium">
                     เรื่องค้างทั้งหมด
                   </span>
                 </div>
 
                 {/* Status summary chips */}
                 {statusChips.length > 0 && (
-                  <div className="flex flex-wrap items-center justify-center gap-1.5 pt-1 text-[11px] text-[#2A1245]">
-                    <span className="inline-flex flex-wrap items-center justify-center gap-x-2 gap-y-1 px-3 py-1 bg-[#EDE6F5]/75 border border-[#B8923A]/35 rounded-sm font-medium">
+                  <div className="flex flex-wrap items-center justify-center gap-1.5 pt-1 text-[11px] text-heading">
+                    <span className="inline-flex flex-wrap items-center justify-center gap-x-2 gap-y-1 px-3 py-1 bg-brand-soft/75 border border-gold-border/35 rounded-sm font-medium">
                       {statusChips.map((chip, idx) => (
                         <React.Fragment key={chip.key}>
-                          {idx > 0 && <span className="text-[#9C7A2B]" aria-hidden="true">·</span>}
+                          {idx > 0 && <span className="text-gold-text" aria-hidden="true">·</span>}
                           <span>
-                            {chip.label} <strong className="text-[#4B1F7A] tabular-numbers">{chip.count}</strong>
+                            {chip.label} <strong className="text-accent tabular-numbers">{chip.count}</strong>
                           </span>
                         </React.Fragment>
                       ))}
@@ -206,10 +206,10 @@ export const FirstLoginAlertsModal: React.FC = () => {
 
               {/* Latest 3 pending items */}
               <div className="space-y-2">
-                <p className="text-[11px] font-semibold text-[#9C7A2B] uppercase tracking-wider">
+                <p className="text-[11px] font-semibold text-gold-text uppercase tracking-wider">
                   รายการล่าสุดที่รอดำเนินการ ({latestThree.length} จาก {pendingCount} เรื่อง)
                 </p>
-                <div className="divide-y divide-[#4B1F7A]/10 border border-[#B8923A]/30 bg-white/80 rounded-sm">
+                <div className="divide-y divide-gold-border/15 border border-gold-border/30 bg-surface-elevated/85 rounded-sm">
                   {latestThree.map((item) => (
                     <div
                       key={item.id || item.trackingCode}
@@ -217,24 +217,24 @@ export const FirstLoginAlertsModal: React.FC = () => {
                     >
                       <div className="flex flex-wrap items-center justify-between gap-1.5">
                         <div className="flex flex-wrap items-center gap-1.5 min-w-0">
-                          <span className="font-mono font-bold text-[#4B1F7A] text-[11px]">
+                          <span className="font-mono font-bold text-accent text-[11px]">
                             {item.trackingCode || item.id}
                           </span>
                           <span
                             className={`px-1.5 py-0.5 rounded-sm text-[10px] font-medium ${
                               item.type === 'corruption'
-                                ? 'bg-red-50 text-[#9B1C31] border border-red-200'
-                                : 'bg-[#EDE6F5] text-[#4B1F7A]'
+                                ? 'bg-error-bg text-error border border-error/25'
+                                : 'bg-brand-soft text-accent'
                             }`}
                           >
                             {getComplaintTypeLabel(item.type)}
                           </span>
                         </div>
-                        <span className="text-[11px] text-[#1B1226]/55 shrink-0">
+                        <span className="text-[11px] text-text-muted shrink-0">
                           {formatRelativeTimeTH(item.createdAt)}
                         </span>
                       </div>
-                      <p className="font-medium text-[#1B1226] line-clamp-1">
+                      <p className="font-medium text-text line-clamp-1">
                         {item.title}
                       </p>
                     </div>
@@ -243,11 +243,11 @@ export const FirstLoginAlertsModal: React.FC = () => {
               </div>
 
               {/* Action buttons */}
-              <div className="flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-end gap-2.5 pt-2 border-t border-[#B8923A]/25">
+              <div className="flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-end gap-2.5 pt-2 border-t border-gold-border/25">
                 <button
                   type="button"
                   onClick={dismissFirstLoginModal}
-                  className="px-4 py-2.5 border border-[#4B1F7A]/25 bg-white text-[#1B1226]/80 hover:bg-stone-50 text-xs font-medium rounded-sm transition-colors"
+                  className="px-4 py-2.5 border border-gold-border/25 bg-surface-elevated text-text hover:bg-bg-alt text-xs font-medium rounded-sm transition-colors"
                 >
                   ไว้ทีหลัง
                 </button>
@@ -255,10 +255,10 @@ export const FirstLoginAlertsModal: React.FC = () => {
                   ref={primaryBtnRef}
                   type="button"
                   onClick={handleGoToComplaints}
-                  className="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-[#4B1F7A] hover:bg-[#2A1245] text-[#FAF7F0] text-xs font-medium rounded-sm transition-colors shadow-sm"
+                  className="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-brand hover:bg-brand-hover text-brand-contrast text-xs font-medium rounded-sm transition-colors shadow-sm"
                 >
                   <span>ดูเรื่องร้องเรียน</span>
-                  <ArrowRight size={14} weight="bold" className="text-[#D9B867]" />
+                  <ArrowRight size={14} weight="bold" className="text-gold-light" />
                 </button>
               </div>
             </div>

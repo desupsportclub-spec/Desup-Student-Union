@@ -86,49 +86,49 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
   };
 
   return (
-    <div className="border border-[#4B1F7A]/15 bg-[#FAF7F0] p-4 rounded-sm space-y-3">
-      <div className="flex items-center justify-between border-b border-[#4B1F7A]/10 pb-2">
+    <div className="border border-gold-border/20 bg-surface p-4 rounded-sm space-y-3">
+      <div className="flex items-center justify-between border-b border-gold-border/15 pb-2">
         <div className="flex items-center gap-4 text-xs font-medium">
           <button
             type="button"
             onClick={() => setTab('upload')}
-            className={`pb-1 transition-colors ${tab === 'upload' ? 'border-b-2 border-[#B8923A] text-[#2A1245] font-semibold' : 'text-[#1B1226]/60 hover:text-[#2A1245]'}`}
+            className={`pb-1 transition-colors ${tab === 'upload' ? 'border-b-2 border-gold text-heading font-semibold' : 'text-text-muted hover:text-heading'}`}
           >
             อัปโหลดไฟล์จากเครื่อง / ถ่ายภาพ
           </button>
           <button
             type="button"
             onClick={() => setTab('url')}
-            className={`pb-1 transition-colors ${tab === 'url' ? 'border-b-2 border-[#B8923A] text-[#2A1245] font-semibold' : 'text-[#1B1226]/60 hover:text-[#2A1245]'}`}
+            className={`pb-1 transition-colors ${tab === 'url' ? 'border-b-2 border-gold text-heading font-semibold' : 'text-text-muted hover:text-heading'}`}
           >
             ระบุลิงก์รูปภาพ (URL)
           </button>
         </div>
-        <span className="text-[11px] text-[#9C7A2B]">{aspectRatioLabel}</span>
+        <span className="text-[11px] text-gold-text">{aspectRatioLabel}</span>
       </div>
 
       {/* Preview if exists */}
       {currentUrl ? (
-        <div className="relative group border border-[#B8923A]/30 overflow-hidden bg-stone-100 max-h-64 flex items-center justify-center">
+        <div className="relative group border border-gold-border/30 overflow-hidden bg-bg-alt max-h-64 flex items-center justify-center">
           <img
             src={currentUrl}
             alt={altText || "พรีวิวรูปภาพ"}
             className="max-h-64 w-auto object-contain"
           />
-          <div className="absolute inset-0 bg-[#2A1245]/70 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-2 p-3 text-white text-xs">
+          <div className="absolute inset-0 bg-anchor-bg/80 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-2 p-3 text-anchor-text text-xs">
             <p className="line-clamp-1 text-center font-medium">{altText || "ไม่มีคำอธิบาย alt"}</p>
             <div className="flex items-center gap-2">
               <button
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
-                className="px-3 py-1 bg-[#4B1F7A] text-[#FAF7F0] text-xs hover:bg-[#2A1245] transition-colors"
+                className="px-3 py-1 bg-brand text-brand-contrast text-xs hover:bg-brand-hover transition-colors"
               >
                 เปลี่ยนรูป
               </button>
               <button
                 type="button"
                 onClick={handleRemove}
-                className="px-3 py-1 bg-red-800 text-white text-xs hover:bg-red-900 transition-colors"
+                className="px-3 py-1 bg-error text-brand-contrast text-xs hover:opacity-90 transition-opacity"
               >
                 ลบรูป
               </button>
@@ -141,7 +141,7 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
       {tab === 'upload' && !currentUrl && (
         <div
           onClick={() => !isUploading && fileInputRef.current?.click()}
-          className="border-2 border-dashed border-[#4B1F7A]/25 hover:border-[#B8923A] transition-colors cursor-pointer p-6 flex flex-col items-center justify-center text-center bg-white/50"
+          className="border-2 border-dashed border-gold-border/30 hover:border-gold transition-colors cursor-pointer p-6 flex flex-col items-center justify-center text-center bg-bg-alt/40"
         >
           <input
             ref={fileInputRef}
@@ -151,20 +151,20 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
             onChange={handleFileSelect}
             disabled={isUploading}
           />
-          <svg className="w-8 h-8 text-[#9C7A2B] mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <svg className="w-8 h-8 text-gold-text mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
           </svg>
-          <p className="text-sm font-medium text-[#2A1245]">
+          <p className="text-sm font-medium text-heading">
             {isUploading ? 'กำลังบีบอัดและอัปโหลด...' : 'คลิกเพื่อเลือกรูปภาพ หรือถ่ายจากมือถือ'}
           </p>
-          <p className="text-xs text-[#1B1226]/60 mt-1">
+          <p className="text-xs text-text-muted mt-1">
             รองรับไฟล์ JPG, PNG, WebP (บีบอัดลงฐานข้อมูลอัตโนมัติ)
           </p>
 
           {isUploading && (
-            <div className="w-full max-w-xs bg-stone-200 h-1.5 mt-3 overflow-hidden rounded-full">
+            <div className="w-full max-w-xs bg-bg-alt h-1.5 mt-3 overflow-hidden rounded-full">
               <div
-                className="bg-[#B8923A] h-full transition-all duration-300"
+                className="bg-gold h-full transition-all duration-300"
                 style={{ width: `${uploadProgress}%` }}
               />
             </div>
@@ -187,20 +187,20 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
             <button
               type="submit"
               disabled={isUploading}
-              className="px-4 py-1.5 bg-[#4B1F7A] text-[#FAF7F0] text-xs hover:bg-[#2A1245] transition-colors"
+              className="px-4 py-1.5 bg-brand text-brand-contrast text-xs hover:bg-brand-hover transition-colors"
             >
               นำเข้า
             </button>
           </div>
-          <p className="text-[11px] text-[#1B1226]/60">
+          <p className="text-[11px] text-text-muted">
             วางลิงก์รูปภาพโดยตรงที่เปิดดูได้สาธารณะ
           </p>
         </form>
       )}
 
       {/* Alt Text Input (Required for accessibility) */}
-      <div className="pt-2 border-t border-[#4B1F7A]/10">
-        <label className="block text-[11px] font-medium text-[#2A1245] mb-1">
+      <div className="pt-2 border-t border-gold-border/15">
+        <label className="block text-[11px] font-medium text-heading mb-1">
           คำอธิบายรูปภาพ (Alt Text ภาษาไทย - สำหรับการเข้าถึงและ SEO)
         </label>
         <input
@@ -222,7 +222,7 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
       </div>
 
       {errorMsg && (
-        <p className="text-xs text-[#9B1C31] bg-red-50 p-2 border-l-2 border-[#9B1C31]">
+        <p className="text-xs text-error bg-error-bg p-2 border-l-2 border-error">
           {errorMsg}
         </p>
       )}

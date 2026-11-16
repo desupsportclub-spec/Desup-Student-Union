@@ -121,32 +121,32 @@ export const AdminEvents: React.FC = () => {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#4B1F7A]/15 pb-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-gold-border/20 pb-4">
         <div>
-          <h1 className="font-serif text-2xl font-semibold text-[#2A1245]">
+          <h1 className="font-serif text-2xl font-semibold text-heading">
             จัดการปฏิทินกิจกรรม
           </h1>
-          <p className="text-xs text-[#1B1226]/60">
+          <p className="text-xs text-text-muted">
             กำหนดการ กิจกรรมวิชาการ กีฬา และการประชุมขององค์การนักเรียน
           </p>
         </div>
 
         <button
           onClick={handleOpenCreate}
-          className="px-5 py-2.5 bg-[#4B1F7A] text-[#FAF7F0] text-xs font-medium rounded-sm hover:bg-[#2A1245] transition-colors shadow-sm self-start sm:self-auto"
+          className="px-5 py-2.5 bg-brand text-brand-contrast text-xs font-medium rounded-sm hover:bg-brand-hover transition-colors shadow-sm self-start sm:self-auto"
         >
           + เพิ่มกิจกรรมใหม่
         </button>
       </div>
 
       {/* Events Table */}
-      <div className="bg-white border border-[#4B1F7A]/15 rounded-sm shadow-editorial-sm overflow-hidden">
+      <div className="bg-surface-elevated border border-gold-border/20 rounded-sm shadow-editorial-sm overflow-hidden">
         {loading ? (
-          <div className="p-8 text-center text-xs text-stone-500">กำลังโหลดกิจกรรม...</div>
+          <div className="p-8 text-center text-xs text-text-muted">กำลังโหลดกิจกรรม...</div>
         ) : events.length > 0 ? (
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs">
-              <thead className="bg-[#FAF7F0] border-b border-[#4B1F7A]/10 text-[#9C7A2B] uppercase tracking-wider font-medium">
+              <thead className="bg-surface border-b border-gold-border/15 text-gold-text uppercase tracking-wider font-medium">
                 <tr>
                   <th className="py-3 px-4">วันที่</th>
                   <th className="py-3 px-4">ชื่อกิจกรรม</th>
@@ -155,58 +155,58 @@ export const AdminEvents: React.FC = () => {
                   <th className="py-3 px-4 text-center">การจัดการ</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-stone-100">
+              <tbody className="divide-y divide-gold-border/10">
                 {events.map((item) => {
                   const scheduleStatus = getEventScheduleStatus(item.startAt, item.endAt);
                   const hasEnd = Boolean(item.endAt && getEventDateKey(item.endAt) > getEventDateKey(item.startAt));
                   return (
-                  <tr key={item.id} className="hover:bg-stone-50">
-                    <td className="py-3 px-4 font-mono font-bold text-[#4B1F7A] whitespace-nowrap">
+                  <tr key={item.id} className="hover:bg-bg-alt/60 transition-colors">
+                    <td className="py-3 px-4 font-mono font-bold text-accent whitespace-nowrap">
                       <div>{formatThaiDate(item.startAt, true)}</div>
                       {hasEnd && item.endAt && (
-                        <div className="text-[10px] font-normal text-[#9C7A2B]">
+                        <div className="text-[10px] font-normal text-gold-text">
                           ถึง {formatThaiDate(item.endAt, true)}
                         </div>
                       )}
                     </td>
-                    <td className="py-3 px-4 font-medium text-[#1B1226]">
+                    <td className="py-3 px-4 font-medium text-text">
                       <div>{item.title}</div>
                       <div className="mt-1">
                         {scheduleStatus === 'ongoing' ? (
-                          <span className="inline-block px-1.5 py-0.5 text-[10px] rounded-sm bg-emerald-50 text-emerald-700 border border-emerald-200">
+                          <span className="inline-block px-1.5 py-0.5 text-[10px] rounded-sm bg-success-bg text-success border border-success/30">
                             อยู่ในช่วงจัดกิจกรรม
                           </span>
                         ) : scheduleStatus === 'upcoming' ? (
-                          <span className="inline-block px-1.5 py-0.5 text-[10px] rounded-sm bg-[#EDE6F5] text-[#4B1F7A]">
+                          <span className="inline-block px-1.5 py-0.5 text-[10px] rounded-sm bg-brand-soft text-accent">
                             ยังไม่จัด
                           </span>
                         ) : (
-                          <span className="inline-block px-1.5 py-0.5 text-[10px] rounded-sm bg-stone-100 text-stone-500">
+                          <span className="inline-block px-1.5 py-0.5 text-[10px] rounded-sm bg-bg-alt text-text-muted">
                             ผ่านไปแล้ว (ซ่อนจากหน้าแรก)
                           </span>
                         )}
                       </div>
                     </td>
-                    <td className="py-3 px-4 text-[#1B1226]/60">
+                    <td className="py-3 px-4 text-text-muted">
                       {item.location}
                     </td>
                     <td className="py-3 px-4">
                       {item.published ? (
-                        <span className="text-emerald-700 font-medium">แสดงบนปฏิทิน</span>
+                        <span className="text-success font-medium">แสดงบนปฏิทิน</span>
                       ) : (
-                        <span className="text-stone-400">ซ่อนไว้</span>
+                        <span className="text-text-muted">ซ่อนไว้</span>
                       )}
                     </td>
                     <td className="py-3 px-4 text-center space-x-2">
                       <button
                         onClick={() => handleOpenEdit(item)}
-                        className="text-[#4B1F7A] hover:underline"
+                        className="text-accent hover:underline"
                       >
                         แก้ไข
                       </button>
                       <button
                         onClick={() => handleDelete(item.id!, item.title)}
-                        className="text-[#9B1C31] hover:underline"
+                        className="text-error hover:underline"
                       >
                         ลบ
                       </button>
@@ -218,7 +218,7 @@ export const AdminEvents: React.FC = () => {
             </table>
           </div>
         ) : (
-          <div className="p-12 text-center text-xs text-[#1B1226]/60">
+          <div className="p-12 text-center text-xs text-text-muted">
             ยังไม่มีกิจกรรมในระบบ กดปุ่ม "เพิ่มกิจกรรมใหม่" เพื่อเริ่มกำหนดตาราง
           </div>
         )}
@@ -226,20 +226,20 @@ export const AdminEvents: React.FC = () => {
 
       {/* Modal */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white rounded-sm border border-[#B8923A]/40 max-w-lg w-full p-6 space-y-5 shadow-editorial">
-            <div className="flex items-center justify-between border-b border-[#4B1F7A]/15 pb-3">
-              <h2 className="font-serif text-lg font-semibold text-[#2A1245]">
+        <div className="fixed inset-0 z-50 bg-overlay-backdrop backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-surface-elevated rounded-sm border border-gold-border/40 max-w-lg w-full p-6 space-y-5 shadow-editorial">
+            <div className="flex items-center justify-between border-b border-gold-border/20 pb-3">
+              <h2 className="font-serif text-lg font-semibold text-heading">
                 {editingItem ? 'แก้ไขกิจกรรม' : 'เพิ่มกิจกรรมใหม่'}
               </h2>
-              <button onClick={() => setIsModalOpen(false)} className="text-stone-400 hover:text-stone-800">
+              <button onClick={() => setIsModalOpen(false)} className="text-text-muted hover:text-heading">
                 ✕
               </button>
             </div>
 
             <form onSubmit={handleSave} className="space-y-4 text-xs">
               <div>
-                <label className="block font-semibold text-[#2A1245] mb-1">ชื่อกิจกรรม *</label>
+                <label className="block font-semibold text-heading mb-1">ชื่อกิจกรรม *</label>
                 <input
                   type="text"
                   value={title}
@@ -252,7 +252,7 @@ export const AdminEvents: React.FC = () => {
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label className="block font-semibold text-[#2A1245] mb-1">วันที่เริ่มจัดกิจกรรม *</label>
+                  <label className="block font-semibold text-heading mb-1">วันที่เริ่มจัดกิจกรรม *</label>
                   <input
                     type="date"
                     value={startDate}
@@ -261,25 +261,25 @@ export const AdminEvents: React.FC = () => {
                       setStartDate(val);
                       if (endDate && val > endDate) setEndDate('');
                     }}
-                    className="w-full border p-2 rounded-sm"
+                    className="w-full border border-gold-border/30 bg-surface text-text p-2 rounded-sm focus:outline-none focus:border-gold"
                     required
                   />
                 </div>
 
                 <div>
-                  <label className="block font-semibold text-[#2A1245] mb-1">วันที่สิ้นสุด (ถ้าจัดหลายวัน)</label>
+                  <label className="block font-semibold text-heading mb-1">วันที่สิ้นสุด (ถ้าจัดหลายวัน)</label>
                   <input
                     type="date"
                     value={endDate}
                     min={startDate || undefined}
                     onChange={(e) => setEndDate(e.target.value)}
-                    className="w-full border p-2 rounded-sm"
+                    className="w-full border border-gold-border/30 bg-surface text-text p-2 rounded-sm focus:outline-none focus:border-gold"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block font-semibold text-[#2A1245] mb-1">สถานที่จัดกิจกรรม</label>
+                <label className="block font-semibold text-heading mb-1">สถานที่จัดกิจกรรม</label>
                 <input
                   type="text"
                   value={location}
@@ -290,7 +290,7 @@ export const AdminEvents: React.FC = () => {
               </div>
 
               <div>
-                <label className="block font-semibold text-[#2A1245] mb-1">คำอธิบายรายละเอียด</label>
+                <label className="block font-semibold text-heading mb-1">คำอธิบายรายละเอียด</label>
                 <textarea
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
@@ -300,28 +300,28 @@ export const AdminEvents: React.FC = () => {
                 />
               </div>
 
-              <label className="flex items-center gap-2 cursor-pointer pt-2">
+              <label className="flex items-center gap-2 text-text cursor-pointer pt-2">
                 <input
                   type="checkbox"
                   checked={published}
                   onChange={(e) => setPublished(e.target.checked)}
-                  className="accent-[#4B1F7A]"
+                  className="accent-accent"
                 />
                 <span>แสดงบนปฏิทินสาธารณะ</span>
               </label>
 
-              <div className="flex justify-end gap-3 pt-4 border-t">
+              <div className="flex justify-end gap-3 pt-4 border-t border-gold-border/20">
                 <button
                   type="button"
                   onClick={() => setIsModalOpen(false)}
-                  className="px-4 py-2 border rounded-sm hover:bg-stone-50"
+                  className="px-4 py-2 border border-gold-border/30 text-text rounded-sm hover:bg-bg-alt transition-colors"
                 >
                   ยกเลิก
                 </button>
                 <button
                   type="submit"
                   disabled={saving}
-                  className="px-6 py-2 bg-[#4B1F7A] text-[#FAF7F0] rounded-sm hover:bg-[#2A1245]"
+                  className="px-6 py-2 bg-brand text-brand-contrast rounded-sm hover:bg-brand-hover transition-colors"
                 >
                   {saving ? 'กำลังบันทึก...' : 'บันทึก'}
                 </button>

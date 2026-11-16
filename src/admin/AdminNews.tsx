@@ -340,19 +340,19 @@ export const AdminNews: React.FC = () => {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#4B1F7A]/15 pb-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-gold-border/20 pb-4">
         <div>
-          <h1 className="font-serif text-2xl font-semibold text-[#2A1245]">
+          <h1 className="font-serif text-2xl font-semibold text-heading">
             จัดการข่าวสารและประกาศ
           </h1>
-          <p className="text-xs text-[#1B1226]/60">
+          <p className="text-xs text-text-muted">
             สร้าง แก้ไข กดปุ่มปักหมุดขึ้นหน้าแรก และดึงวิดีโอ/ปกจาก YouTube อัตโนมัติ
           </p>
         </div>
 
         <button
           onClick={handleOpenCreate}
-          className="px-5 py-2.5 bg-[#4B1F7A] text-[#FAF7F0] text-xs font-medium rounded-sm hover:bg-[#2A1245] transition-colors shadow-sm self-start sm:self-auto"
+          className="px-5 py-2.5 bg-brand text-brand-contrast text-xs font-medium rounded-sm hover:bg-brand-hover transition-colors shadow-sm self-start sm:self-auto"
         >
           + สร้างข่าวใหม่
         </button>
@@ -360,15 +360,15 @@ export const AdminNews: React.FC = () => {
 
       {/* Inline Pin Feedback */}
       {pinNotice && (
-        <div className="p-3 bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-sm text-xs font-medium flex items-center justify-between">
+        <div className="p-3 bg-success-bg border border-success/30 text-success rounded-sm text-xs font-medium flex items-center justify-between">
           <span className="inline-flex items-center gap-1.5">
-            <PinIcon className="w-3.5 h-3.5 text-emerald-700" />
+            <PinIcon className="w-3.5 h-3.5 text-success" />
             <span>{pinNotice}</span>
           </span>
           <button
             type="button"
             onClick={() => setPinNotice('')}
-            className="text-emerald-700 hover:underline text-[11px]"
+            className="text-success hover:underline text-[11px]"
           >
             ปิด
           </button>
@@ -382,18 +382,18 @@ export const AdminNews: React.FC = () => {
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           placeholder="ค้นหาตามหัวข้อข่าว..."
-          className="w-full text-xs input-underline bg-white px-3 py-2 border rounded-sm"
+          className="w-full text-xs input-underline bg-surface-elevated px-3 py-2 border border-gold-border/25 rounded-sm"
         />
       </div>
 
       {/* Table */}
-      <div className="bg-white border border-[#4B1F7A]/15 rounded-sm shadow-editorial-sm overflow-hidden">
+      <div className="bg-surface-elevated border border-gold-border/20 rounded-sm shadow-editorial-sm overflow-hidden">
         {loading ? (
-          <div className="p-8 text-center text-xs text-stone-500">กำลังโหลดข่าวสาร...</div>
+          <div className="p-8 text-center text-xs text-text-muted">กำลังโหลดข่าวสาร...</div>
         ) : filteredNews.length > 0 ? (
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs">
-              <thead className="bg-[#FAF7F0] border-b border-[#4B1F7A]/10 text-[#9C7A2B] uppercase tracking-wider font-medium">
+              <thead className="bg-surface border-b border-gold-border/15 text-gold-text uppercase tracking-wider font-medium">
                 <tr>
                   <th className="py-3 px-4">หัวข้อข่าว</th>
                   <th className="py-3 px-4">หมวดหมู่</th>
@@ -404,18 +404,18 @@ export const AdminNews: React.FC = () => {
                   <th className="py-3 px-4 text-center">การจัดการ</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-stone-100">
+              <tbody className="divide-y divide-gold-border/10">
                 {filteredNews.map((item) => {
                   const thumb = getNewsCoverUrl(item);
                   return (
-                    <tr key={item.id} className="hover:bg-stone-50">
-                      <td className="py-3 px-4 font-medium text-[#1B1226] max-w-xs">
+                    <tr key={item.id} className="hover:bg-bg-alt/60 transition-colors">
+                      <td className="py-3 px-4 font-medium text-text max-w-xs">
                         <div className="flex items-center gap-2.5 min-w-0">
                           {thumb && (
                             <img
                               src={thumb}
                               alt=""
-                              className="w-11 h-7 object-cover rounded-sm border border-stone-200 shrink-0"
+                              className="w-11 h-7 object-cover rounded-sm border border-gold-border/20 shrink-0"
                             />
                           )}
                           <span className="truncate">{item.title}</span>
@@ -431,14 +431,14 @@ export const AdminNews: React.FC = () => {
                           disabled={togglingPinId === item.id}
                           className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-sm border text-[11px] font-medium transition-colors cursor-pointer ${
                             item.pinned
-                              ? 'bg-[#4B1F7A] text-[#FAF7F0] border-[#4B1F7A] hover:bg-[#2A1245]'
-                              : 'bg-[#FAF7F0] text-[#4B1F7A] border-[#B8923A]/50 hover:bg-[#EDE6F5]'
+                              ? 'bg-brand text-brand-contrast border-brand hover:bg-brand-hover'
+                              : 'bg-surface text-accent border-gold-border/50 hover:bg-brand-soft'
                           } disabled:opacity-50`}
                           title={item.pinned ? 'คลิกเพื่อยกเลิกปักหมุดหน้าแรก' : 'คลิกเพื่อปักหมุดแสดงบนหน้าแรก'}
                         >
                           <PinIcon
                             className={`w-3.5 h-3.5 ${
-                              item.pinned ? 'text-[#D9B867]' : 'text-[#4B1F7A]'
+                              item.pinned ? 'text-anchor-gold' : 'text-accent'
                             }`}
                           />
                           <span>
@@ -452,27 +452,27 @@ export const AdminNews: React.FC = () => {
                       </td>
                       <td className="py-3 px-4 whitespace-nowrap">
                         {item.published ? (
-                          <span className="text-emerald-700 font-medium">เผยแพร่แล้ว</span>
+                          <span className="text-success font-medium">เผยแพร่แล้ว</span>
                         ) : (
-                          <span className="text-stone-400">ฉบับร่าง</span>
+                          <span className="text-text-muted">ฉบับร่าง</span>
                         )}
                       </td>
-                      <td className="py-3 px-4 font-mono tabular-numbers">
+                      <td className="py-3 px-4 font-mono tabular-numbers text-text">
                         {item.views || 0}
                       </td>
-                      <td className="py-3 px-4 text-[#1B1226]/60 whitespace-nowrap">
+                      <td className="py-3 px-4 text-text-muted whitespace-nowrap">
                         {formatThaiDate(item.createdAt, true)}
                       </td>
                       <td className="py-3 px-4 text-center space-x-2 whitespace-nowrap">
                         <button
                           onClick={() => handleOpenEdit(item)}
-                          className="text-[#4B1F7A] hover:underline"
+                          className="text-accent hover:underline"
                         >
                           แก้ไข
                         </button>
                         <button
                           onClick={() => handleDelete(item.id!, item.title)}
-                          className="text-[#9B1C31] hover:underline"
+                          className="text-error hover:underline"
                         >
                           ลบ
                         </button>
@@ -484,7 +484,7 @@ export const AdminNews: React.FC = () => {
             </table>
           </div>
         ) : (
-          <div className="p-12 text-center text-xs text-[#1B1226]/60">
+          <div className="p-12 text-center text-xs text-text-muted">
             ยังไม่มีข่าวสารในระบบ กดปุ่ม "สร้างข่าวใหม่" เพื่อเริ่มเขียนข่าวแรก
           </div>
         )}
@@ -492,15 +492,15 @@ export const AdminNews: React.FC = () => {
 
       {/* Create / Edit Modal */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
-          <div className="bg-white rounded-sm border border-[#B8923A]/40 max-w-3xl w-full max-h-[90vh] overflow-y-auto p-6 md:p-8 space-y-6 shadow-editorial my-8">
-            <div className="flex items-center justify-between border-b border-[#4B1F7A]/15 pb-4">
-              <h2 className="font-serif text-xl font-semibold text-[#2A1245]">
+        <div className="fixed inset-0 z-50 bg-overlay-backdrop backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
+          <div className="bg-surface-elevated rounded-sm border border-gold-border/40 max-w-3xl w-full max-h-[90vh] overflow-y-auto p-6 md:p-8 space-y-6 shadow-editorial my-8">
+            <div className="flex items-center justify-between border-b border-gold-border/20 pb-4">
+              <h2 className="font-serif text-xl font-semibold text-heading">
                 {editingItem ? 'แก้ไขข่าวสาร' : 'สร้างข่าวสารใหม่'}
               </h2>
               <button
                 onClick={() => setIsModalOpen(false)}
-                className="text-stone-400 hover:text-stone-800 text-lg"
+                className="text-text-muted hover:text-heading text-lg"
               >
                 ✕
               </button>
@@ -508,7 +508,7 @@ export const AdminNews: React.FC = () => {
 
             <form onSubmit={handleSave} className="space-y-5">
               <div>
-                <label className="block text-xs font-semibold text-[#2A1245] mb-1">
+                <label className="block text-xs font-semibold text-heading mb-1">
                   หัวข้อข่าวสาร *
                 </label>
                 <input
@@ -523,13 +523,13 @@ export const AdminNews: React.FC = () => {
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-semibold text-[#2A1245] mb-1">
+                  <label className="block text-xs font-semibold text-heading mb-1">
                     หมวดหมู่ข่าว *
                   </label>
                   <select
                     value={category}
                     onChange={(e) => setCategory(e.target.value as NewsCategory)}
-                    className="w-full text-xs border border-stone-300 p-2 rounded-sm"
+                    className="w-full text-xs border border-gold-border/30 bg-surface text-text p-2 rounded-sm focus:outline-none focus:border-gold"
                   >
                     <option value="pr">ข่าวประชาสัมพันธ์</option>
                     <option value="activity">ภาพข่าวกิจกรรม</option>
@@ -540,7 +540,7 @@ export const AdminNews: React.FC = () => {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-[#2A1245] mb-1">
+                  <label className="block text-xs font-semibold text-heading mb-1">
                     ลิงก์วิดีโอ / โพสต์หลัก (YouTube / Facebook / IG / TikTok)
                   </label>
                   <input
@@ -555,14 +555,19 @@ export const AdminNews: React.FC = () => {
 
               {/* Automatic YouTube Preview Card when YouTube URL is detected */}
               {ytPreview && (
-                <div className="p-4 bg-[#EDE6F5]/45 border border-[#4B1F7A]/25 rounded-sm space-y-3">
+                <div className="p-4 bg-brand-soft/60 border border-gold-border/30 rounded-sm space-y-3">
                   <div className="flex flex-wrap items-center justify-between gap-2">
-                    <div className="flex items-center gap-2 text-xs font-semibold text-[#2A1245]">
-                      <span className="px-2 py-0.5 rounded-sm bg-red-600 text-white text-[10px]">YouTube</span>
+                    <div className="flex items-center gap-2 text-xs font-semibold text-heading">
+                      <span
+                        className="px-2 py-0.5 rounded-sm text-anchor-text text-[10px]"
+                        style={{ backgroundColor: 'var(--social-yt)' }}
+                      >
+                        YouTube
+                      </span>
                       <span>ดึงข้อมูลวิดีโอจาก YouTube สำเร็จ (พร้อมแสดงบนหน้าเว็บและภาพปกอัตโนมัติ)</span>
                     </div>
                     {ytPreview.loading && (
-                      <span className="text-[11px] text-[#4B1F7A]">กำลังโหลดข้อมูลคลิป...</span>
+                      <span className="text-[11px] text-accent">กำลังโหลดข้อมูลคลิป...</span>
                     )}
                   </div>
 
@@ -573,15 +578,15 @@ export const AdminNews: React.FC = () => {
                     <div className="sm:col-span-7 space-y-2 text-xs">
                       {ytPreview.title && (
                         <div>
-                          <span className="text-[11px] text-[#9C7A2B] font-medium block">ชื่อคลิปจาก YouTube:</span>
-                          <p className="font-serif font-semibold text-[#1B1226] text-sm leading-snug">
+                          <span className="text-[11px] text-gold-text font-medium block">ชื่อคลิปจาก YouTube:</span>
+                          <p className="font-serif font-semibold text-heading text-sm leading-snug">
                             {ytPreview.title}
                           </p>
                         </div>
                       )}
                       {ytPreview.authorName && (
-                        <p className="text-[11px] text-[#1B1226]/70">
-                          ช่อง: <span className="font-medium text-[#4B1F7A]">{ytPreview.authorName}</span>
+                        <p className="text-[11px] text-text-muted">
+                          ช่อง: <span className="font-medium text-accent">{ytPreview.authorName}</span>
                         </p>
                       )}
                       <div className="flex flex-wrap gap-2 pt-1">
@@ -589,7 +594,7 @@ export const AdminNews: React.FC = () => {
                           <button
                             type="button"
                             onClick={() => setTitle(ytPreview.title)}
-                            className="px-2.5 py-1 bg-white border border-[#4B1F7A]/25 text-[#4B1F7A] hover:bg-[#4B1F7A] hover:text-white rounded-sm text-[11px] transition-colors"
+                            className="px-2.5 py-1 bg-surface-elevated border border-gold-border/30 text-accent hover:bg-brand hover:text-brand-contrast rounded-sm text-[11px] transition-colors"
                           >
                             ใช้ชื่อคลิปเป็นหัวข้อข่าว
                           </button>
@@ -603,7 +608,7 @@ export const AdminNews: React.FC = () => {
                                 alt: ytPreview.title || title || 'ภาพปกวิดีโอ YouTube',
                               })
                             }
-                            className="px-2.5 py-1 bg-white border border-[#B8923A] text-[#9C7A2B] hover:bg-[#B8923A] hover:text-white rounded-sm text-[11px] transition-colors"
+                            className="px-2.5 py-1 bg-surface-elevated border border-gold text-gold-text hover:bg-brand hover:text-brand-contrast rounded-sm text-[11px] transition-colors"
                           >
                             ใช้ภาพปกจาก YouTube
                           </button>
@@ -615,12 +620,12 @@ export const AdminNews: React.FC = () => {
               )}
 
               {/* Multi-Platform Social Media Links */}
-              <div className="p-4 bg-[#FAF7F0] border border-[#B8923A]/30 rounded-sm space-y-3">
+              <div className="p-4 bg-surface border border-gold-border/30 rounded-sm space-y-3">
                 <div>
-                  <label className="block text-xs font-semibold text-[#2A1245]">
+                  <label className="block text-xs font-semibold text-heading">
                     ลิงก์สื่อโซเชียลมีเดียเพิ่มเติม (Facebook, Instagram, TikTok, YouTube)
                   </label>
-                  <p className="text-[11px] text-[#1B1226]/60">
+                  <p className="text-[11px] text-text-muted">
                     รองรับโพสต์ คลิปวิดีโอ และ Reels จากทุกแพลตฟอร์ม โดยไม่เกิดปัญหาบล็อกการเชื่อมต่อบนหน้าเว็บ
                   </p>
                 </div>
@@ -628,19 +633,19 @@ export const AdminNews: React.FC = () => {
                 {socialLinks.length > 0 && (
                   <div className="space-y-2">
                     {socialLinks.map((sl, idx) => (
-                      <div key={idx} className="flex items-center justify-between gap-2 p-2 bg-white border border-[#4B1F7A]/15 rounded-sm text-xs">
+                      <div key={idx} className="flex items-center justify-between gap-2 p-2 bg-surface-elevated border border-gold-border/20 rounded-sm text-xs">
                         <div className="flex items-center gap-2 min-w-0">
-                          <span className="px-2 py-0.5 bg-[#EDE6F5] text-[#4B1F7A] rounded font-semibold text-[10px] shrink-0">
+                          <span className="px-2 py-0.5 bg-brand-soft text-accent rounded font-semibold text-[10px] shrink-0">
                             {PLATFORM_LABELS[sl.platform || detectSocialPlatform(sl.url)]}
                           </span>
-                          <span className="truncate font-medium text-[#1B1226]">
+                          <span className="truncate font-medium text-text">
                             {sl.label || sl.url}
                           </span>
                         </div>
                         <button
                           type="button"
                           onClick={() => handleRemoveSocialLink(idx)}
-                          className="text-[#9B1C31] hover:underline shrink-0 text-[11px]"
+                          className="text-error hover:underline shrink-0 text-[11px]"
                         >
                           ลบ
                         </button>
@@ -655,19 +660,19 @@ export const AdminNews: React.FC = () => {
                     value={newSocialUrl}
                     onChange={(e) => setNewSocialUrl(e.target.value)}
                     placeholder="วางลิงก์ Facebook / Instagram / TikTok / YouTube..."
-                    className="sm:col-span-7 text-xs input-underline bg-white px-2"
+                    className="sm:col-span-7 text-xs input-underline bg-surface-elevated px-2"
                   />
                   <input
                     type="text"
                     value={newSocialLabel}
                     onChange={(e) => setNewSocialLabel(e.target.value)}
                     placeholder="คำอธิบายลิงก์ (ไม่บังคับ)"
-                    className="sm:col-span-3 text-xs input-underline bg-white px-2"
+                    className="sm:col-span-3 text-xs input-underline bg-surface-elevated px-2"
                   />
                   <button
                     type="button"
                     onClick={handleAddSocialLink}
-                    className="sm:col-span-2 px-3 py-1.5 bg-[#4B1F7A] text-[#FAF7F0] text-xs rounded-sm hover:bg-[#2A1245]"
+                    className="sm:col-span-2 px-3 py-1.5 bg-brand text-brand-contrast text-xs rounded-sm hover:bg-brand-hover transition-colors"
                   >
                     + เพิ่มลิงก์
                   </button>
@@ -676,7 +681,7 @@ export const AdminNews: React.FC = () => {
 
               {/* Cover Image Uploader */}
               <div>
-                <label className="block text-xs font-semibold text-[#2A1245] mb-1">
+                <label className="block text-xs font-semibold text-heading mb-1">
                   ภาพปกข่าว (อัปโหลดจากเครื่อง หรือระบุลิงก์ — หากเป็น YouTube จะดึงภาพปกให้อัตโนมัติ)
                 </label>
                 <ImageUploader
@@ -690,7 +695,7 @@ export const AdminNews: React.FC = () => {
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-[#2A1245] mb-1">
+                <label className="block text-xs font-semibold text-heading mb-1">
                   บทคัดย่อสั้น (Excerpt)
                 </label>
                 <textarea
@@ -704,83 +709,83 @@ export const AdminNews: React.FC = () => {
 
               {/* Tiptap Rich Text Content Editor */}
               <div>
-                <label className="block text-xs font-semibold text-[#2A1245] mb-1">
+                <label className="block text-xs font-semibold text-heading mb-1">
                   เนื้อหาข่าวฉบับเต็ม (Rich Text Editor)
                 </label>
-                <div className="border border-stone-300 rounded-sm overflow-hidden bg-white">
-                  <div className="bg-stone-100 border-b border-stone-200 p-2 flex flex-wrap gap-2 text-xs">
+                <div className="border border-gold-border/30 rounded-sm overflow-hidden bg-surface">
+                  <div className="bg-bg-alt border-b border-gold-border/20 p-2 flex flex-wrap gap-2 text-xs">
                     <button
                       type="button"
                       onClick={() => editor?.chain().focus().toggleBold().run()}
-                      className={`px-2 py-0.5 rounded ${editor?.isActive('bold') ? 'bg-[#4B1F7A] text-white' : 'bg-white'}`}
+                      className={`px-2 py-0.5 rounded transition-colors ${editor?.isActive('bold') ? 'bg-brand text-brand-contrast' : 'bg-surface-elevated text-text'}`}
                     >
                       B
                     </button>
                     <button
                       type="button"
                       onClick={() => editor?.chain().focus().toggleItalic().run()}
-                      className={`px-2 py-0.5 rounded ${editor?.isActive('italic') ? 'bg-[#4B1F7A] text-white' : 'bg-white'}`}
+                      className={`px-2 py-0.5 rounded transition-colors ${editor?.isActive('italic') ? 'bg-brand text-brand-contrast' : 'bg-surface-elevated text-text'}`}
                     >
                       I
                     </button>
                     <button
                       type="button"
                       onClick={() => editor?.chain().focus().toggleHeading({ level: 2 }).run()}
-                      className={`px-2 py-0.5 rounded ${editor?.isActive('heading', { level: 2 }) ? 'bg-[#4B1F7A] text-white' : 'bg-white'}`}
+                      className={`px-2 py-0.5 rounded transition-colors ${editor?.isActive('heading', { level: 2 }) ? 'bg-brand text-brand-contrast' : 'bg-surface-elevated text-text'}`}
                     >
                       H2
                     </button>
                     <button
                       type="button"
                       onClick={() => editor?.chain().focus().toggleBulletList().run()}
-                      className={`px-2 py-0.5 rounded ${editor?.isActive('bulletList') ? 'bg-[#4B1F7A] text-white' : 'bg-white'}`}
+                      className={`px-2 py-0.5 rounded transition-colors ${editor?.isActive('bulletList') ? 'bg-brand text-brand-contrast' : 'bg-surface-elevated text-text'}`}
                     >
                       • รายการ
                     </button>
                   </div>
-                  <EditorContent editor={editor} className="p-4 min-h-[160px] text-xs leading-relaxed focus:outline-none" />
+                  <EditorContent editor={editor} className="p-4 min-h-[160px] text-xs leading-relaxed text-text focus:outline-none" />
                 </div>
               </div>
 
               {/* Toggles */}
               <div className="flex flex-wrap items-center gap-6 pt-2">
-                <label className="flex items-center gap-2 text-xs cursor-pointer">
+                <label className="flex items-center gap-2 text-xs text-text cursor-pointer">
                   <input
                     type="checkbox"
                     checked={published}
                     onChange={(e) => setPublished(e.target.checked)}
-                    className="accent-[#4B1F7A]"
+                    className="accent-accent"
                   />
                   <span>เผยแพร่สู่สาธารณะทันที (Published)</span>
                 </label>
 
-                <label className="flex items-center gap-2 text-xs cursor-pointer font-medium text-[#2A1245]">
+                <label className="flex items-center gap-2 text-xs cursor-pointer font-medium text-heading">
                   <input
                     type="checkbox"
                     checked={pinned}
                     onChange={(e) => setPinned(e.target.checked)}
-                    className="accent-[#B8923A]"
+                    className="accent-gold"
                   />
                   <span className="inline-flex items-center gap-1.5">
-                    <PinIcon className="w-3.5 h-3.5 text-[#9C7A2B]" />
+                    <PinIcon className="w-3.5 h-3.5 text-gold-text" />
                     <span>ปักหมุดขึ้นหน้าแรก (แสดงด้านบนข่าวสารและความเคลื่อนไหว)</span>
                   </span>
                 </label>
               </div>
 
               {/* Action buttons */}
-              <div className="flex items-center justify-end gap-3 pt-4 border-t border-stone-200">
+              <div className="flex items-center justify-end gap-3 pt-4 border-t border-gold-border/20">
                 <button
                   type="button"
                   onClick={() => setIsModalOpen(false)}
-                  className="px-4 py-2 border border-stone-300 text-xs rounded-sm hover:bg-stone-50"
+                  className="px-4 py-2 border border-gold-border/30 text-text text-xs rounded-sm hover:bg-bg-alt transition-colors"
                 >
                   ยกเลิก
                 </button>
                 <button
                   type="submit"
                   disabled={saving}
-                  className="px-6 py-2 bg-[#4B1F7A] text-[#FAF7F0] text-xs font-medium rounded-sm hover:bg-[#2A1245] transition-colors"
+                  className="px-6 py-2 bg-brand text-brand-contrast text-xs font-medium rounded-sm hover:bg-brand-hover transition-colors"
                 >
                   {saving ? 'กำลังบันทึก...' : 'บันทึกข้อมูลข่าวสาร'}
                 </button>

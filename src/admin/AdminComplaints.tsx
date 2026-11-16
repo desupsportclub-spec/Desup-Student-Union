@@ -246,33 +246,33 @@ export const AdminComplaints: React.FC = () => {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#4B1F7A]/15 pb-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-gold-border/20 pb-4">
         <div>
-          <h1 className="font-serif text-2xl font-semibold text-[#2A1245]">
+          <h1 className="font-serif text-2xl font-semibold text-heading">
             ระบบรับเรื่องร้องเรียนและข้อเสนอแนะ
           </h1>
-          <p className="text-xs text-[#1B1226]/60">
+          <p className="text-xs text-text-muted">
             พิจารณา ดำเนินการ ตอบกลับสาธารณะ และสืบค้นเรื่องร้องเรียนทั้งหมด
           </p>
         </div>
 
         <button
           onClick={handleExportCSV}
-          className="px-4 py-2 bg-white border border-[#B8923A] text-xs font-medium text-[#2A1245] hover:bg-[#FAF7F0] rounded-sm shadow-sm self-start sm:self-auto"
+          className="px-4 py-2 bg-surface-elevated border border-gold text-xs font-medium text-heading hover:bg-surface rounded-sm shadow-sm self-start sm:self-auto transition-colors"
         >
           📥 ส่งออกเป็น CSV
         </button>
       </div>
 
       {errorMsg && (
-        <div className="p-3 bg-red-50 border border-red-200 rounded-sm text-xs text-[#9B1C31] flex items-center justify-between">
+        <div className="p-3 bg-error-bg border border-error/30 rounded-sm text-xs text-error flex items-center justify-between">
           <span>{errorMsg}</span>
-          <button type="button" onClick={() => setErrorMsg(null)} className="text-[#9B1C31] font-bold ml-4">✕</button>
+          <button type="button" onClick={() => setErrorMsg(null)} className="text-error font-bold ml-4">✕</button>
         </div>
       )}
 
       {/* Filter and Search Bar */}
-      <div className="flex flex-wrap items-center gap-4 bg-white p-4 border border-[#4B1F7A]/15 rounded-sm">
+      <div className="flex flex-wrap items-center gap-4 bg-surface-elevated p-4 border border-gold-border/20 rounded-sm">
         <div className="flex-1 min-w-[200px]">
           <input
             type="text"
@@ -284,11 +284,11 @@ export const AdminComplaints: React.FC = () => {
         </div>
 
         <div className="flex items-center gap-2 text-xs">
-          <span className="text-stone-500">สถานะ:</span>
+          <span className="text-text-muted">สถานะ:</span>
           <select
             value={selectedStatus}
             onChange={(e) => setSelectedStatus(e.target.value)}
-            className="border p-1.5 rounded-sm text-xs bg-white"
+            className="border border-gold-border/30 p-1.5 rounded-sm text-xs bg-surface text-text focus:outline-none focus:border-gold"
           >
             <option value="all">ทั้งหมด</option>
             <option value="received">รับเรื่องแล้ว</option>
@@ -299,11 +299,11 @@ export const AdminComplaints: React.FC = () => {
         </div>
 
         <div className="flex items-center gap-2 text-xs">
-          <span className="text-stone-500">ประเภท:</span>
+          <span className="text-text-muted">ประเภท:</span>
           <select
             value={selectedType}
             onChange={(e) => setSelectedType(e.target.value)}
-            className="border p-1.5 rounded-sm text-xs bg-white"
+            className="border border-gold-border/30 p-1.5 rounded-sm text-xs bg-surface text-text focus:outline-none focus:border-gold"
           >
             <option value="all">ทั้งหมด</option>
             <option value="complaint">เรื่องร้องเรียน</option>
@@ -317,13 +317,13 @@ export const AdminComplaints: React.FC = () => {
       </div>
 
       {/* Complaints Table */}
-      <div className="bg-white border border-[#4B1F7A]/15 rounded-sm shadow-editorial-sm overflow-hidden">
+      <div className="bg-surface-elevated border border-gold-border/20 rounded-sm shadow-editorial-sm overflow-hidden">
         {loading ? (
-          <div className="p-8 text-center text-xs text-stone-500">กำลังโหลด...</div>
+          <div className="p-8 text-center text-xs text-text-muted">กำลังโหลด...</div>
         ) : filtered.length > 0 ? (
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs">
-              <thead className="bg-[#FAF7F0] border-b border-[#4B1F7A]/10 text-[#9C7A2B] uppercase tracking-wider font-medium">
+              <thead className="bg-surface border-b border-gold-border/15 text-gold-text uppercase tracking-wider font-medium">
                 <tr>
                   <th className="py-3 px-4">รหัสติดตาม</th>
                   <th className="py-3 px-4">ประเภท</th>
@@ -334,32 +334,32 @@ export const AdminComplaints: React.FC = () => {
                   <th className="py-3 px-4 text-center">จัดการ</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-stone-100">
+              <tbody className="divide-y divide-gold-border/10">
                 {filtered.map((item) => (
-                  <tr key={item.id} className="hover:bg-stone-50">
-                    <td className="py-3 px-4 font-mono font-bold text-[#4B1F7A]">
+                  <tr key={item.id} className="hover:bg-bg-alt/60 transition-colors">
+                    <td className="py-3 px-4 font-mono font-bold text-accent">
                       {item.trackingCode}
                     </td>
-                    <td className="py-3 px-4 text-[#1B1226]/70">
+                    <td className="py-3 px-4 text-text-muted">
                       {item.type === 'complaint' ? 'ร้องเรียน' : item.type === 'suggestion' ? 'เสนอแนะ' : item.type === 'corruption' ? 'ทุจริต' : item.type === 'inquiry' ? 'สอบถาม' : 'อื่น ๆ'}
                     </td>
-                    <td className="py-3 px-4 font-medium text-[#1B1226] max-w-xs truncate">
+                    <td className="py-3 px-4 font-medium text-text max-w-xs truncate">
                       {item.title}
                     </td>
                     <td className="py-3 px-4">
                       <ComplaintStatusBadge status={item.status} />
                     </td>
-                    <td className="py-3 px-4 text-[#1B1226]/60">
+                    <td className="py-3 px-4 text-text-muted">
                       {item.anonymous ? 'ไม่ระบุตัวตน' : 'ระบุตัวตน'}
                     </td>
-                    <td className="py-3 px-4 text-[#1B1226]/60">
+                    <td className="py-3 px-4 text-text-muted">
                       {formatThaiDate(item.createdAt, true)}
                     </td>
                     <td className="py-3 px-4 text-center space-x-2 whitespace-nowrap">
                       <button
                         type="button"
                         onClick={() => handleOpenDetail(item)}
-                        className="px-3 py-1 bg-[#4B1F7A] text-[#FAF7F0] rounded-sm hover:bg-[#2A1245] text-xs"
+                        className="px-3 py-1 bg-brand text-brand-contrast rounded-sm hover:bg-brand-hover text-xs transition-colors"
                       >
                         เปิดดู
                       </button>
@@ -367,7 +367,7 @@ export const AdminComplaints: React.FC = () => {
                         type="button"
                         onClick={() => setDeleteTarget(item)}
                         disabled={updating}
-                        className="px-2.5 py-1 bg-red-50 text-[#9B1C31] hover:bg-red-100 rounded-sm text-xs"
+                        className="px-2.5 py-1 bg-error-bg text-error hover:bg-error/15 rounded-sm text-xs transition-colors"
                       >
                         ลบ
                       </button>
@@ -378,7 +378,7 @@ export const AdminComplaints: React.FC = () => {
             </table>
           </div>
         ) : (
-          <div className="p-12 text-center text-xs text-[#1B1226]/60">
+          <div className="p-12 text-center text-xs text-text-muted">
             ไม่พบเรื่องร้องเรียนที่ตรงตามเงื่อนไข
           </div>
         )}
@@ -386,34 +386,34 @@ export const AdminComplaints: React.FC = () => {
 
       {/* Complaint Detail Modal */}
       {activeComplaint && (
-        <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
-          <div className="bg-white rounded-sm border border-[#B8923A]/40 max-w-2xl w-full max-h-[90vh] overflow-y-auto p-6 md:p-8 space-y-6 shadow-editorial my-8">
-            <div className="flex items-center justify-between border-b border-[#4B1F7A]/15 pb-4">
+        <div className="fixed inset-0 z-50 bg-overlay-backdrop backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
+          <div className="bg-surface-elevated rounded-sm border border-gold-border/40 max-w-2xl w-full max-h-[90vh] overflow-y-auto p-6 md:p-8 space-y-6 shadow-editorial my-8">
+            <div className="flex items-center justify-between border-b border-gold-border/20 pb-4">
               <div>
-                <span className="font-mono text-xs font-bold text-[#4B1F7A]">
+                <span className="font-mono text-xs font-bold text-accent">
                   รหัสติดตาม: {activeComplaint.trackingCode}
                 </span>
-                <h2 className="font-serif text-xl font-semibold text-[#2A1245] mt-1">
+                <h2 className="font-serif text-xl font-semibold text-heading mt-1">
                   {activeComplaint.title}
                 </h2>
               </div>
               <button
                 onClick={() => setActiveComplaint(null)}
-                className="text-stone-400 hover:text-stone-800 text-lg"
+                className="text-text-muted hover:text-heading text-lg"
               >
                 ✕
               </button>
             </div>
 
             {/* Status Change Selector */}
-            <div className="p-4 bg-[#EDE6F5]/50 border border-[#B8923A]/30 rounded-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
-              <span className="font-medium text-[#2A1245]">สถานะการดำเนินงานปัจจุบัน:</span>
+            <div className="p-4 bg-brand-soft/60 border border-gold-border/30 rounded-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
+              <span className="font-medium text-heading">สถานะการดำเนินงานปัจจุบัน:</span>
               <div className="flex items-center gap-2">
                 <select
                   value={activeComplaint.status}
                   onChange={(e) => handleStatusChange(e.target.value as ComplaintStatus)}
                   disabled={updating}
-                  className="p-1.5 border border-[#4B1F7A]/30 rounded-sm bg-white font-medium"
+                  className="p-1.5 border border-gold-border/35 rounded-sm bg-surface text-text font-medium focus:outline-none focus:border-gold"
                 >
                   <option value="received">รับเรื่องแล้ว</option>
                   <option value="considering">กำลังพิจารณา</option>
@@ -425,20 +425,20 @@ export const AdminComplaints: React.FC = () => {
             </div>
 
             {/* Description Body */}
-            <div className="space-y-2 text-xs leading-relaxed text-[#1B1226]">
-              <span className="font-semibold text-[#4B1F7A] block">รายละเอียดเรื่อง:</span>
-              <div className="p-4 bg-stone-50 border border-stone-200 rounded-sm whitespace-pre-wrap font-sans">
+            <div className="space-y-2 text-xs leading-relaxed text-text">
+              <span className="font-semibold text-accent block">รายละเอียดเรื่อง:</span>
+              <div className="p-4 bg-surface border border-gold-border/20 rounded-sm whitespace-pre-wrap font-sans">
                 {activeComplaint.body}
               </div>
-              <div className="text-[11px] text-stone-500 pt-1">
+              <div className="text-[11px] text-text-muted pt-1">
                 📍 สถานที่: {activeComplaint.location || 'ไม่ระบุ'} · ส่งเมื่อ: {formatThaiDateTime(activeComplaint.createdAt)}
               </div>
             </div>
 
             {/* Attached Photos (Private attachments) */}
             {privateAttachments?.images && privateAttachments.images.length > 0 && (
-              <div className="space-y-2 pt-2 border-t">
-                <span className="text-xs font-semibold text-[#4B1F7A] block">
+              <div className="space-y-2 pt-2 border-t border-gold-border/15">
+                <span className="text-xs font-semibold text-accent block">
                   รูปถ่ายแนบประกอบ (ข้อมูลลับเฉพาะผู้ดูแล):
                 </span>
                 <div className="flex gap-4">
@@ -448,7 +448,7 @@ export const AdminComplaints: React.FC = () => {
                       href={img.url}
                       target="_blank"
                       rel="noreferrer"
-                      className="w-28 h-28 border rounded overflow-hidden bg-stone-100 block"
+                      className="w-28 h-28 border border-gold-border/25 rounded overflow-hidden bg-bg-alt block"
                     >
                       <img src={img.url} alt="แนบประกอบ" className="w-full h-full object-cover" />
                     </a>
@@ -458,43 +458,43 @@ export const AdminComplaints: React.FC = () => {
             )}
 
             {/* Submitter Contact Info (Private contact) */}
-            <div className="space-y-2 pt-2 border-t">
-              <span className="text-xs font-semibold text-[#4B1F7A] block">
+            <div className="space-y-2 pt-2 border-t border-gold-border/15">
+              <span className="text-xs font-semibold text-accent block">
                 ข้อมูลผู้ส่งเรื่อง (ข้อมูลลับเฉพาะผู้ดูแล):
               </span>
               {activeComplaint.anonymous ? (
-                <p className="text-xs text-stone-500 italic">ผู้ส่งเลือกส่งแบบ "ไม่ระบุตัวตน"</p>
+                <p className="text-xs text-text-muted italic">ผู้ส่งเลือกส่งแบบ "ไม่ระบุตัวตน"</p>
               ) : privateContact ? (
-                <div className="p-3 bg-stone-50 border border-stone-200 rounded-sm text-xs space-y-1">
+                <div className="p-3 bg-surface border border-gold-border/20 rounded-sm text-xs text-text space-y-1">
                   <p><strong>ชื่อ-นามสกุล:</strong> {privateContact.name || '-'}</p>
                   <p><strong>ชั้น/ห้อง:</strong> {privateContact.gradeClass || '-'}</p>
                   <p><strong>ช่องทางติดต่อกลับ:</strong> {privateContact.contactMethod || '-'}</p>
                 </div>
               ) : (
-                <p className="text-xs text-stone-500">ไม่มีข้อมูลติดต่อส่วนตัว</p>
+                <p className="text-xs text-text-muted">ไม่มีข้อมูลติดต่อส่วนตัว</p>
               )}
             </div>
 
             {/* Public Replies Section */}
-            <div className="space-y-3 pt-2 border-t">
-              <span className="text-xs font-semibold text-[#4B1F7A] block">
+            <div className="space-y-3 pt-2 border-t border-gold-border/15">
+              <span className="text-xs font-semibold text-accent block">
                 ข้อความตอบกลับสาธารณะ (ผู้ส่งจะเห็นผ่านหน้ารหัสติดตาม):
               </span>
 
               {activeComplaint.publicReplies && activeComplaint.publicReplies.length > 0 ? (
                 <div className="space-y-2">
                   {activeComplaint.publicReplies.map((r, i) => (
-                    <div key={i} className="p-3 bg-[#FAF7F0] border border-[#B8923A]/30 rounded-sm text-xs">
-                      <div className="flex justify-between text-[11px] text-[#9C7A2B]">
+                    <div key={i} className="p-3 bg-surface border border-gold-border/30 rounded-sm text-xs">
+                      <div className="flex justify-between text-[11px] text-gold-text">
                         <span>{r.by || 'องค์การนักเรียน'}</span>
                         <span>{formatThaiDateTime(r.at)}</span>
                       </div>
-                      <p className="mt-1 text-[#1B1226]">{r.text}</p>
+                      <p className="mt-1 text-text">{r.text}</p>
                     </div>
                   ))}
                 </div>
               ) : (
-                <p className="text-xs text-stone-400">ยังไม่มีข้อความตอบกลับ</p>
+                <p className="text-xs text-text-muted">ยังไม่มีข้อความตอบกลับ</p>
               )}
 
               {/* Add New Public Reply */}
@@ -504,7 +504,7 @@ export const AdminComplaints: React.FC = () => {
                   onChange={(e) => setReplyText(e.target.value)}
                   rows={3}
                   placeholder="พิมพ์ข้อความตอบกลับเพื่อแจ้งผลการพิจารณาหรือความคืบหน้าแก่นักเรียน..."
-                  className="w-full text-xs input-underline bg-white p-2 border rounded-sm"
+                  className="w-full text-xs input-underline bg-surface p-2 border border-gold-border/25 rounded-sm"
                   required
                 />
                 <div className="flex items-center justify-between pt-2">
@@ -512,14 +512,14 @@ export const AdminComplaints: React.FC = () => {
                     type="button"
                     onClick={() => setDeleteTarget(activeComplaint)}
                     disabled={updating}
-                    className="px-4 py-2 border border-red-200 text-[#9B1C31] hover:bg-red-50 text-xs font-medium rounded-sm transition-colors"
+                    className="px-4 py-2 border border-error/30 text-error hover:bg-error-bg text-xs font-medium rounded-sm transition-colors"
                   >
                     ลบเรื่องร้องเรียนนี้
                   </button>
                   <button
                     type="submit"
                     disabled={updating || !replyText.trim()}
-                    className="px-5 py-2 bg-[#4B1F7A] text-[#FAF7F0] text-xs font-medium rounded-sm hover:bg-[#2A1245] transition-colors"
+                    className="px-5 py-2 bg-brand text-brand-contrast text-xs font-medium rounded-sm hover:bg-brand-hover transition-colors"
                   >
                     + ส่งข้อความตอบกลับสาธารณะ
                   </button>
@@ -532,24 +532,24 @@ export const AdminComplaints: React.FC = () => {
 
       {/* In-App Delete Confirmation Modal (avoids sandboxed iframe window.confirm blocking) */}
       {deleteTarget && (
-        <div className="fixed inset-0 z-[60] bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-[#FAF7F0] border border-[#B8923A]/50 rounded-sm max-w-md w-full p-6 space-y-4 shadow-2xl">
-            <h3 className="font-serif text-lg font-semibold text-[#2A1245]">
+        <div className="fixed inset-0 z-[60] bg-overlay-backdrop backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-surface border border-gold-border/50 rounded-sm max-w-md w-full p-6 space-y-4 shadow-2xl">
+            <h3 className="font-serif text-lg font-semibold text-heading">
               ยืนยันการลบเรื่องร้องเรียน
             </h3>
-            <p className="text-xs text-[#1B1226]/80 leading-relaxed">
+            <p className="text-xs text-text-muted leading-relaxed">
               คุณต้องการลบเรื่องร้องเรียนรหัส{' '}
-              <span className="font-mono font-bold text-[#4B1F7A]">
+              <span className="font-mono font-bold text-accent">
                 {deleteTarget.trackingCode || deleteTarget.id}
               </span>{' '}
               ({deleteTarget.title}) ถาวรหรือไม่? การลบไม่สามารถกู้คืนได้
             </p>
-            <div className="flex justify-end gap-3 pt-3 border-t border-[#4B1F7A]/15">
+            <div className="flex justify-end gap-3 pt-3 border-t border-gold-border/20">
               <button
                 type="button"
                 onClick={() => setDeleteTarget(null)}
                 disabled={updating}
-                className="px-4 py-2 border border-stone-300 bg-white text-xs text-[#1B1226] rounded-sm hover:bg-stone-50"
+                className="px-4 py-2 border border-gold-border/30 bg-surface-elevated text-xs text-text rounded-sm hover:bg-bg-alt transition-colors"
               >
                 ยกเลิก
               </button>
@@ -557,7 +557,7 @@ export const AdminComplaints: React.FC = () => {
                 type="button"
                 onClick={confirmDeleteComplaint}
                 disabled={updating}
-                className="px-5 py-2 bg-[#9B1C31] text-white text-xs font-medium rounded-sm hover:bg-red-900 disabled:opacity-60"
+                className="px-5 py-2 bg-error text-brand-contrast text-xs font-medium rounded-sm hover:opacity-90 disabled:opacity-60 transition-opacity"
               >
                 {updating ? 'กำลังลบ...' : 'ยืนยันการลบถาวร'}
               </button>

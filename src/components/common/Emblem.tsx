@@ -19,6 +19,7 @@ export const Emblem: React.FC<EmblemProps> = ({ className = "w-12 h-12", size = 
       <img
         src={SITE_CONFIG.emblemUrl}
         alt={SITE_CONFIG.schoolName}
+        data-emblem="true"
         className={`object-contain ${className}`}
         width={size}
         height={size}
@@ -40,13 +41,13 @@ export const Emblem: React.FC<EmblemProps> = ({ className = "w-12 h-12", size = 
     >
       <defs>
         <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stopColor="#D9B867" />
-          <stop offset="50%" stopColor="#B8923A" />
-          <stop offset="100%" stopColor="#9C7A2B" />
+          <stop offset="0%" stopColor="rgb(var(--gold-light))" />
+          <stop offset="50%" stopColor="rgb(var(--gold))" />
+          <stop offset="100%" stopColor="rgb(var(--gold-text))" />
         </linearGradient>
         <linearGradient id="violetGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stopColor="#4B1F7A" />
-          <stop offset="100%" stopColor="#2A1245" />
+          <stop offset="0%" stopColor="rgb(var(--brand))" />
+          <stop offset="100%" stopColor="rgb(var(--anchor-bg))" />
         </linearGradient>
       </defs>
 
@@ -87,7 +88,7 @@ export const Emblem: React.FC<EmblemProps> = ({ className = "w-12 h-12", size = 
         x="50"
         y="68"
         textAnchor="middle"
-        fill="#FAF7F0"
+        fill="rgb(var(--anchor-text))"
         fontFamily="'Cormorant Garamond', 'Noto Serif Thai', serif"
         fontWeight="600"
         fontSize="14"
@@ -107,7 +108,7 @@ export const Emblem: React.FC<EmblemProps> = ({ className = "w-12 h-12", size = 
         x="50"
         y="96"
         textAnchor="middle"
-        fill="#D9B867"
+        fill="rgb(var(--anchor-gold))"
         fontFamily="'Cormorant Garamond', serif"
         fontWeight="500"
         fontSize="9"

@@ -98,7 +98,7 @@ export const CookieConsent: React.FC = () => {
           exit={{ opacity: 0, y: 40, scale: 0.96 }}
           transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
           aria-label="การตั้งค่าคุกกี้และความเป็นส่วนตัว"
-          className="fixed bottom-3 left-3 right-3 sm:bottom-4 sm:left-4 sm:right-4 md:left-auto md:right-8 md:max-w-lg z-50 bg-[#2A1245] text-[#FAF7F0] border-2 border-[#B8923A] p-4 sm:p-6 rounded-sm shadow-2xl"
+          className="fixed bottom-3 left-3 right-3 sm:bottom-4 sm:left-4 sm:right-4 md:left-auto md:right-8 md:max-w-lg z-50 bg-anchor-bg text-anchor-text border-2 border-gold p-4 sm:p-6 rounded-sm shadow-2xl"
         >
           <CornerBracket position="top-left" />
           <CornerBracket position="top-right" />
@@ -108,13 +108,13 @@ export const CookieConsent: React.FC = () => {
           <div className="space-y-3">
             <div className="flex items-center justify-between gap-2">
               <div className="flex items-center gap-2">
-                <svg className="w-5 h-5 text-[#D9B867] shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <svg className="w-5 h-5 text-anchor-gold shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <path d="M12 2a10 10 0 1 0 10 10 4 4 0 0 1-5-5 4 4 0 0 1-5-5" />
                   <circle cx="8.5" cy="8.5" r="1" fill="currentColor" />
                   <circle cx="11.5" cy="14.5" r="1" fill="currentColor" />
                   <circle cx="15.5" cy="12.5" r="1" fill="currentColor" />
                 </svg>
-                <h3 className="font-serif text-base font-bold text-[#D9B867]">
+                <h3 className="font-serif text-base font-bold text-anchor-gold">
                   การใช้คุกกี้และความเป็นส่วนตัว (PDPA)
                 </h3>
               </div>
@@ -122,35 +122,35 @@ export const CookieConsent: React.FC = () => {
                 type="button"
                 onClick={() => setVisible(false)}
                 aria-label="ปิดหน้าต่างคุกกี้"
-                className="text-xs text-[#FAF7F0]/60 hover:text-[#FAF7F0]"
+                className="text-xs text-anchor-text/60 hover:text-anchor-text"
               >
                 ✕
               </button>
             </div>
 
-            <p className="text-xs text-[#FAF7F0]/85 leading-relaxed font-sans">
+            <p className="text-xs text-anchor-text/85 leading-relaxed font-sans">
               เว็บไซต์องค์การนักเรียน โรงเรียนสาธิตมหาวิทยาลัยพะเยา ใช้คุกกี้จริงในการจดจำการตั้งค่า การทำงานที่จำเป็นของระบบ ความปลอดภัย และสถิติการเข้าชม โดยเป็นไปตาม พ.ร.บ. คุ้มครองข้อมูลส่วนบุคคล พ.ศ. ๒๕๖๒
             </p>
 
             {showDetails && (
-              <div className="p-3 bg-white/5 border border-white/10 rounded text-[11px] space-y-2.5 text-[#FAF7F0]/80">
+              <div className="p-3 bg-anchor-text/5 border border-anchor-text/10 rounded text-[11px] space-y-2.5 text-anchor-text/80">
                 <div className="flex items-start justify-between gap-3">
                   <div>
-                    <p className="font-semibold text-[#FAF7F0]">คุกกี้ที่จำเป็น (Strictly Necessary)</p>
-                    <p className="text-[#FAF7F0]/65">จดจำการตั้งค่าความเป็นส่วนตัว สถานะเซสชัน และความปลอดภัย</p>
+                    <p className="font-semibold text-anchor-text">คุกกี้ที่จำเป็น (Strictly Necessary)</p>
+                    <p className="text-anchor-text/65">จดจำการตั้งค่าความเป็นส่วนตัว สถานะเซสชัน และความปลอดภัย</p>
                   </div>
-                  <span className="text-[10px] px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 shrink-0">เปิดใช้งานเสมอ</span>
+                  <span className="text-[10px] px-2 py-0.5 rounded bg-success-bg/70 text-success shrink-0">เปิดใช้งานเสมอ</span>
                 </div>
-                <label className="flex items-start justify-between gap-3 pt-2 border-t border-white/10 cursor-pointer">
+                <label className="flex items-start justify-between gap-3 pt-2 border-t border-anchor-text/10 cursor-pointer">
                   <div>
-                    <p className="font-semibold text-[#FAF7F0]">คุกกี้เพื่อการวิเคราะห์และสถิติ (Analytics)</p>
-                    <p className="text-[#FAF7F0]/65">นับจำนวนการเปิดอ่านข่าวและสถิติการใช้งานโดยไม่ระบุตัวตน</p>
+                    <p className="font-semibold text-anchor-text">คุกกี้เพื่อการวิเคราะห์และสถิติ (Analytics)</p>
+                    <p className="text-anchor-text/65">นับจำนวนการเปิดอ่านข่าวและสถิติการใช้งานโดยไม่ระบุตัวตน</p>
                   </div>
                   <input
                     type="checkbox"
                     checked={analyticsEnabled}
                     onChange={(e) => setAnalyticsEnabled(e.target.checked)}
-                    className="mt-1 accent-[#D9B867]"
+                    className="mt-1 accent-gold"
                   />
                 </label>
               </div>
@@ -160,7 +160,7 @@ export const CookieConsent: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setShowDetails(!showDetails)}
-                className="text-[11px] text-[#D9B867] hover:underline text-left"
+                className="text-[11px] text-anchor-gold hover:underline text-left"
               >
                 {showDetails ? 'ซ่อนรายละเอียด' : 'ตั้งค่า / ดูรายละเอียดคุกกี้'}
               </button>
@@ -170,7 +170,7 @@ export const CookieConsent: React.FC = () => {
                   <button
                     type="button"
                     onClick={handleSaveCustom}
-                    className="px-4 py-1.5 border border-[#D9B867] text-xs font-medium text-[#D9B867] hover:bg-white/10 rounded-sm transition-colors"
+                    className="px-4 py-1.5 border border-anchor-gold text-xs font-medium text-anchor-gold hover:bg-anchor-text/10 rounded-sm transition-colors"
                   >
                     บันทึกการตั้งค่า
                   </button>
@@ -178,7 +178,7 @@ export const CookieConsent: React.FC = () => {
                   <button
                     type="button"
                     onClick={handleAcceptNecessary}
-                    className="px-3.5 py-1.5 border border-[#B8923A]/50 text-xs text-[#FAF7F0] hover:bg-white/10 rounded-sm transition-colors"
+                    className="px-3.5 py-1.5 border border-gold/50 text-xs text-anchor-text hover:bg-anchor-text/10 rounded-sm transition-colors"
                   >
                     จำเป็นเท่านั้น
                   </button>
@@ -186,7 +186,7 @@ export const CookieConsent: React.FC = () => {
                 <button
                   type="button"
                   onClick={handleAcceptAll}
-                  className="px-4 py-1.5 bg-[#B8923A] text-[#1B1226] text-xs font-semibold hover:bg-[#D9B867] rounded-sm shadow-md transition-colors"
+                  className="px-4 py-1.5 bg-gold text-anchor-bg-deep text-xs font-semibold hover:bg-anchor-gold rounded-sm shadow-md transition-colors"
                 >
                   ยอมรับทั้งหมด
                 </button>

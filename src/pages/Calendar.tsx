@@ -116,12 +116,12 @@ export const CalendarPage: React.FC = () => {
   return (
     <div className="max-w-[1240px] mx-auto px-4 sm:px-6 md:px-12 py-6 sm:py-10 space-y-6 sm:space-y-10">
       {/* Page Header */}
-      <div className="border-b border-[#B8923A]/30 pb-6">
+      <div className="border-b border-gold-border/30 pb-6">
         <SectionEyebrow enText="CALENDAR" thText="ปฏิทินกิจกรรม" />
-        <h1 className="font-serif text-3xl md:text-4xl font-semibold text-[#1B1226] mt-2">
+        <h1 className="font-serif text-3xl md:text-4xl font-semibold text-heading mt-2">
           กำหนดการและกิจกรรมนักเรียน
         </h1>
-        <p className="text-xs md:text-sm text-[#1B1226]/70 mt-1">
+        <p className="text-xs md:text-sm text-text-muted mt-1">
           ติดตามตารางกิจกรรม โครงการ และวันสำคัญขององค์การนักเรียน
         </p>
       </div>
@@ -129,29 +129,29 @@ export const CalendarPage: React.FC = () => {
       {/* Desktop Split View: Month Grid (Left 8 cols) + Selected Day Panel (Right 4 cols) */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8">
         {/* Month Calendar Grid (8 cols) */}
-        <div className="lg:col-span-8 bg-[#FAF7F0] border border-[#B8923A]/30 p-3.5 sm:p-6 rounded-sm shadow-editorial">
+        <div className="lg:col-span-8 bg-surface border border-gold-border/30 p-3.5 sm:p-6 rounded-sm shadow-editorial">
           {/* Month Header Controller */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 sm:pb-6 mb-4 sm:mb-6 border-b border-[#4B1F7A]/15">
-            <h2 className="font-serif text-xl sm:text-2xl font-semibold text-[#2A1245]">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 sm:pb-6 mb-4 sm:mb-6 border-b border-gold-border/20">
+            <h2 className="font-serif text-xl sm:text-2xl font-semibold text-heading">
               {thaiDateParts.monthFull} พ.ศ. {thaiDateParts.yearBE}
             </h2>
             <div className="flex items-center gap-1.5 sm:gap-2">
               <button
                 onClick={handlePrevMonth}
-                className="flex-1 sm:flex-none px-2.5 sm:px-3 py-1.5 sm:py-2 border border-[#4B1F7A]/20 hover:border-[#B8923A] rounded-sm text-xs whitespace-nowrap"
+                className="flex-1 sm:flex-none px-2.5 sm:px-3 py-1.5 sm:py-2 border border-gold-border/25 hover:border-gold text-text rounded-sm text-xs whitespace-nowrap transition-colors"
                 title="เดือนก่อนหน้า"
               >
                 ← เดือนก่อน
               </button>
               <button
                 onClick={() => setCurrentDate(new Date())}
-                className="px-3 py-1.5 sm:py-2 border border-[#4B1F7A]/20 hover:border-[#B8923A] rounded-sm text-xs text-[#4B1F7A] font-medium whitespace-nowrap"
+                className="px-3 py-1.5 sm:py-2 border border-gold-border/25 hover:border-gold rounded-sm text-xs text-accent font-medium whitespace-nowrap transition-colors"
               >
                 วันนี้
               </button>
               <button
                 onClick={handleNextMonth}
-                className="flex-1 sm:flex-none px-2.5 sm:px-3 py-1.5 sm:py-2 border border-[#4B1F7A]/20 hover:border-[#B8923A] rounded-sm text-xs whitespace-nowrap"
+                className="flex-1 sm:flex-none px-2.5 sm:px-3 py-1.5 sm:py-2 border border-gold-border/25 hover:border-gold text-text rounded-sm text-xs whitespace-nowrap transition-colors"
                 title="เดือนถัดไป"
               >
                 เดือนถัดไป →
@@ -160,7 +160,7 @@ export const CalendarPage: React.FC = () => {
           </div>
 
           {/* Days of Week Header (Starts Sunday) */}
-          <div className="grid grid-cols-7 text-center font-medium text-[11px] sm:text-xs text-[#9C7A2B] pb-2 sm:pb-3 border-b border-[#4B1F7A]/10">
+          <div className="grid grid-cols-7 text-center font-medium text-[11px] sm:text-xs text-gold-text pb-2 sm:pb-3 border-b border-gold-border/15">
             <div>อา.</div>
             <div>จ.</div>
             <div>อ.</div>
@@ -174,7 +174,7 @@ export const CalendarPage: React.FC = () => {
           <div className="grid grid-cols-7 gap-1 pt-2">
             {/* Empty slots for days before 1st of month */}
             {Array.from({ length: firstDayIndex }).map((_, i) => (
-              <div key={`empty-${i}`} className="h-12 sm:h-20 md:h-24 p-1 bg-stone-50/50 rounded-sm" />
+              <div key={`empty-${i}`} className="h-12 sm:h-20 md:h-24 p-1 bg-bg-alt/40 rounded-sm" />
             ))}
 
             {/* Days in Month */}
@@ -190,24 +190,24 @@ export const CalendarPage: React.FC = () => {
                   onClick={() => handleSelectDay(dayNum)}
                   className={`h-12 sm:h-20 md:h-24 p-1 sm:p-2 border rounded-sm cursor-pointer transition-all flex flex-col justify-between ${
                     isSelected
-                      ? 'border-[#B8923A] bg-[#EDE6F5]/50 ring-1 ring-[#B8923A]'
+                      ? 'border-gold bg-brand-soft/60 ring-1 ring-gold'
                       : isToday(dayNum)
-                      ? 'border-[#4B1F7A] bg-white'
-                      : 'border-stone-200/80 bg-white hover:border-[#B8923A]/50'
+                      ? 'border-accent bg-surface-elevated'
+                      : 'border-gold-border/15 bg-surface-elevated hover:border-gold/60'
                   }`}
                 >
                   <div className="flex items-center justify-between">
                     <span
                       className={`text-[11px] sm:text-xs font-serif ${
                         isToday(dayNum)
-                          ? 'w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-[#4B1F7A] text-white flex items-center justify-center font-bold'
-                          : 'text-[#1B1226]'
+                          ? 'w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-brand text-brand-contrast flex items-center justify-center font-bold'
+                          : 'text-text'
                       }`}
                     >
                       {dayNum}
                     </span>
                     {dayEvents.length > 0 && (
-                      <span className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-[#B8923A]" />
+                      <span className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-gold" />
                     )}
                   </div>
 
@@ -216,13 +216,13 @@ export const CalendarPage: React.FC = () => {
                       {dayEvents.slice(0, 2).map((ev) => (
                         <div
                           key={ev.id}
-                          className="text-[10px] truncate text-[#4B1F7A] bg-[#EDE6F5] px-1 py-0.5 rounded-sm"
+                          className="text-[10px] truncate text-accent bg-brand-soft px-1 py-0.5 rounded-sm"
                         >
                           {ev.title}
                         </div>
                       ))}
                       {dayEvents.length > 2 && (
-                        <div className="text-[9px] text-[#9C7A2B]">+{dayEvents.length - 2} อื่น ๆ</div>
+                        <div className="text-[9px] text-gold-text">+{dayEvents.length - 2} อื่น ๆ</div>
                       )}
                     </div>
                   )}
@@ -233,13 +233,13 @@ export const CalendarPage: React.FC = () => {
         </div>
 
         {/* Selected Day Agenda Panel (Right 4 cols) */}
-        <div className="lg:col-span-4 bg-[#FAF7F0] border border-[#B8923A]/30 p-6 rounded-sm shadow-editorial flex flex-col justify-between">
+        <div className="lg:col-span-4 bg-surface border border-gold-border/30 p-6 rounded-sm shadow-editorial flex flex-col justify-between">
           <div>
-            <div className="border-b border-[#4B1F7A]/15 pb-4 mb-4">
-              <span className="text-[11px] uppercase tracking-wider text-[#9C7A2B] font-semibold">
+            <div className="border-b border-gold-border/20 pb-4 mb-4">
+              <span className="text-[11px] uppercase tracking-wider text-gold-text font-semibold">
                 กิจกรรมของวันที่เลือก
               </span>
-              <h3 className="font-serif text-lg font-semibold text-[#1B1226] mt-1">
+              <h3 className="font-serif text-lg font-semibold text-heading mt-1">
                 {selectedDayStr ? formatThaiDate(selectedDayStr) : 'กรุณาเลือกวันที่'}
               </h3>
             </div>
@@ -247,20 +247,20 @@ export const CalendarPage: React.FC = () => {
             {selectedDayEvents.length > 0 ? (
               <div className="space-y-4">
                 {selectedDayEvents.map((evt) => (
-                  <div key={evt.id} className="p-4 bg-white border border-[#4B1F7A]/15 rounded-sm space-y-2">
-                    <h4 className="font-serif text-sm font-semibold text-[#1B1226]">
+                  <div key={evt.id} className="p-4 bg-surface-elevated border border-gold-border/20 rounded-sm space-y-2">
+                    <h4 className="font-serif text-sm font-semibold text-heading">
                       {evt.title}
                     </h4>
                     {evt.description && (
-                      <p className="text-xs text-[#1B1226]/70 line-clamp-3 leading-relaxed">
+                      <p className="text-xs text-text-muted line-clamp-3 leading-relaxed">
                         {evt.description}
                       </p>
                     )}
-                    <div className="text-[11px] text-[#1B1226]/60 pt-2 border-t border-stone-100 flex items-center justify-between">
+                    <div className="text-[11px] text-text-muted pt-2 border-t border-gold-border/15 flex items-center justify-between">
                       <span>📍 {evt.location || 'โรงเรียนสาธิต มพ.'}</span>
                       <button
                         onClick={() => handleExportICS(evt)}
-                        className="text-[#4B1F7A] hover:text-[#9C7A2B] underline"
+                        className="text-accent hover:text-gold-text underline"
                       >
                         + ปฏิทิน (.ics)
                       </button>
@@ -269,9 +269,9 @@ export const CalendarPage: React.FC = () => {
                 ))}
               </div>
             ) : (
-              <div className="py-12 text-center text-xs text-[#1B1226]/60 space-y-1">
+              <div className="py-12 text-center text-xs text-text-muted space-y-1">
                 <p>ไม่มีกิจกรรมในวันนี้</p>
-                <p className="text-[11px] text-stone-400">คลิกวันที่ที่มีจุดสีทองบนปฏิทินเพื่อดูรายละเอียด</p>
+                <p className="text-[11px] opacity-75">คลิกวันที่ที่มีจุดสีทองบนปฏิทินเพื่อดูรายละเอียด</p>
               </div>
             )}
           </div>
@@ -279,8 +279,8 @@ export const CalendarPage: React.FC = () => {
       </div>
 
       {/* Mobile Agenda List View (Ongoing & upcoming chronologically) */}
-      <div className="lg:hidden space-y-6 pt-4 border-t border-[#4B1F7A]/15">
-        <h3 className="font-serif text-xl font-semibold text-[#2A1245]">
+      <div className="lg:hidden space-y-6 pt-4 border-t border-gold-border/20">
+        <h3 className="font-serif text-xl font-semibold text-heading">
           กิจกรรมที่กำลังจัดและกำลังจะมาถึง
         </h3>
 
@@ -290,24 +290,24 @@ export const CalendarPage: React.FC = () => {
               const p = getThaiDateParts(evt.startAt);
               const hasEnd = Boolean(evt.endAt && getEventDateKey(evt.endAt) > getEventDateKey(evt.startAt));
               return (
-                <div key={evt.id} className="p-4 bg-white border border-[#4B1F7A]/15 rounded-sm flex gap-4">
-                  <div className="w-14 h-14 bg-[#EDE6F5] rounded-sm flex flex-col items-center justify-center shrink-0 border border-[#B8923A]/30">
-                    <span className="font-serif text-xl font-bold text-[#4B1F7A] leading-none">{p.day}</span>
-                    <span className="text-[10px] text-[#9C7A2B] font-medium">{p.monthShort}</span>
+                <div key={evt.id} className="p-4 bg-surface-elevated border border-gold-border/20 rounded-sm flex gap-4">
+                  <div className="w-14 h-14 bg-brand-soft rounded-sm flex flex-col items-center justify-center shrink-0 border border-gold-border/30">
+                    <span className="font-serif text-xl font-bold text-accent leading-none">{p.day}</span>
+                    <span className="text-[10px] text-gold-text font-medium">{p.monthShort}</span>
                   </div>
                   <div className="space-y-1 flex-1">
-                    <h4 className="font-serif text-sm font-semibold text-[#1B1226]">{evt.title}</h4>
+                    <h4 className="font-serif text-sm font-semibold text-heading">{evt.title}</h4>
                     {hasEnd && evt.endAt && (
-                      <p className="text-[11px] text-[#9C7A2B] font-medium">
+                      <p className="text-[11px] text-gold-text font-medium">
                         ช่วงวันที่จัด: {formatThaiDate(evt.startAt, true)} – {formatThaiDate(evt.endAt, true)}
                       </p>
                     )}
-                    <p className="text-xs text-[#1B1226]/70 line-clamp-2">{evt.description}</p>
-                    <div className="text-[11px] text-[#1B1226]/60 pt-1 flex items-center justify-between">
+                    <p className="text-xs text-text-muted line-clamp-2">{evt.description}</p>
+                    <div className="text-[11px] text-text-muted pt-1 flex items-center justify-between">
                       <span>📍 {evt.location || 'โรงเรียนสาธิต มพ.'}</span>
                       <button
                         onClick={() => handleExportICS(evt)}
-                        className="text-[#4B1F7A] underline text-[11px]"
+                        className="text-accent underline text-[11px]"
                       >
                         + บันทึกลงปฏิทิน
                       </button>
@@ -318,7 +318,7 @@ export const CalendarPage: React.FC = () => {
             })}
           </div>
         ) : (
-          <p className="text-xs text-stone-500 py-6 text-center">ยังไม่มีกิจกรรมที่กำลังจัดหรือกำลังจะมาถึง</p>
+          <p className="text-xs text-text-muted py-6 text-center">ยังไม่มีกิจกรรมที่กำลังจัดหรือกำลังจะมาถึง</p>
         )}
       </div>
     </div>

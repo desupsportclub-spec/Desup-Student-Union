@@ -202,12 +202,12 @@ export const AdminDownloads: React.FC = () => {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#4B1F7A]/15 pb-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-gold-border/20 pb-4">
         <div>
-          <h1 className="font-serif text-2xl font-semibold text-[#2A1245]">
+          <h1 className="font-serif text-2xl font-semibold text-heading">
             จัดการเอกสารดาวน์โหลด & ไฟล์ PDF
           </h1>
-          <p className="text-xs text-[#1B1226]/60 mt-1">
+          <p className="text-xs text-text-muted mt-1">
             รองรับการอัปโหลดไฟล์ PDF จากเครื่องโดยตรง (สูงสุด 15MB) พร้อมระบบเปิดดูและพิมพ์ออนไลน์
           </p>
         </div>
@@ -215,7 +215,7 @@ export const AdminDownloads: React.FC = () => {
         <div className="flex items-center gap-3">
           <button
             onClick={handleOpenCreate}
-            className="px-5 py-2.5 bg-[#4B1F7A] text-[#FAF7F0] text-xs font-medium rounded-sm hover:bg-[#2A1245] transition-colors shadow-sm self-start sm:self-auto"
+            className="px-5 py-2.5 bg-brand text-brand-contrast text-xs font-medium rounded-sm hover:bg-brand-hover transition-colors shadow-sm self-start sm:self-auto"
           >
             + เพิ่มเอกสารใหม่
           </button>
@@ -223,13 +223,13 @@ export const AdminDownloads: React.FC = () => {
       </div>
 
       {/* Downloads Table */}
-      <div className="bg-white border border-[#4B1F7A]/15 rounded-sm shadow-editorial-sm overflow-hidden">
+      <div className="bg-surface-elevated border border-gold-border/20 rounded-sm shadow-editorial-sm overflow-hidden">
         {loading ? (
-          <div className="p-8 text-center text-xs text-stone-500">กำลังโหลดเอกสาร...</div>
+          <div className="p-8 text-center text-xs text-text-muted">กำลังโหลดเอกสาร...</div>
         ) : downloads.length > 0 ? (
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs">
-              <thead className="bg-[#FAF7F0] border-b border-[#4B1F7A]/10 text-[#9C7A2B] uppercase tracking-wider font-medium">
+              <thead className="bg-surface border-b border-gold-border/15 text-gold-text uppercase tracking-wider font-medium">
                 <tr>
                   <th className="py-3 px-4">ชื่อเอกสาร</th>
                   <th className="py-3 px-4">ชนิดไฟล์</th>
@@ -238,19 +238,19 @@ export const AdminDownloads: React.FC = () => {
                   <th className="py-3 px-4 text-center">การจัดการ</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-stone-100">
+              <tbody className="divide-y divide-gold-border/10">
                 {downloads.map((item) => (
-                  <tr key={item.id} className="hover:bg-stone-50">
-                    <td className="py-3 px-4 font-medium text-[#1B1226]">
+                  <tr key={item.id} className="hover:bg-bg-alt/60 transition-colors">
+                    <td className="py-3 px-4 font-medium text-text">
                       {item.title}
                     </td>
-                    <td className="py-3 px-4 font-mono uppercase font-bold text-[#9C7A2B]">
+                    <td className="py-3 px-4 font-mono uppercase font-bold text-gold-text">
                       {item.fileType}
                     </td>
-                    <td className="py-3 px-4 font-mono tabular-numbers">
+                    <td className="py-3 px-4 font-mono tabular-numbers text-text">
                       {item.downloads} ครั้ง
                     </td>
-                    <td className="py-3 px-4 text-[#1B1226]/60">
+                    <td className="py-3 px-4 text-text-muted">
                       {formatThaiDate(item.createdAt, true)}
                     </td>
                     <td className="py-3 px-4 text-center space-x-3">
@@ -258,19 +258,19 @@ export const AdminDownloads: React.FC = () => {
                         type="button"
                         onClick={() => handleAdminPreview(item)}
                         disabled={previewingId === item.id}
-                        className="text-[#9C7A2B] hover:underline font-medium"
+                        className="text-gold-text hover:underline font-medium"
                       >
                         {previewingId === item.id ? 'กำลังเปิด...' : 'พรีวิว'}
                       </button>
                       <button
                         onClick={() => handleOpenEdit(item)}
-                        className="text-[#4B1F7A] hover:underline"
+                        className="text-accent hover:underline"
                       >
                         แก้ไข
                       </button>
                       <button
                         onClick={() => handleDelete(item.id!, item.title)}
-                        className="text-[#9B1C31] hover:underline"
+                        className="text-error hover:underline"
                       >
                         ลบ
                       </button>
@@ -281,11 +281,11 @@ export const AdminDownloads: React.FC = () => {
             </table>
           </div>
         ) : (
-          <div className="p-12 text-center text-xs text-[#1B1226]/60 space-y-3">
+          <div className="p-12 text-center text-xs text-text-muted space-y-3">
             <p>ยังไม่มีเอกสารในระบบ</p>
             <button
               onClick={handleOpenCreate}
-              className="text-xs px-5 py-2.5 bg-[#4B1F7A] text-white rounded-sm hover:bg-[#2A1245]"
+              className="text-xs px-5 py-2.5 bg-brand text-brand-contrast rounded-sm hover:bg-brand-hover transition-colors"
             >
               + เพิ่มเอกสารใหม่
             </button>
@@ -295,30 +295,30 @@ export const AdminDownloads: React.FC = () => {
 
       {/* Modal */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-[#FAF7F0] rounded-sm border border-[#B8923A]/50 max-w-xl w-full p-6 md:p-8 space-y-5 shadow-2xl relative">
+        <div className="fixed inset-0 z-50 bg-overlay-backdrop backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-surface rounded-sm border border-gold-border/50 max-w-xl w-full p-6 md:p-8 space-y-5 shadow-2xl relative">
             <CornerBracket position="top-left" />
             <CornerBracket position="top-right" />
             <CornerBracket position="bottom-left" />
             <CornerBracket position="bottom-right" />
 
-            <div className="flex items-center justify-between border-b border-[#4B1F7A]/15 pb-3">
-              <h2 className="font-serif text-lg font-semibold text-[#2A1245]">
+            <div className="flex items-center justify-between border-b border-gold-border/20 pb-3">
+              <h2 className="font-serif text-lg font-semibold text-heading">
                 {editingItem ? 'แก้ไขเอกสาร' : 'เพิ่มเอกสาร / อัปโหลดไฟล์ PDF'}
               </h2>
-              <button onClick={() => setIsModalOpen(false)} className="text-stone-400 hover:text-stone-800 text-lg">
+              <button onClick={() => setIsModalOpen(false)} className="text-text-muted hover:text-heading text-lg">
                 ✕
               </button>
             </div>
 
             <form onSubmit={handleSave} className="space-y-4 text-xs">
               {errorMsg && (
-                <div className="p-3 bg-red-50 border-l-2 border-[#9B1C31] text-xs text-[#9B1C31]">
+                <div className="p-3 bg-error-bg border-l-2 border-error text-xs text-error">
                   {errorMsg}
                 </div>
               )}
               <div>
-                <label className="block font-semibold text-[#2A1245] mb-1">ชื่อเอกสาร *</label>
+                <label className="block font-semibold text-heading mb-1">ชื่อเอกสาร *</label>
                 <input
                   type="text"
                   value={title}
@@ -330,11 +330,11 @@ export const AdminDownloads: React.FC = () => {
               </div>
 
               <div>
-                <label className="block font-semibold text-[#2A1245] mb-1">ประเภทไฟล์ *</label>
+                <label className="block font-semibold text-heading mb-1">ประเภทไฟล์ *</label>
                 <select
                   value={fileType}
                   onChange={(e) => setFileType(e.target.value as FileExtensionType)}
-                  className="w-full border border-stone-300 p-2 rounded-sm font-mono uppercase bg-white"
+                  className="w-full border border-gold-border/30 p-2 rounded-sm font-mono uppercase bg-surface-elevated text-text focus:outline-none focus:border-gold"
                 >
                   <option value="pdf">PDF (เปิดอ่าน / พิมพ์ได้)</option>
                   <option value="docx">DOCX (Word)</option>
@@ -344,14 +344,14 @@ export const AdminDownloads: React.FC = () => {
 
               {/* Upload Mode Selector */}
               <div className="pt-2">
-                <div className="flex items-center gap-4 border-b border-stone-200 pb-2 mb-3">
+                <div className="flex items-center gap-4 border-b border-gold-border/20 pb-2 mb-3">
                   <button
                     type="button"
                     onClick={() => setUploadMode('file')}
                     className={`pb-1 font-medium transition-colors ${
                       uploadMode === 'file'
-                        ? 'border-b-2 border-[#B8923A] text-[#2A1245] font-semibold'
-                        : 'text-stone-500 hover:text-stone-800'
+                        ? 'border-b-2 border-gold text-heading font-semibold'
+                        : 'text-text-muted hover:text-heading'
                     }`}
                   >
                     📁 อัปโหลดไฟล์จากเครื่อง (รองรับ PDF)
@@ -361,8 +361,8 @@ export const AdminDownloads: React.FC = () => {
                     onClick={() => setUploadMode('url')}
                     className={`pb-1 font-medium transition-colors ${
                       uploadMode === 'url'
-                        ? 'border-b-2 border-[#B8923A] text-[#2A1245] font-semibold'
-                        : 'text-stone-500 hover:text-stone-800'
+                        ? 'border-b-2 border-gold text-heading font-semibold'
+                        : 'text-text-muted hover:text-heading'
                     }`}
                   >
                     🔗 ระบุลิงก์ภายนอก (Google Drive / OneDrive)
@@ -380,30 +380,30 @@ export const AdminDownloads: React.FC = () => {
                     />
                     <div
                       onClick={() => fileInputRef.current?.click()}
-                      className="border-2 border-dashed border-[#4B1F7A]/30 hover:border-[#B8923A] p-5 rounded-sm bg-white/70 text-center cursor-pointer transition-colors"
+                      className="border-2 border-dashed border-gold-border/35 hover:border-gold p-5 rounded-sm bg-surface-elevated/70 text-center cursor-pointer transition-colors"
                     >
                       <div className="text-2xl mb-1">📄</div>
-                      <p className="font-medium text-[#2A1245]">
+                      <p className="font-medium text-heading">
                         {selectedFileName ? selectedFileName : 'คลิกเพื่อเลือกไฟล์ PDF หรือเอกสารจากเครื่อง'}
                       </p>
-                      <p className="text-[11px] text-stone-500 mt-1">
+                      <p className="text-[11px] text-text-muted mt-1">
                         {fileSizeText ? `ขนาด: ${fileSizeText}` : 'รองรับไฟล์ .pdf, .docx, .xlsx (ขนาดไม่เกิน 15MB)'}
                       </p>
                     </div>
                     {(fileUrl || editingItem?.isChunked) && (
-                      <p className="text-[11px] text-emerald-700 bg-emerald-50 p-2 rounded border border-emerald-200">
+                      <p className="text-[11px] text-success bg-success-bg p-2 rounded border border-success/30">
                         ✓ เตรียมไฟล์เรียบร้อย พร้อมจัดเก็บและเปิดอ่าน
                       </p>
                     )}
                     {saving && uploadProgress > 0 && (
                       <div className="space-y-1">
-                        <div className="h-1.5 bg-stone-200 rounded-full overflow-hidden">
+                        <div className="h-1.5 bg-bg-alt rounded-full overflow-hidden">
                           <div
-                            className="h-full bg-[#4B1F7A] transition-all duration-300"
+                            className="h-full bg-brand transition-all duration-300"
                             style={{ width: `${uploadProgress}%` }}
                           />
                         </div>
-                        <p className="text-[10px] text-[#4B1F7A] text-right font-mono">
+                        <p className="text-[10px] text-accent text-right font-mono">
                           กำลังจัดเก็บข้อมูล {uploadProgress}%
                         </p>
                       </div>
@@ -411,7 +411,7 @@ export const AdminDownloads: React.FC = () => {
                   </div>
                 ) : (
                   <div>
-                    <label className="block font-semibold text-[#2A1245] mb-1">
+                    <label className="block font-semibold text-heading mb-1">
                       ลิงก์ไฟล์เอกสาร (URL) *
                     </label>
                     <input
@@ -425,18 +425,18 @@ export const AdminDownloads: React.FC = () => {
                 )}
               </div>
 
-              <div className="flex justify-end gap-3 pt-4 border-t border-[#4B1F7A]/15">
+              <div className="flex justify-end gap-3 pt-4 border-t border-gold-border/20">
                 <button
                   type="button"
                   onClick={() => setIsModalOpen(false)}
-                  className="px-4 py-2 border rounded-sm hover:bg-stone-50 text-xs"
+                  className="px-4 py-2 border border-gold-border/30 text-text rounded-sm hover:bg-bg-alt text-xs transition-colors"
                 >
                   ยกเลิก
                 </button>
                 <button
                   type="submit"
                   disabled={saving}
-                  className="px-6 py-2 bg-[#4B1F7A] text-[#FAF7F0] rounded-sm hover:bg-[#2A1245] font-medium text-xs shadow-editorial disabled:opacity-60"
+                  className="px-6 py-2 bg-brand text-brand-contrast rounded-sm hover:bg-brand-hover font-medium text-xs shadow-editorial disabled:opacity-60 transition-colors"
                 >
                   {saving ? `กำลังบันทึก (${uploadProgress}%)...` : 'บันทึกเอกสาร'}
                 </button>

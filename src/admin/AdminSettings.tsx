@@ -228,71 +228,71 @@ export const AdminSettings: React.FC = () => {
   };
 
   if (loading) {
-    return <div className="p-8 text-center text-xs text-stone-500">กำลังโหลดการตั้งค่าเว็บไซต์...</div>;
+    return <div className="p-8 text-center text-xs text-text-muted">กำลังโหลดการตั้งค่าเว็บไซต์...</div>;
   }
 
   return (
     <div className="space-y-8">
       {/* Header */}
-      <div className="border-b border-[#4B1F7A]/15 pb-4">
-        <h1 className="font-serif text-2xl font-semibold text-[#2A1245]">
+      <div className="border-b border-gold-border/20 pb-4">
+        <h1 className="font-serif text-2xl font-semibold text-heading">
           ตั้งค่าเว็บไซต์ทั่วไป
         </h1>
-        <p className="text-xs text-[#1B1226]/60 mt-1">
+        <p className="text-xs text-text-muted mt-1">
           ปีการศึกษาปัจจุบัน สารจากนายกองค์การนักเรียน ข้อความประกาศวิ่ง ลิงก์ระบบที่เกี่ยวข้อง และข้อมูลติดต่อ
         </p>
       </div>
 
       {errorMsg && (
-        <div className="p-3 bg-red-50 border-l-2 border-[#9B1C31] text-xs text-[#9B1C31]">
+        <div className="p-3 bg-error-bg border-l-2 border-error text-xs text-error">
           {errorMsg}
         </div>
       )}
 
       {inlineSavedNotice && (
-        <div className="p-3 bg-emerald-50 border-l-2 border-emerald-600 text-xs text-emerald-800 font-medium">
+        <div className="p-3 bg-success-bg border-l-2 border-success text-xs text-success font-medium">
           {inlineSavedNotice}
         </div>
       )}
 
       {/* Part 0: Global Academic Year */}
-      <div className="bg-white p-6 border border-[#4B1F7A]/15 rounded-sm shadow-editorial-sm space-y-4">
+      <div className="bg-surface-elevated p-6 border border-gold-border/20 rounded-sm shadow-editorial-sm space-y-4">
         <div>
-          <h2 className="font-serif text-base font-semibold text-[#2A1245]">
+          <h2 className="font-serif text-base font-semibold text-heading">
             ปีการศึกษาปัจจุบัน (พ.ศ.)
           </h2>
-          <p className="text-xs text-stone-500 mt-0.5">
+          <p className="text-xs text-text-muted mt-0.5">
             ค่านี้จะอัปเดตอัตโนมัติทั่วทั้งเว็บไซต์ เช่น หน้าแรก ระบบรหัสติดตามเรื่องร้องเรียน (SC-{academicYearTH}-XXXXXX) คณะกรรมการ งบประมาณ และส่วนท้ายของเว็บ
           </p>
         </div>
 
         <div className="flex items-center gap-3">
-          <label className="text-xs font-semibold text-[#2A1245]">ปีการศึกษา พ.ศ.:</label>
+          <label className="text-xs font-semibold text-heading">ปีการศึกษา พ.ศ.:</label>
           <input
             type="text"
             value={academicYearTH}
             onChange={(e) => setAcademicYearTH(e.target.value)}
             maxLength={4}
             placeholder="2569"
-            className="w-32 input-underline font-serif text-base font-bold text-[#4B1F7A]"
+            className="w-32 input-underline font-serif text-base font-bold text-accent"
           />
         </div>
       </div>
 
       {/* Part 1: Section 06 Message from the President */}
-      <div className="bg-white p-6 border border-[#4B1F7A]/15 rounded-sm shadow-editorial-sm space-y-4">
+      <div className="bg-surface-elevated p-6 border border-gold-border/20 rounded-sm shadow-editorial-sm space-y-4">
         <div>
-          <h2 className="font-serif text-base font-semibold text-[#2A1245]">
+          <h2 className="font-serif text-base font-semibold text-heading">
             06 สารจากนายกองค์การนักเรียน (หน้าแรก)
           </h2>
-          <p className="text-xs text-stone-500 mt-0.5">
+          <p className="text-xs text-text-muted mt-0.5">
             ปรับแต่งหัวข้อคำคมและเนื้อหาสารจากนายกองค์การนักเรียนที่แสดงในส่วนที่ 06 ของหน้าแรก (รูปภาพและชื่อจะดึงจากบุคลากรตำแหน่ง "นายกองค์การนักเรียน" ล่าสุดให้อัตโนมัติ)
           </p>
         </div>
 
         <div className="space-y-4 text-xs">
           <div>
-            <label className="block font-semibold text-[#2A1245] mb-1">
+            <label className="block font-semibold text-heading mb-1">
               หัวข้อคำคม / ประโยคเด่น (Headline Quote)
             </label>
             <input
@@ -305,7 +305,7 @@ export const AdminSettings: React.FC = () => {
           </div>
 
           <div>
-            <label className="block font-semibold text-[#2A1245] mb-1">
+            <label className="block font-semibold text-heading mb-1">
               เนื้อหาสารจากนายกองค์การนักเรียน
             </label>
             <textarea
@@ -320,22 +320,22 @@ export const AdminSettings: React.FC = () => {
       </div>
 
       {/* Part 2: Ticker Announcements */}
-      <div className="bg-white p-6 border border-[#4B1F7A]/15 rounded-sm shadow-editorial-sm space-y-4">
-        <h2 className="font-serif text-base font-semibold text-[#2A1245]">
+      <div className="bg-surface-elevated p-6 border border-gold-border/20 rounded-sm shadow-editorial-sm space-y-4">
+        <h2 className="font-serif text-base font-semibold text-heading">
           แถบข้อความข่าวด่วนวิ่ง (Ticker Announcement Bar)
         </h2>
-        <p className="text-xs text-stone-500">
+        <p className="text-xs text-text-muted">
           ข้อความเหล่านี้จะวิ่งอยู่ใต้เมนูหลักหน้าเว็บไซต์ เพื่อแจ้งข่าวเร่งด่วนแก่นักเรียน
         </p>
 
         <div className="space-y-2">
           {tickerList.map((item, idx) => (
-            <div key={idx} className="flex items-center justify-between p-2.5 bg-[#FAF7F0] border border-stone-200 rounded-sm text-xs">
-              <span className="text-[#1B1226] font-medium">{item}</span>
+            <div key={idx} className="flex items-center justify-between p-2.5 bg-surface border border-gold-border/20 rounded-sm text-xs">
+              <span className="text-text font-medium">{item}</span>
               <button
                 type="button"
                 onClick={() => handleRemoveTicker(idx)}
-                className="text-red-700 hover:text-red-900 text-xs ml-4"
+                className="text-error hover:underline text-xs ml-4"
               >
                 ลบ
               </button>
@@ -353,7 +353,7 @@ export const AdminSettings: React.FC = () => {
           />
           <button
             type="submit"
-            className="px-4 py-2 bg-[#4B1F7A] text-[#FAF7F0] text-xs rounded-sm hover:bg-[#2A1245]"
+            className="px-4 py-2 bg-brand text-brand-contrast text-xs rounded-sm hover:bg-brand-hover transition-colors"
           >
             + เพิ่มข้อความ
           </button>
@@ -361,37 +361,37 @@ export const AdminSettings: React.FC = () => {
       </div>
 
       {/* Part 3: Related System Links */}
-      <div className="bg-white p-6 border border-[#4B1F7A]/15 rounded-sm shadow-editorial-sm space-y-4">
+      <div className="bg-surface-elevated p-6 border border-gold-border/20 rounded-sm shadow-editorial-sm space-y-4">
         <div>
-          <h2 className="font-serif text-base font-semibold text-[#2A1245]">
+          <h2 className="font-serif text-base font-semibold text-heading">
             ลิงก์ระบบที่เกี่ยวข้อง (Footer)
           </h2>
-          <p className="text-xs text-stone-500 mt-0.5">
+          <p className="text-xs text-text-muted mt-0.5">
             แสดงในส่วนท้ายของเว็บไซต์ทุกหน้า (เช่น ระบบบริหารงานวิชาการ, ระบบบริหารงานกิจการนักเรียน, เพจ Facebook องค์การนักเรียน)
           </p>
         </div>
 
         <div className="space-y-3 text-xs">
           {links.map((lk, idx) => (
-            <div key={idx} className="grid grid-cols-1 sm:grid-cols-12 gap-2 p-3 bg-[#FAF7F0] border border-stone-200 rounded-sm items-center">
+            <div key={idx} className="grid grid-cols-1 sm:grid-cols-12 gap-2 p-3 bg-surface border border-gold-border/20 rounded-sm items-center">
               <input
                 type="text"
                 value={lk.title}
                 onChange={(e) => handleUpdateLink(idx, 'title', e.target.value)}
                 placeholder="ชื่อระบบ"
-                className="sm:col-span-4 input-underline bg-white px-2"
+                className="sm:col-span-4 input-underline bg-surface-elevated px-2"
               />
               <input
                 type="url"
                 value={lk.url}
                 onChange={(e) => handleUpdateLink(idx, 'url', e.target.value)}
                 placeholder="https://..."
-                className="sm:col-span-7 input-underline bg-white px-2 font-mono"
+                className="sm:col-span-7 input-underline bg-surface-elevated px-2 font-mono"
               />
               <button
                 type="button"
                 onClick={() => handleRemoveLink(idx)}
-                className="sm:col-span-1 text-red-700 hover:underline text-right"
+                className="sm:col-span-1 text-error hover:underline text-right"
               >
                 ลบ
               </button>
@@ -424,7 +424,7 @@ export const AdminSettings: React.FC = () => {
           <button
             type="button"
             onClick={handleAddLink}
-            className="sm:col-span-2 px-3 py-2 bg-[#4B1F7A] text-[#FAF7F0] rounded-sm hover:bg-[#2A1245]"
+            className="sm:col-span-2 px-3 py-2 bg-brand text-brand-contrast rounded-sm hover:bg-brand-hover transition-colors"
           >
             + เพิ่มลิงก์
           </button>
@@ -432,14 +432,14 @@ export const AdminSettings: React.FC = () => {
       </div>
 
       {/* Part 4: Contact Information Override */}
-      <div className="bg-white p-6 border border-[#4B1F7A]/15 rounded-sm shadow-editorial-sm space-y-4">
-        <h2 className="font-serif text-base font-semibold text-[#2A1245]">
+      <div className="bg-surface-elevated p-6 border border-gold-border/20 rounded-sm shadow-editorial-sm space-y-4">
+        <h2 className="font-serif text-base font-semibold text-heading">
           ข้อมูลการติดต่อ
         </h2>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
           <div>
-            <label className="block font-semibold text-[#2A1245] mb-1">เบอร์โทรศัพท์</label>
+            <label className="block font-semibold text-heading mb-1">เบอร์โทรศัพท์</label>
             <input
               type="text"
               value={contactPhone}
@@ -449,7 +449,7 @@ export const AdminSettings: React.FC = () => {
           </div>
 
           <div>
-            <label className="block font-semibold text-[#2A1245] mb-1">อีเมลติดต่อ</label>
+            <label className="block font-semibold text-heading mb-1">อีเมลติดต่อ</label>
             <input
               type="email"
               value={contactEmail}
@@ -459,7 +459,7 @@ export const AdminSettings: React.FC = () => {
           </div>
 
           <div className="sm:col-span-2">
-            <label className="block font-semibold text-[#2A1245] mb-1">ที่อยู่โรงเรียน</label>
+            <label className="block font-semibold text-heading mb-1">ที่อยู่โรงเรียน</label>
             <input
               type="text"
               value={contactAddress}
@@ -469,7 +469,7 @@ export const AdminSettings: React.FC = () => {
           </div>
 
           <div>
-            <label className="block font-semibold text-[#2A1245] mb-1">ชื่อเพจ Facebook</label>
+            <label className="block font-semibold text-heading mb-1">ชื่อเพจ Facebook</label>
             <input
               type="text"
               value={facebookName}
@@ -479,7 +479,7 @@ export const AdminSettings: React.FC = () => {
           </div>
 
           <div>
-            <label className="block font-semibold text-[#2A1245] mb-1">ลิงก์เพจ Facebook</label>
+            <label className="block font-semibold text-heading mb-1">ลิงก์เพจ Facebook</label>
             <input
               type="url"
               value={facebookUrl}
@@ -491,13 +491,13 @@ export const AdminSettings: React.FC = () => {
       </div>
 
       {/* Part 5: Admin Notification Sound */}
-      <div className="bg-white p-6 border border-[#4B1F7A]/15 rounded-sm shadow-editorial-sm space-y-4">
+      <div className="bg-surface-elevated p-6 border border-gold-border/20 rounded-sm shadow-editorial-sm space-y-4">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>
-            <h2 className="font-serif text-base font-semibold text-[#2A1245]">
+            <h2 className="font-serif text-base font-semibold text-heading">
               เสียงแจ้งเตือนเรื่องร้องเรียน (ผู้ดูแลระบบ)
             </h2>
-            <p className="text-xs text-stone-500 mt-0.5">
+            <p className="text-xs text-text-muted mt-0.5">
               เล่นเสียงแจ้งเตือนอัตโนมัติบนอุปกรณ์นี้เมื่อเข้าสู่ระบบครั้งแรกที่มีเรื่องค้าง หรือเมื่อมีเรื่องร้องเรียนใหม่เข้ามาแบบเรียลไทม์
             </p>
           </div>
@@ -509,12 +509,12 @@ export const AdminSettings: React.FC = () => {
                 toggleSound();
                 setSoundTestNote(null);
               }}
-              className="inline-flex items-center gap-2 px-3.5 py-2 border border-[#4B1F7A]/25 bg-[#FAF7F0] hover:bg-[#EDE6F5] text-[#2A1245] text-xs font-medium rounded-sm transition-colors"
+              className="inline-flex items-center gap-2 px-3.5 py-2 border border-gold-border/30 bg-surface hover:bg-brand-soft text-heading text-xs font-medium rounded-sm transition-colors"
             >
               {soundEnabled ? (
-                <SpeakerHigh size={16} weight="light" className="text-[#4B1F7A]" />
+                <SpeakerHigh size={16} weight="light" className="text-accent" />
               ) : (
-                <SpeakerSlash size={16} weight="light" className="text-stone-400" />
+                <SpeakerSlash size={16} weight="light" className="text-text-muted" />
               )}
               <span>{soundEnabled ? 'เสียงแจ้งเตือน: เปิดอยู่' : 'เสียงแจ้งเตือน: ปิดอยู่'}</span>
             </button>
@@ -530,7 +530,7 @@ export const AdminSettings: React.FC = () => {
                 setSoundTestNote('เล่นเสียงแจ้งเตือนทดสอบแล้ว');
                 window.setTimeout(() => setSoundTestNote(null), 2500);
               }}
-              className="px-4 py-2 bg-[#4B1F7A] hover:bg-[#2A1245] text-[#FAF7F0] text-xs font-medium rounded-sm transition-colors"
+              className="px-4 py-2 bg-brand hover:bg-brand-hover text-brand-contrast text-xs font-medium rounded-sm transition-colors"
             >
               ทดสอบเสียง
             </button>
@@ -538,7 +538,7 @@ export const AdminSettings: React.FC = () => {
         </div>
 
         {soundTestNote && (
-          <p className="text-xs text-[#4B1F7A] font-medium">{soundTestNote}</p>
+          <p className="text-xs text-accent font-medium">{soundTestNote}</p>
         )}
       </div>
 
@@ -548,7 +548,7 @@ export const AdminSettings: React.FC = () => {
           type="button"
           onClick={handleSaveAll}
           disabled={saving}
-          className="px-8 py-3 bg-[#4B1F7A] text-[#FAF7F0] text-xs font-medium rounded-sm hover:bg-[#2A1245] transition-colors shadow-editorial"
+          className="px-8 py-3 bg-brand text-brand-contrast text-xs font-medium rounded-sm hover:bg-brand-hover transition-colors shadow-editorial"
         >
           {saving ? 'กำลังบันทึก...' : 'บันทึกการตั้งค่าทั้งหมด'}
         </button>

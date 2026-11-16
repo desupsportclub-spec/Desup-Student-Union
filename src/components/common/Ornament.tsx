@@ -11,9 +11,9 @@ import React from 'react';
 export const SectionDivider: React.FC<{ className?: string }> = ({ className = "my-12" }) => {
   return (
     <div className={`flex items-center justify-center gap-4 w-full max-w-xl mx-auto ${className}`}>
-      <div className="h-[1px] flex-1 bg-gradient-to-r from-transparent via-[#B8923A]/40 to-[#B8923A]" />
-      <span className="text-[#9C7A2B] text-xs font-serif select-none transform rotate-45 inline-block">◆</span>
-      <div className="h-[1px] flex-1 bg-gradient-to-l from-transparent via-[#B8923A]/40 to-[#B8923A]" />
+      <div className="h-[1px] flex-1 bg-gradient-to-r from-transparent via-gold/40 to-gold" />
+      <span className="text-gold-text text-xs font-serif select-none transform rotate-45 inline-block">◆</span>
+      <div className="h-[1px] flex-1 bg-gradient-to-l from-transparent via-gold/40 to-gold" />
     </div>
   );
 };
@@ -38,7 +38,7 @@ export const SectionEyebrow: React.FC<EyebrowProps> = ({
   light = false
 }) => {
   return (
-    <div className={`flex items-center gap-2 text-xs uppercase tracking-[0.2em] font-medium ${light ? 'text-[#D9B867]' : 'text-[#9C7A2B]'} ${className}`}>
+    <div className={`flex items-center gap-2 text-xs uppercase tracking-[0.2em] font-medium ${light ? 'text-anchor-gold' : 'text-gold-text'} ${className}`}>
       {number && (
         <span className="font-serif italic font-normal text-sm tracking-normal mr-1 opacity-90">
           {number}
@@ -75,7 +75,7 @@ export const CornerBracket: React.FC<{ position: 'top-left' | 'top-right' | 'bot
   return (
     <div
       aria-hidden="true"
-      className={`absolute w-3 h-3 pointer-events-none border-[#B8923A]/50 transition-all duration-500 ${getStyles()}`}
+      className={`absolute w-3 h-3 pointer-events-none border-gold/50 transition-all duration-500 ${getStyles()}`}
     />
   );
 };

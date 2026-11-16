@@ -163,13 +163,13 @@ export const Downloads: React.FC = () => {
   return (
     <div className="max-w-[1240px] mx-auto px-4 sm:px-6 md:px-12 py-6 sm:py-10 space-y-6 sm:space-y-10">
       {/* Header */}
-      <div className="border-b border-[#B8923A]/30 pb-5 sm:pb-6 flex flex-col md:flex-row md:items-end justify-between gap-4">
+      <div className="border-b border-gold-border/30 pb-5 sm:pb-6 flex flex-col md:flex-row md:items-end justify-between gap-4">
         <div>
           <SectionEyebrow enText="Document" thText="ดาวน์โหลดเอกสาร" />
-          <h1 className="font-serif text-3xl md:text-4xl font-semibold text-[#1B1226] mt-2">
+          <h1 className="font-serif text-3xl md:text-4xl font-semibold text-heading mt-2">
             ศูนย์รวมเอกสารและแบบฟอร์ม
           </h1>
-          <p className="text-xs md:text-sm text-[#1B1226]/70 mt-1">
+          <p className="text-xs md:text-sm text-text-muted mt-1">
             เปิดดูเอกสาร PDF แบบออนไลน์ พร้อมระบบดาวน์โหลดและสั่งพิมพ์เอกสารได้ทันที
           </p>
         </div>
@@ -190,31 +190,31 @@ export const Downloads: React.FC = () => {
       {loading ? (
         <div className="animate-pulse space-y-4">
           {[1, 2, 3, 4, 5].map((i) => (
-            <div key={i} className="h-14 bg-stone-200/60 rounded-sm" />
+            <div key={i} className="h-14 bg-bg-alt/60 rounded-sm" />
           ))}
         </div>
       ) : filtered.length > 0 ? (
-        <div className="border border-[#4B1F7A]/15 bg-[#FAF7F0] rounded-sm shadow-editorial overflow-hidden">
+        <div className="border border-gold-border/20 bg-surface rounded-sm shadow-editorial overflow-hidden">
           {/* Mobile Card List (no horizontal table scrolling) */}
-          <div className="md:hidden divide-y divide-[#4B1F7A]/10">
+          <div className="md:hidden divide-y divide-gold-border/15">
             {filtered.map((item) => (
               <div key={item.id} className="p-4 space-y-3">
                 <div className="flex items-start justify-between gap-2">
-                  <h3 className="font-serif text-base font-semibold text-[#1B1226] leading-snug">
+                  <h3 className="font-serif text-base font-semibold text-heading leading-snug">
                     {item.title}
                   </h3>
-                  <span className="font-mono text-[10px] tracking-wider px-2 py-0.5 border border-[#B8923A]/60 rounded-sm text-[#9C7A2B] uppercase font-bold shrink-0">
+                  <span className="font-mono text-[10px] tracking-wider px-2 py-0.5 border border-gold/60 rounded-sm text-gold-text uppercase font-bold shrink-0">
                     {item.fileType}
                   </span>
                 </div>
-                <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-[#1B1226]/65">
+                <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-text-muted">
                   <span>{formatThaiDate(item.createdAt, true)}</span>
                 </div>
                 <div className="grid grid-cols-2 gap-2 pt-1">
                   <button
                     type="button"
                     onClick={() => openPreview(item)}
-                    className="w-full inline-flex items-center justify-center gap-1 px-3 py-2 border border-[#B8923A] text-[#9C7A2B] hover:bg-[#EDE6F5] rounded-sm text-xs font-medium transition-colors"
+                    className="w-full inline-flex items-center justify-center gap-1 px-3 py-2 border border-gold text-gold-text hover:bg-brand-soft rounded-sm text-xs font-medium transition-colors"
                   >
                     <span>เปิดดู</span>
                   </button>
@@ -222,7 +222,7 @@ export const Downloads: React.FC = () => {
                     type="button"
                     onClick={() => triggerDownload(item)}
                     disabled={downloadingId === item.id}
-                    className="w-full inline-flex items-center justify-center gap-1.5 px-3 py-2 bg-[#4B1F7A] text-[#FAF7F0] hover:bg-[#2A1245] transition-colors rounded-sm text-xs font-medium shadow-editorial-sm disabled:opacity-60"
+                    className="w-full inline-flex items-center justify-center gap-1.5 px-3 py-2 bg-brand text-brand-contrast hover:bg-brand-hover transition-colors rounded-sm text-xs font-medium shadow-editorial-sm disabled:opacity-60"
                   >
                     <span>{downloadingId === item.id ? 'กำลังเตรียม...' : 'ดาวน์โหลด'}</span>
                     <span className="text-[10px] opacity-75">({formatNumber(item.downloads)})</span>
@@ -235,7 +235,7 @@ export const Downloads: React.FC = () => {
           {/* Desktop Table */}
           <div className="hidden md:block overflow-x-auto">
             <table className="w-full text-left text-xs">
-              <thead className="bg-[#EDE6F5]/50 border-b border-[#4B1F7A]/15 text-[#9C7A2B] uppercase tracking-wider font-medium">
+              <thead className="bg-brand-soft/60 border-b border-gold-border/20 text-gold-text uppercase tracking-wider font-medium">
                 <tr>
                   <th className="py-3 px-4">ชื่อเอกสาร</th>
                   <th className="py-3 px-4">ชนิดไฟล์</th>
@@ -243,18 +243,18 @@ export const Downloads: React.FC = () => {
                   <th className="py-3 px-4 text-center">เปิดดู / พิมพ์ / ดาวน์โหลด</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-[#4B1F7A]/10">
+              <tbody className="divide-y divide-gold-border/15">
                 {filtered.map((item) => (
-                  <tr key={item.id} className="hover:bg-[#EDE6F5]/30 transition-colors">
-                    <td className="py-4 px-4 font-serif text-sm font-semibold text-[#1B1226]">
+                  <tr key={item.id} className="hover:bg-brand-soft/30 transition-colors">
+                    <td className="py-4 px-4 font-serif text-sm font-semibold text-heading">
                       {item.title}
                     </td>
                     <td className="py-4 px-4">
-                      <span className="font-mono text-[10px] tracking-wider px-2 py-0.5 border border-[#B8923A]/60 rounded-sm text-[#9C7A2B] uppercase font-bold">
+                      <span className="font-mono text-[10px] tracking-wider px-2 py-0.5 border border-gold/60 rounded-sm text-gold-text uppercase font-bold">
                         {item.fileType}
                       </span>
                     </td>
-                    <td className="py-4 px-4 text-[#1B1226]/60">
+                    <td className="py-4 px-4 text-text-muted">
                       {formatThaiDate(item.createdAt, true)}
                     </td>
                     <td className="py-4 px-4">
@@ -263,7 +263,7 @@ export const Downloads: React.FC = () => {
                         <button
                           type="button"
                           onClick={() => openPreview(item)}
-                          className="inline-flex items-center gap-1 px-3 py-1.5 border border-[#B8923A] text-[#9C7A2B] hover:bg-[#EDE6F5] rounded-sm text-xs font-medium transition-colors"
+                          className="inline-flex items-center gap-1 px-3 py-1.5 border border-gold text-gold-text hover:bg-brand-soft rounded-sm text-xs font-medium transition-colors"
                         >
                           <span>👁️ เปิดดู</span>
                         </button>
@@ -273,7 +273,7 @@ export const Downloads: React.FC = () => {
                           type="button"
                           onClick={() => triggerDownload(item)}
                           disabled={downloadingId === item.id}
-                          className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#4B1F7A] text-[#FAF7F0] hover:bg-[#2A1245] transition-colors rounded-sm text-xs font-medium shadow-editorial-sm disabled:opacity-60"
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-brand text-brand-contrast hover:bg-brand-hover transition-colors rounded-sm text-xs font-medium shadow-editorial-sm disabled:opacity-60"
                         >
                           <span>{downloadingId === item.id ? 'กำลังเตรียมไฟล์...' : 'ดาวน์โหลด'}</span>
                           <span className="text-[10px] opacity-70">({formatNumber(item.downloads)})</span>
@@ -287,11 +287,11 @@ export const Downloads: React.FC = () => {
           </div>
         </div>
       ) : (
-        <div className="p-16 text-center border border-dashed border-[#4B1F7A]/25 rounded-sm bg-white/40 space-y-2">
-          <p className="font-serif text-lg text-[#2A1245]">
+        <div className="p-16 text-center border border-dashed border-gold-border/30 rounded-sm bg-surface/50 space-y-2">
+          <p className="font-serif text-lg text-heading">
             {search ? `ไม่พบเอกสารที่ตรงกับ "${search}"` : 'ยังไม่มีเอกสารให้ดาวน์โหลดในขณะนี้'}
           </p>
-          <p className="text-xs text-[#1B1226]/60">
+          <p className="text-xs text-text-muted">
             เอกสารจะถูกจัดเก็บและเปิดให้ดาวน์โหลดผ่านหน้านี้เมื่อมีประกาศเพิ่มเติม
           </p>
         </div>
@@ -299,20 +299,20 @@ export const Downloads: React.FC = () => {
 
       {/* Inline PDF Viewer Modal with Download & Print */}
       {previewItem && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-3 sm:p-6 overflow-hidden">
-          <div className="bg-[#FAF7F0] border-2 border-[#B8923A] rounded-sm w-full max-w-4xl max-h-[95vh] flex flex-col shadow-2xl relative overflow-hidden">
+        <div className="fixed inset-0 z-50 bg-anchor-bg-deep/70 backdrop-blur-sm flex items-center justify-center p-3 sm:p-6 overflow-hidden">
+          <div className="bg-surface border-2 border-gold rounded-sm w-full max-w-4xl max-h-[95vh] flex flex-col shadow-2xl relative overflow-hidden">
             <CornerBracket position="top-left" />
             <CornerBracket position="top-right" />
             <CornerBracket position="bottom-left" />
             <CornerBracket position="bottom-right" />
 
             {/* Modal Header */}
-            <div className="p-4 sm:p-5 border-b border-[#4B1F7A]/20 flex items-center justify-between bg-white">
+            <div className="p-4 sm:p-5 border-b border-gold-border/25 flex items-center justify-between bg-surface-elevated">
               <div className="pr-4">
-                <span className="text-[10px] uppercase font-bold tracking-wider text-[#9C7A2B]">
+                <span className="text-[10px] uppercase font-bold tracking-wider text-gold-text">
                   {previewItem.fileType.toUpperCase()}
                 </span>
-                <h3 className="font-serif text-base sm:text-lg font-bold text-[#2A1245] line-clamp-1">
+                <h3 className="font-serif text-base sm:text-lg font-bold text-heading line-clamp-1">
                   {previewItem.title}
                 </h3>
               </div>
@@ -320,21 +320,21 @@ export const Downloads: React.FC = () => {
                 type="button"
                 onClick={closePreview}
                 aria-label="Close Preview"
-                className="w-8 h-8 rounded-full border border-stone-300 flex items-center justify-center text-stone-500 hover:text-stone-900 hover:bg-stone-100 transition-colors"
+                className="w-8 h-8 rounded-full border border-gold-border/30 flex items-center justify-center text-text-muted hover:text-heading hover:bg-bg-alt transition-colors"
               >
                 ✕
               </button>
             </div>
 
             {/* Modal Body: Embedded Viewer */}
-            <div className="flex-1 bg-stone-900/5 p-2 overflow-hidden flex items-center justify-center min-h-[50vh]">
+            <div className="flex-1 bg-bg-alt/60 p-2 overflow-hidden flex items-center justify-center min-h-[50vh]">
               {previewLoading ? (
                 <div className="p-12 text-center space-y-3">
-                  <div className="w-8 h-8 border-2 border-[#4B1F7A] border-t-transparent rounded-full animate-spin mx-auto" />
-                  <p className="text-xs text-[#2A1245] font-medium">กำลังโหลดไฟล์เอกสารจากฐานข้อมูล...</p>
+                  <div className="w-8 h-8 border-2 border-accent border-t-transparent rounded-full animate-spin mx-auto" />
+                  <p className="text-xs text-heading font-medium">กำลังโหลดไฟล์เอกสารจากฐานข้อมูล...</p>
                 </div>
               ) : previewError ? (
-                <div className="p-12 text-center space-y-3 text-xs text-[#9B1C31]">
+                <div className="p-12 text-center space-y-3 text-xs text-error">
                   <p className="font-semibold">{previewError}</p>
                 </div>
               ) : (previewItem.fileType === 'pdf' || previewUrl.startsWith('blob:') || previewItem.fileUrl.endsWith('.pdf')) && previewUrl ? (
@@ -342,18 +342,18 @@ export const Downloads: React.FC = () => {
                   ref={pdfFrameRef}
                   src={previewUrl}
                   title={previewItem.title}
-                  className="w-full h-full min-h-[60vh] rounded-sm border border-stone-200 bg-white"
+                  className="w-full h-full min-h-[60vh] rounded-sm border border-gold-border/25 bg-surface-elevated"
                 />
               ) : (
                 <div className="p-12 text-center space-y-4">
                   <div className="text-4xl">📄</div>
-                  <p className="font-serif text-base text-[#2A1245]">
+                  <p className="font-serif text-base text-heading">
                     ไฟล์ประเภท {previewItem.fileType.toUpperCase()} จำเป็นต้องดาวน์โหลดเพื่อเปิดในโปรแกรมเฉพาะทาง
                   </p>
                   <button
                     type="button"
                     onClick={() => triggerDownload(previewItem, previewUrl)}
-                    className="inline-block px-6 py-2.5 bg-[#4B1F7A] text-white rounded text-xs font-medium"
+                    className="inline-block px-6 py-2.5 bg-brand text-brand-contrast hover:bg-brand-hover rounded text-xs font-medium transition-colors"
                   >
                     คลิกเพื่อดาวน์โหลดไฟล์
                   </button>
@@ -362,8 +362,8 @@ export const Downloads: React.FC = () => {
             </div>
 
             {/* Modal Action Footer Toolbar */}
-            <div className="p-3 sm:p-4 bg-white border-t border-[#4B1F7A]/15 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
-              <div className="text-[11px] text-[#1B1226]/60">
+            <div className="p-3 sm:p-4 bg-surface-elevated border-t border-gold-border/20 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
+              <div className="text-[11px] text-text-muted">
                 เผยแพร่เมื่อ {formatThaiDate(previewItem.createdAt, true)} · ดาวน์โหลดแล้ว {previewItem.downloads} ครั้ง
               </div>
 
@@ -373,7 +373,7 @@ export const Downloads: React.FC = () => {
                   type="button"
                   onClick={handlePrint}
                   disabled={!previewUrl}
-                  className="inline-flex items-center justify-center gap-1.5 px-3 sm:px-4 py-2 border border-[#B8923A] text-[#2A1245] hover:bg-[#EDE6F5] rounded-sm font-medium transition-colors disabled:opacity-50"
+                  className="inline-flex items-center justify-center gap-1.5 px-3 sm:px-4 py-2 border border-gold text-heading hover:bg-brand-soft rounded-sm font-medium transition-colors disabled:opacity-50"
                 >
                   <span>🖨️</span>
                   <span>พิมพ์เอกสาร</span>
@@ -385,7 +385,7 @@ export const Downloads: React.FC = () => {
                     href={previewUrl}
                     target="_blank"
                     rel="noreferrer"
-                    className="inline-flex items-center justify-center gap-1 px-3 py-2 border border-stone-300 hover:bg-stone-50 rounded-sm text-stone-700 transition-colors"
+                    className="inline-flex items-center justify-center gap-1 px-3 py-2 border border-gold-border/30 hover:bg-bg-alt rounded-sm text-text transition-colors"
                   >
                     <span>↗ เปิดหน้าต่างใหม่</span>
                   </a>
@@ -396,7 +396,7 @@ export const Downloads: React.FC = () => {
                   type="button"
                   onClick={() => triggerDownload(previewItem, previewUrl)}
                   disabled={!previewUrl}
-                  className="flex-1 sm:flex-none inline-flex items-center justify-center gap-1.5 px-4 sm:px-5 py-2 bg-[#4B1F7A] text-white hover:bg-[#2A1245] rounded-sm font-medium shadow-editorial transition-colors disabled:opacity-50"
+                  className="flex-1 sm:flex-none inline-flex items-center justify-center gap-1.5 px-4 sm:px-5 py-2 bg-brand text-brand-contrast hover:bg-brand-hover rounded-sm font-medium shadow-editorial transition-colors disabled:opacity-50"
                 >
                   <span>⬇ ดาวน์โหลดไฟล์</span>
                 </button>

@@ -16,6 +16,7 @@ import {
 import { FirstLoginAlertsModal } from '../components/admin/FirstLoginAlertsModal';
 import { NewComplaintToast } from '../components/admin/NewComplaintToast';
 import { installAudioUnlock } from '../lib/alertSound';
+import { ThemeSwitcher } from '../components/common/ThemeSwitcher';
 import {
   DashboardIcon,
   NewsIcon,
@@ -38,12 +39,12 @@ const PendingBadge: React.FC<{ count: number; pulseTick: number }> = ({ count, p
         <span
           key={`ring-${pulseTick}`}
           aria-hidden="true"
-          className="absolute inset-0 rounded-full border-2 border-[#E5383B] pointer-events-none animate-badge-ring"
+          className="absolute inset-0 rounded-full border-2 border-error pointer-events-none animate-badge-ring"
         />
       )}
       <span
         key={`badge-${pulseTick}`}
-        className={`h-5 min-w-[20px] px-1.5 rounded-full bg-[#E5383B] text-white text-[11px] font-bold leading-none inline-flex items-center justify-center tabular-nums ${
+        className={`h-5 min-w-[20px] px-1.5 rounded-full bg-error text-brand-contrast text-[11px] font-bold leading-none inline-flex items-center justify-center tabular-nums ${
           pulseTick > 0 ? 'animate-badge-pop' : ''
         }`}
       >
@@ -70,8 +71,8 @@ const AdminLayoutShell: React.FC = () => {
     role === 'admin' ? 'Admin' : 'Editor';
 
   const roleBadgeColor =
-    role === 'super_admin' ? 'bg-[#4B1F7A] text-[#FAF7F0]' :
-    role === 'admin' ? 'bg-[#9C7A2B] text-[#FAF7F0]' : 'bg-[#EDE6F5] text-[#4B1F7A]';
+    role === 'super_admin' ? 'bg-brand text-brand-contrast' :
+    role === 'admin' ? 'bg-gold text-anchor-bg' : 'bg-brand-soft text-accent';
 
   const navItems = [
     { path: '/admin', label: 'ภาพรวมระบบ', icon: <DashboardIcon />, exact: true },
@@ -88,28 +89,28 @@ const AdminLayoutShell: React.FC = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-[#F7F4EE] flex text-[#1B1226] font-sans">
+    <div className="min-h-screen bg-bg-alt flex text-text font-sans">
       {/* Desktop Sidebar (Left) */}
-      <aside className="hidden md:flex flex-col w-64 bg-white border-r border-[#4B1F7A]/15 shrink-0 justify-between">
+      <aside className="hidden md:flex flex-col w-64 bg-surface-elevated border-r border-gold-border/20 shrink-0 justify-between">
         <div>
           {/* Header with Emblem */}
-          <div className="p-6 border-b border-[#4B1F7A]/10 flex items-center gap-3">
+          <div className="p-6 border-b border-gold-border/15 flex items-center gap-3">
             <Emblem size={40} />
             <div>
-              <h2 className="font-serif text-sm font-semibold text-[#2A1245] leading-tight">
+              <h2 className="font-serif text-sm font-semibold text-heading leading-tight">
                 องค์การนักเรียน
               </h2>
-              <span className="text-[10px] text-[#9C7A2B] uppercase tracking-wider">Admin Portal</span>
+              <span className="text-[10px] text-gold-text uppercase tracking-wider">Admin Portal</span>
             </div>
           </div>
 
           {/* User profile brief */}
-          <div className="p-4 border-b border-stone-100 bg-[#FAF7F0]/60 flex items-center gap-3">
-            <div className="w-8 h-8 rounded-full bg-[#4B1F7A] text-white flex items-center justify-center font-bold text-xs uppercase">
+          <div className="p-4 border-b border-gold-border/15 bg-surface flex items-center gap-3">
+            <div className="w-8 h-8 rounded-full bg-brand text-brand-contrast flex items-center justify-center font-bold text-xs uppercase">
               {user.displayName?.[0] || user.email?.[0] || 'A'}
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-xs font-semibold text-[#1B1226] truncate">
+              <p className="text-xs font-semibold text-heading truncate">
                 {user.displayName || user.email}
               </p>
               <div className="flex items-center gap-1.5 mt-0.5">
@@ -133,11 +134,11 @@ const AdminLayoutShell: React.FC = () => {
                   to={item.path}
                   className={`flex items-center gap-3 px-3 py-2 text-xs rounded-sm transition-colors ${
                     active
-                      ? 'bg-[#EDE6F5] text-[#4B1F7A] font-semibold border-l-2 border-[#B8923A]'
-                      : 'text-[#1B1226]/75 hover:bg-stone-100 hover:text-[#2A1245]'
+                      ? 'bg-brand-soft text-accent font-semibold border-l-2 border-gold'
+                      : 'text-text-muted hover:bg-bg-alt hover:text-heading'
                   }`}
                 >
-                  <span className={`${active ? 'text-[#4B1F7A]' : 'text-stone-400 group-hover:text-stone-600'}`}>
+                  <span className={`${active ? 'text-accent' : 'text-text-muted'}`}>
                     {item.icon}
                   </span>
                   <span className="truncate">{item.label}</span>
@@ -151,25 +152,31 @@ const AdminLayoutShell: React.FC = () => {
         </div>
 
         {/* Footer Sidebar Actions */}
-        <div className="p-4 border-t border-[#4B1F7A]/10 space-y-2">
+        <div className="p-4 border-t border-gold-border/15 space-y-2.5">
+          {/* สลับโหมดสว่าง / มืด สำหรับผู้ดูแลระบบ */}
+          <div className="flex items-center justify-between gap-2 pb-1">
+            <span className="text-[11px] text-text-muted font-medium">ธีมหน้าจอ</span>
+            <ThemeSwitcher variant="compact" className="shrink-0" />
+          </div>
+
           <button
             type="button"
             onClick={toggleSound}
             aria-pressed={soundEnabled}
-            className="w-full flex items-center justify-between px-3 py-1.5 text-xs border border-[#4B1F7A]/15 bg-[#FAF7F0] hover:bg-[#EDE6F5]/60 text-[#2A1245] rounded-sm transition-colors"
+            className="w-full flex items-center justify-between px-3 py-1.5 text-xs border border-gold-border/25 bg-surface hover:bg-brand-soft/60 text-heading rounded-sm transition-colors"
             title={soundEnabled ? 'ปิดเสียงแจ้งเตือนเรื่องร้องเรียน' : 'เปิดเสียงแจ้งเตือนเรื่องร้องเรียน'}
           >
             <span className="inline-flex items-center gap-2">
               {soundEnabled ? (
-                <SpeakerHigh size={15} weight="light" className="text-[#4B1F7A]" />
+                <SpeakerHigh size={15} weight="light" className="text-accent" />
               ) : (
-                <SpeakerSlash size={15} weight="light" className="text-stone-400" />
+                <SpeakerSlash size={15} weight="light" className="text-text-muted" />
               )}
               <span>เสียงแจ้งเตือน</span>
             </span>
             <span
               className={`text-[10px] font-semibold ${
-                soundEnabled ? 'text-emerald-700' : 'text-stone-400'
+                soundEnabled ? 'text-success' : 'text-text-muted'
               }`}
             >
               {soundEnabled ? 'เปิด' : 'ปิด'}
@@ -177,13 +184,13 @@ const AdminLayoutShell: React.FC = () => {
           </button>
           <Link
             to="/"
-            className="block text-center text-xs py-1.5 border border-stone-200 text-[#1B1226]/70 hover:text-[#4B1F7A] hover:bg-stone-50 rounded-sm transition-colors"
+            className="block text-center text-xs py-1.5 border border-gold-border/25 text-text-muted hover:text-accent hover:bg-bg-alt rounded-sm transition-colors"
           >
             ← ดูหน้าเว็บจริง
           </Link>
           <button
             onClick={() => logout()}
-            className="w-full text-center text-xs py-1.5 bg-red-50 text-[#9B1C31] hover:bg-red-100 rounded-sm transition-colors"
+            className="w-full text-center text-xs py-1.5 bg-error-bg text-error hover:bg-error/15 rounded-sm transition-colors"
           >
             ออกจากระบบ
           </button>
@@ -193,38 +200,41 @@ const AdminLayoutShell: React.FC = () => {
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col min-w-0">
         {/* Mobile Top Header */}
-        <header className="md:hidden bg-white border-b border-[#4B1F7A]/15 px-4 py-3 flex items-center justify-between">
+        <header className="md:hidden bg-surface-elevated border-b border-gold-border/20 px-4 py-3 flex items-center justify-between gap-2">
           <div className="flex items-center gap-2 min-w-0">
             <Emblem size={28} />
-            <span className="font-serif text-sm font-semibold text-[#2A1245] truncate">
+            <span className="font-serif text-sm font-semibold text-heading truncate">
               ระบบจัดการหลังบ้าน
             </span>
           </div>
-          <button
-            type="button"
-            onClick={() => setMobileSidebarOpen(!mobileSidebarOpen)}
-            aria-expanded={mobileSidebarOpen}
-            aria-label={
-              pendingCount > 0
-                ? `เปิดเมนูผู้ดูแลระบบ (มีเรื่องร้องเรียนค้าง ${pendingCount} เรื่อง)`
-                : 'เปิดเมนูผู้ดูแลระบบ'
-            }
-            className="relative inline-flex items-center gap-1.5 text-xs px-2.5 py-1.5 border border-stone-300 rounded-sm text-[#2A1245] bg-white hover:bg-stone-50"
-          >
-            {mobileSidebarOpen ? <X size={15} /> : <List size={15} />}
-            <span>เมนู</span>
-            {pendingCount > 0 && (
-              <span
-                aria-hidden="true"
-                className="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-[#E5383B] ring-2 ring-white"
-              />
-            )}
-          </button>
+          <div className="flex items-center gap-2 shrink-0">
+            <ThemeSwitcher variant="dropdown" />
+            <button
+              type="button"
+              onClick={() => setMobileSidebarOpen(!mobileSidebarOpen)}
+              aria-expanded={mobileSidebarOpen}
+              aria-label={
+                pendingCount > 0
+                  ? `เปิดเมนูผู้ดูแลระบบ (มีเรื่องร้องเรียนค้าง ${pendingCount} เรื่อง)`
+                  : 'เปิดเมนูผู้ดูแลระบบ'
+              }
+              className="relative inline-flex items-center gap-1.5 text-xs px-2.5 py-1.5 border border-gold-border/30 rounded-sm text-heading bg-surface hover:bg-bg-alt"
+            >
+              {mobileSidebarOpen ? <X size={15} /> : <List size={15} />}
+              <span>เมนู</span>
+              {pendingCount > 0 && (
+                <span
+                  aria-hidden="true"
+                  className="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-error ring-2 ring-surface-elevated"
+                />
+              )}
+            </button>
+          </div>
         </header>
 
         {/* Mobile Sidebar Overlay */}
         {mobileSidebarOpen && (
-          <div className="md:hidden bg-white border-b border-[#4B1F7A]/20 p-4 space-y-2">
+          <div className="md:hidden bg-surface-elevated border-b border-gold-border/25 p-4 space-y-2">
             {navItems.map((item) => {
               const active = item.exact
                 ? location.pathname === item.path
@@ -236,7 +246,7 @@ const AdminLayoutShell: React.FC = () => {
                   to={item.path}
                   onClick={() => setMobileSidebarOpen(false)}
                   className={`flex items-center gap-3 text-xs py-2 px-3 rounded-sm ${
-                    active ? 'bg-[#EDE6F5] text-[#4B1F7A] font-semibold' : 'hover:bg-[#EDE6F5]'
+                    active ? 'bg-brand-soft text-accent font-semibold' : 'text-text-muted hover:bg-brand-soft/60 hover:text-heading'
                   }`}
                 >
                   <span>{item.icon}</span>
@@ -247,32 +257,36 @@ const AdminLayoutShell: React.FC = () => {
                 </Link>
               );
             })}
-            <div className="pt-2 border-t space-y-2">
+            <div className="pt-2 border-t border-gold-border/15 space-y-2">
+              <div className="flex items-center justify-between gap-2 px-1 py-1">
+                <span className="text-xs text-text-muted">โหมดแสดงผล</span>
+                <ThemeSwitcher variant="compact" />
+              </div>
               <button
                 type="button"
                 onClick={toggleSound}
                 aria-pressed={soundEnabled}
-                className="w-full flex items-center justify-between px-3 py-2 text-xs border border-[#4B1F7A]/15 bg-[#FAF7F0] rounded-sm text-[#2A1245]"
+                className="w-full flex items-center justify-between px-3 py-2 text-xs border border-gold-border/25 bg-surface rounded-sm text-heading"
               >
                 <span className="inline-flex items-center gap-2">
                   {soundEnabled ? (
-                    <SpeakerHigh size={15} weight="light" className="text-[#4B1F7A]" />
+                    <SpeakerHigh size={15} weight="light" className="text-accent" />
                   ) : (
-                    <SpeakerSlash size={15} weight="light" className="text-stone-400" />
+                    <SpeakerSlash size={15} weight="light" className="text-text-muted" />
                   )}
                   <span>เสียงแจ้งเตือน</span>
                 </span>
-                <span className={`text-[10px] font-semibold ${soundEnabled ? 'text-emerald-700' : 'text-stone-400'}`}>
+                <span className={`text-[10px] font-semibold ${soundEnabled ? 'text-success' : 'text-text-muted'}`}>
                   {soundEnabled ? 'เปิด' : 'ปิด'}
                 </span>
               </button>
               <div className="flex gap-2">
-                <Link to="/" className="text-xs py-1.5 px-3 border rounded text-center flex-1">
+                <Link to="/" className="text-xs py-1.5 px-3 border border-gold-border/25 text-text rounded text-center flex-1 hover:bg-bg-alt">
                   ไปหน้าเว็บ
                 </Link>
                 <button
                   onClick={() => logout()}
-                  className="text-xs py-1.5 px-3 bg-red-50 text-[#9B1C31] rounded text-center"
+                  className="text-xs py-1.5 px-3 bg-error-bg text-error rounded text-center hover:bg-error/15"
                 >
                   ออกจากระบบ
                 </button>
@@ -284,7 +298,7 @@ const AdminLayoutShell: React.FC = () => {
         {/* Content Outlet */}
         <main className="p-4 sm:p-6 md:p-10 flex-1 overflow-y-auto">
           {indexError && (
-            <div className="mb-4 p-3 bg-amber-50 border-l-4 border-amber-500 text-xs text-amber-900 rounded-sm">
+            <div className="mb-4 p-3 bg-warning-bg border-l-4 border-warning text-xs text-warning rounded-sm">
               การแจ้งเตือนเรื่องร้องเรียนแบบเรียลไทม์ต้องสร้างดัชนี (Firestore Index) เพิ่มเติม: {indexError}
             </div>
           )}
@@ -304,9 +318,9 @@ export const AdminLayout: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#FAF7F0] flex flex-col items-center justify-center">
+      <div className="min-h-screen bg-bg flex flex-col items-center justify-center">
         <Emblem size={48} animate />
-        <p className="text-xs text-[#9C7A2B] mt-4 font-serif">กำลังตรวจสอบสิทธิ์ผู้ดูแลระบบ...</p>
+        <p className="text-xs text-gold-text mt-4 font-serif">กำลังตรวจสอบสิทธิ์ผู้ดูแลระบบ...</p>
       </div>
     );
   }

@@ -98,7 +98,7 @@ export const MainLayout: React.FC = () => {
   }, [location.pathname]);
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#FAF7F0] text-[#1B1226] relative selection:bg-[#EDE6F5] selection:text-[#2A1245]">
+    <div className="min-h-screen flex flex-col bg-bg text-text relative selection:bg-brand-soft selection:text-heading">
       {/* Top scroll progress */}
       <ScrollProgress />
 

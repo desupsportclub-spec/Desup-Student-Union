@@ -255,24 +255,24 @@ export const TrackComplaint: React.FC = () => {
   return (
     <div className="max-w-[880px] mx-auto px-4 sm:px-6 py-6 sm:py-10 space-y-6 sm:space-y-8">
       {/* Header */}
-      <div className="border-b border-[#B8923A]/30 pb-5 sm:pb-6 text-center max-w-xl mx-auto space-y-2">
+      <div className="border-b border-gold-border/30 pb-5 sm:pb-6 text-center max-w-xl mx-auto space-y-2">
         <SectionEyebrow enText="STATUS TRACKING" thText="ติดตามสถานะเรื่องร้องเรียน" />
-        <h1 className="font-serif text-3xl md:text-4xl font-semibold text-[#1B1226]">
+        <h1 className="font-serif text-3xl md:text-4xl font-semibold text-heading">
           ตรวจสอบความคืบหน้า
         </h1>
-        <p className="text-xs md:text-sm text-[#1B1226]/70">
+        <p className="text-xs md:text-sm text-text-muted">
           ดูรายการเรื่องที่เคยส่งจากอุปกรณ์นี้ได้ทันที หรือค้นหาด้วยรหัสติดตาม / คำจำส่วนตัว / บัญชี Google
         </p>
       </div>
 
       {/* Section 1: My Saved Complaints (Automatic Local History + Google Sync) */}
-      <section className="bg-white border border-[#4B1F7A]/15 p-4 sm:p-6 rounded-sm shadow-editorial-sm space-y-4">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-[#4B1F7A]/10 pb-3">
+      <section className="bg-surface-elevated border border-gold-border/20 p-4 sm:p-6 rounded-sm shadow-editorial-sm space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-gold-border/15 pb-3">
           <div>
-            <h2 className="font-serif text-base sm:text-lg font-semibold text-[#2A1245]">
+            <h2 className="font-serif text-base sm:text-lg font-semibold text-heading">
               เรื่องร้องเรียนของคุณ (บันทึกอัตโนมัติ)
             </h2>
-            <p className="text-[11px] text-[#1B1226]/60">
+            <p className="text-[11px] text-text-muted">
               {currentUser
                 ? `ซิงค์ข้อมูลจากอุปกรณ์นี้และบัญชี ${currentUser.email}`
                 : 'แสดงเรื่องที่เคยส่งหรือเปิดดูจากอุปกรณ์นี้โดยไม่ต้องกรอกรหัสซ้ำ'}
@@ -284,7 +284,7 @@ export const TrackComplaint: React.FC = () => {
               type="button"
               onClick={handleConnectGoogle}
               disabled={authLoading}
-              className="px-3.5 py-1.5 bg-[#FAF7F0] border border-[#B8923A]/50 hover:border-[#4B1F7A] text-xs font-medium text-[#2A1245] rounded-sm transition-colors self-start sm:self-auto shrink-0"
+              className="px-3.5 py-1.5 bg-surface border border-gold/50 hover:border-accent text-xs font-medium text-heading rounded-sm transition-colors self-start sm:self-auto shrink-0"
             >
               {authLoading ? 'กำลังเชื่อมต่อ...' : 'ดึงประวัติข้ามเครื่องด้วย Google'}
             </button>
@@ -293,8 +293,8 @@ export const TrackComplaint: React.FC = () => {
 
         {myListLoading ? (
           <div className="space-y-2 animate-pulse">
-            <div className="h-14 bg-stone-100 rounded-sm" />
-            <div className="h-14 bg-stone-100 rounded-sm" />
+            <div className="h-14 bg-bg-alt rounded-sm" />
+            <div className="h-14 bg-bg-alt rounded-sm" />
           </div>
         ) : myComplaints.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -314,12 +314,12 @@ export const TrackComplaint: React.FC = () => {
                   }}
                   className={`p-3.5 rounded-sm border text-left cursor-pointer transition-all flex flex-col justify-between gap-2 ${
                     isSelected
-                      ? 'border-[#4B1F7A] bg-[#EDE6F5]/45 ring-1 ring-[#4B1F7A]'
-                      : 'border-[#4B1F7A]/15 bg-[#FAF7F0]/60 hover:border-[#B8923A]'
+                      ? 'border-accent bg-brand-soft/50 ring-1 ring-accent'
+                      : 'border-gold-border/20 bg-surface/70 hover:border-gold'
                   }`}
                 >
                   <div className="flex items-start justify-between gap-2">
-                    <span className="font-mono text-[11px] font-bold text-[#9C7A2B]">
+                    <span className="font-mono text-[11px] font-bold text-gold-text">
                       {item.trackingCode}
                     </span>
                     <div className="flex items-center gap-1.5">
@@ -328,18 +328,18 @@ export const TrackComplaint: React.FC = () => {
                         type="button"
                         onClick={(e) => handleRemoveFromDevice(e, item.trackingCode)}
                         title="นำออกจากประวัติในเครื่องนี้"
-                        className="text-stone-400 hover:text-[#9B1C31] text-xs px-1"
+                        className="text-text-muted hover:text-error text-xs px-1"
                       >
                         ✕
                       </button>
                     </div>
                   </div>
-                  <div className="font-serif text-sm font-semibold text-[#1B1226] line-clamp-1">
+                  <div className="font-serif text-sm font-semibold text-heading line-clamp-1">
                     {item.title}
                   </div>
-                  <div className="flex items-center justify-between text-[11px] text-[#1B1226]/60">
+                  <div className="flex items-center justify-between text-[11px] text-text-muted">
                     <span>{formatThaiDateTime(item.createdAt)}</span>
-                    <span className="text-[#4B1F7A] font-medium">
+                    <span className="text-accent font-medium">
                       {(item.publicReplies?.length || 0) > 0
                         ? `ตอบกลับแล้ว (${item.publicReplies?.length})`
                         : 'ดูรายละเอียด →'}
@@ -350,13 +350,13 @@ export const TrackComplaint: React.FC = () => {
             })}
           </div>
         ) : (
-          <div className="py-5 px-4 text-center bg-[#FAF7F0]/60 border border-dashed border-[#4B1F7A]/20 rounded-sm space-y-2">
-            <p className="text-xs text-[#1B1226]/70">
+          <div className="py-5 px-4 text-center bg-surface/60 border border-dashed border-gold-border/25 rounded-sm space-y-2">
+            <p className="text-xs text-text-muted">
               ยังไม่มีประวัติการส่งเรื่องร้องเรียนบนอุปกรณ์นี้
             </p>
             <Link
               to="/complaint"
-              className="inline-block text-xs font-medium text-[#4B1F7A] hover:underline"
+              className="inline-block text-xs font-medium text-accent hover:underline"
             >
               ส่งเรื่องร้องเรียน / ข้อเสนอแนะใหม่ →
             </Link>
@@ -365,8 +365,8 @@ export const TrackComplaint: React.FC = () => {
       </section>
 
       {/* Section 2: Search Tabs (By Tracking Code OR By Recovery Keyword + PIN) */}
-      <div className="bg-[#FAF7F0] border border-[#B8923A]/40 p-4 sm:p-6 rounded-sm shadow-editorial space-y-4">
-        <div className="flex items-center gap-4 border-b border-[#4B1F7A]/10 pb-2 text-xs font-medium">
+      <div className="bg-surface border border-gold-border/40 p-4 sm:p-6 rounded-sm shadow-editorial space-y-4">
+        <div className="flex items-center gap-4 border-b border-gold-border/15 pb-2 text-xs font-medium">
           <button
             type="button"
             onClick={() => {
@@ -375,13 +375,13 @@ export const TrackComplaint: React.FC = () => {
             }}
             className={`pb-2 transition-colors relative ${
               lookupMode === 'code'
-                ? 'text-[#4B1F7A] font-semibold'
-                : 'text-[#1B1226]/60 hover:text-[#2A1245]'
+                ? 'text-accent font-semibold'
+                : 'text-text-muted hover:text-heading'
             }`}
           >
             ค้นหาด้วยรหัสติดตาม
             {lookupMode === 'code' && (
-              <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-[#B8923A]" />
+              <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-gold" />
             )}
           </button>
 
@@ -393,13 +393,13 @@ export const TrackComplaint: React.FC = () => {
             }}
             className={`pb-2 transition-colors relative ${
               lookupMode === 'recovery'
-                ? 'text-[#4B1F7A] font-semibold'
-                : 'text-[#1B1226]/60 hover:text-[#2A1245]'
+                ? 'text-accent font-semibold'
+                : 'text-text-muted hover:text-heading'
             }`}
           >
             ลืมรหัส? ค้นหาด้วยคำจำส่วนตัว + PIN
             {lookupMode === 'recovery' && (
-              <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-[#B8923A]" />
+              <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-gold" />
             )}
           </button>
         </div>
@@ -417,7 +417,7 @@ export const TrackComplaint: React.FC = () => {
             <button
               type="submit"
               disabled={loading}
-              className="px-7 py-2.5 bg-[#4B1F7A] text-[#FAF7F0] text-xs font-medium rounded-full border border-[#D9B867]/40 hover:bg-[#2A1245] transition-colors shadow-editorial whitespace-nowrap"
+              className="px-7 py-2.5 bg-brand text-brand-contrast text-xs font-medium rounded-full border border-gold-light/40 hover:bg-brand-hover transition-colors shadow-editorial whitespace-nowrap"
             >
               {loading ? 'กำลังค้นหา...' : 'ตรวจสอบสถานะ →'}
             </button>
@@ -445,12 +445,12 @@ export const TrackComplaint: React.FC = () => {
               <button
                 type="submit"
                 disabled={loading}
-                className="sm:col-span-3 px-6 py-2.5 bg-[#4B1F7A] text-[#FAF7F0] text-xs font-medium rounded-full border border-[#D9B867]/40 hover:bg-[#2A1245] transition-colors whitespace-nowrap"
+                className="sm:col-span-3 px-6 py-2.5 bg-brand text-brand-contrast text-xs font-medium rounded-full border border-gold-light/40 hover:bg-brand-hover transition-colors whitespace-nowrap"
               >
                 {loading ? 'กำลังกู้คืน...' : 'ค้นหาเรื่องเดิม →'}
               </button>
             </div>
-            <p className="text-[11px] text-[#1B1226]/60">
+            <p className="text-[11px] text-text-muted">
               ใช้คำจำส่วนตัวและรหัส PIN ที่ตั้งไว้ตอนส่งเรื่อง ระบบจะดึงรายการเรื่องทั้งหมดของคุณกลับมาให้อัตโนมัติ
             </p>
           </form>
@@ -458,11 +458,11 @@ export const TrackComplaint: React.FC = () => {
       </div>
 
       {notFound && (
-        <div className="p-6 text-center border border-dashed border-[#9B1C31]/40 rounded-sm bg-red-50/40 space-y-2">
-          <p className="font-serif text-base font-semibold text-[#9B1C31]">
+        <div className="p-6 text-center border border-dashed border-error/40 rounded-sm bg-error-bg/60 space-y-2">
+          <p className="font-serif text-base font-semibold text-error">
             {notFound}
           </p>
-          <p className="text-xs text-[#1B1226]/60">
+          <p className="text-xs text-text-muted">
             โปรดตรวจสอบความถูกต้องของรหัสติดตาม หรือลองกู้คืนด้วยคำจำส่วนตัว + PIN / บัญชี Google
           </p>
         </div>
@@ -470,23 +470,23 @@ export const TrackComplaint: React.FC = () => {
 
       {/* Complaint Status & Timeline Result */}
       {complaint && (
-        <div className="bg-[#FAF7F0] border border-[#4B1F7A]/20 p-5 sm:p-6 md:p-10 rounded-sm shadow-editorial space-y-6 sm:space-y-8 relative">
+        <div className="bg-surface border border-gold-border/25 p-5 sm:p-6 md:p-10 rounded-sm shadow-editorial space-y-6 sm:space-y-8 relative">
           <CornerBracket position="top-left" />
           <CornerBracket position="top-right" />
           <CornerBracket position="bottom-left" />
           <CornerBracket position="bottom-right" />
 
           {/* Title & Metadata */}
-          <div className="border-b border-[#4B1F7A]/15 pb-5 sm:pb-6 space-y-2">
+          <div className="border-b border-gold-border/20 pb-5 sm:pb-6 space-y-2">
             <div className="flex flex-wrap items-center justify-between gap-2">
               <div className="flex flex-wrap items-center gap-2">
-                <span className="font-mono text-xs font-bold text-[#9C7A2B] tracking-wider">
+                <span className="font-mono text-xs font-bold text-gold-text tracking-wider">
                   รหัส: {complaint.trackingCode}
                 </span>
                 <button
                   type="button"
                   onClick={handleCopyDirectLink}
-                  className="text-[11px] px-2 py-0.5 bg-white border border-[#B8923A]/40 rounded-sm text-[#4B1F7A] hover:bg-[#EDE6F5]"
+                  className="text-[11px] px-2 py-0.5 bg-surface-elevated border border-gold-border/40 rounded-sm text-accent hover:bg-brand-soft"
                 >
                   {copiedLink ? 'คัดลอกลิงก์แล้ว ✓' : '🔗 คัดลอกลิงก์เรื่องนี้'}
                 </button>
@@ -494,11 +494,11 @@ export const TrackComplaint: React.FC = () => {
               <ComplaintStatusBadge status={complaint.status} />
             </div>
 
-            <h2 className="font-serif text-xl sm:text-2xl font-semibold text-[#1B1226] pt-1">
+            <h2 className="font-serif text-xl sm:text-2xl font-semibold text-heading pt-1">
               {complaint.title}
             </h2>
 
-            <div className="text-xs text-[#1B1226]/60 flex flex-wrap gap-x-3 gap-y-1 pt-1">
+            <div className="text-xs text-text-muted flex flex-wrap gap-x-3 gap-y-1 pt-1">
               <span>สถานที่: {complaint.location || 'ไม่ระบุ'}</span>
               <span>·</span>
               <span>ส่งเมื่อ: {formatThaiDateTime(complaint.createdAt)}</span>
@@ -509,11 +509,11 @@ export const TrackComplaint: React.FC = () => {
 
           {/* 4-Step Vertical Timeline */}
           <div className="space-y-6 pt-2">
-            <h3 className="font-serif text-lg font-semibold text-[#2A1245]">
+            <h3 className="font-serif text-lg font-semibold text-heading">
               ขั้นตอนการดำเนินงาน
             </h3>
 
-            <div className="relative pl-6 space-y-8 before:absolute before:left-2 before:top-2 before:bottom-2 before:w-[2px] before:bg-stone-200">
+            <div className="relative pl-6 space-y-8 before:absolute before:left-2 before:top-2 before:bottom-2 before:w-[2px] before:bg-gold-border/25">
               {STAGES.map((st, idx) => {
                 const isPassed = idx <= currentStageIndex;
                 const isCurrent = idx === currentStageIndex;
@@ -524,8 +524,8 @@ export const TrackComplaint: React.FC = () => {
                     <div
                       className={`absolute -left-6 top-1 w-4 h-4 rounded-full border-2 transition-colors ${
                         isPassed
-                          ? 'bg-[#B8923A] border-[#4B1F7A]'
-                          : 'bg-white border-stone-300'
+                          ? 'bg-gold border-accent'
+                          : 'bg-surface-elevated border-gold-border/30'
                       }`}
                     />
 
@@ -533,20 +533,20 @@ export const TrackComplaint: React.FC = () => {
                       <h4
                         className={`font-serif text-base font-semibold ${
                           isCurrent
-                            ? 'text-[#4B1F7A]'
+                            ? 'text-accent'
                             : isPassed
-                            ? 'text-[#1B1226]'
-                            : 'text-stone-400'
+                            ? 'text-heading'
+                            : 'text-text-muted/60'
                         }`}
                       >
                         {st.label}
                         {isCurrent && (
-                          <span className="ml-2 text-[10px] text-[#9C7A2B] font-sans font-normal uppercase tracking-wider bg-[#EDE6F5] px-2 py-0.5 rounded-sm">
+                          <span className="ml-2 text-[10px] text-gold-text font-sans font-normal uppercase tracking-wider bg-brand-soft px-2 py-0.5 rounded-sm">
                             ขั้นตอนปัจจุบัน
                           </span>
                         )}
                       </h4>
-                      <p className="text-xs text-[#1B1226]/65 mt-0.5">
+                      <p className="text-xs text-text-muted mt-0.5">
                         {st.desc}
                       </p>
                     </div>
@@ -557,27 +557,27 @@ export const TrackComplaint: React.FC = () => {
           </div>
 
           {/* Public Official Replies */}
-          <div className="border-t border-[#4B1F7A]/15 pt-6 space-y-4">
-            <h3 className="font-serif text-lg font-semibold text-[#2A1245]">
+          <div className="border-t border-gold-border/20 pt-6 space-y-4">
+            <h3 className="font-serif text-lg font-semibold text-heading">
               ข้อความตอบกลับจากองค์การนักเรียน
             </h3>
 
             {complaint.publicReplies && complaint.publicReplies.length > 0 ? (
               <div className="space-y-3">
                 {complaint.publicReplies.map((reply, index) => (
-                  <div key={index} className="p-4 bg-white border border-[#B8923A]/30 rounded-sm space-y-1">
-                    <div className="flex items-center justify-between text-[11px] text-[#9C7A2B]">
+                  <div key={index} className="p-4 bg-surface-elevated border border-gold-border/30 rounded-sm space-y-1">
+                    <div className="flex items-center justify-between text-[11px] text-gold-text">
                       <span className="font-medium font-serif">{reply.by || 'องค์การนักเรียน'}</span>
                       <span>{formatThaiDateTime(reply.at)}</span>
                     </div>
-                    <p className="text-xs text-[#1B1226] leading-relaxed pt-1 font-sans">
+                    <p className="text-xs text-text leading-relaxed pt-1 font-sans">
                       {reply.text}
                     </p>
                   </div>
                 ))}
               </div>
             ) : (
-              <div className="p-4 bg-white/60 border border-stone-200 rounded-sm text-xs text-[#1B1226]/60 text-center">
+              <div className="p-4 bg-surface-elevated/70 border border-gold-border/20 rounded-sm text-xs text-text-muted text-center">
                 อยู่ระหว่างการพิจารณา เมื่อมีความคืบหน้าคณะทำงานจะแจ้งผลการตอบกลับ ณ จุดนี้
               </div>
             )}

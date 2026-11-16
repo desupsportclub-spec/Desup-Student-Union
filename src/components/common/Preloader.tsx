@@ -50,7 +50,7 @@ export const Preloader: React.FC = () => {
             transition: { duration: 0.25, ease: [0.22, 1, 0.36, 1] }
           }}
           onClick={dismiss}
-          className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-[#2A1245] text-[#FAF7F0] select-none cursor-pointer"
+          className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-anchor-bg text-anchor-text select-none cursor-pointer"
         >
           {/* Subtle Thai gold line motif */}
           <div className="relative flex flex-col items-center">
@@ -69,10 +69,10 @@ export const Preloader: React.FC = () => {
               transition={{ delay: 0.06, duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
               className="text-center"
             >
-              <h1 className="font-serif text-2xl text-[#FAF7F0] tracking-wide mb-1">
+              <h1 className="font-serif text-2xl text-anchor-text tracking-wide mb-1">
                 องค์การนักเรียน
               </h1>
-              <p className="text-xs tracking-[0.25em] text-[#D9B867] uppercase">
+              <p className="text-xs tracking-[0.25em] text-anchor-gold uppercase">
                 โรงเรียนสาธิตมหาวิทยาลัยพะเยา
               </p>
             </motion.div>
@@ -82,7 +82,7 @@ export const Preloader: React.FC = () => {
               initial={{ width: 0 }}
               animate={{ width: 120 }}
               transition={{ duration: 0.32, ease: 'easeInOut' }}
-              className="h-[1.5px] bg-[#B8923A] mt-6"
+              className="h-[1.5px] bg-gold mt-6"
             />
           </div>
         </motion.div>

@@ -123,11 +123,11 @@ export const NewsDetail: React.FC = () => {
   if (loading) {
     return (
       <div className="max-w-[760px] mx-auto px-6 py-16 animate-pulse space-y-6">
-        <div className="h-6 bg-stone-200 rounded w-1/4" />
-        <div className="h-10 bg-stone-200 rounded w-full" />
-        <div className="aspect-[16/9] bg-stone-200 rounded" />
-        <div className="h-4 bg-stone-200 rounded w-full" />
-        <div className="h-4 bg-stone-200 rounded w-5/6" />
+        <div className="h-6 bg-bg-alt rounded w-1/4" />
+        <div className="h-10 bg-bg-alt rounded w-full" />
+        <div className="aspect-[16/9] bg-bg-alt rounded" />
+        <div className="h-4 bg-bg-alt rounded w-full" />
+        <div className="h-4 bg-bg-alt rounded w-5/6" />
       </div>
     );
   }
@@ -136,9 +136,9 @@ export const NewsDetail: React.FC = () => {
     return (
       <div className="max-w-[760px] mx-auto px-6 py-20 text-center space-y-4">
         <Emblem size={64} className="mx-auto" />
-        <h1 className="font-serif text-2xl text-[#2A1245]">ไม่พบข่าวสารที่ต้องการ</h1>
-        <p className="text-xs text-[#1B1226]/60">ข่าวสารนี้อาจถูกลบ ย้าย หรือยังไม่ได้รับการเผยแพร่</p>
-        <Link to="/news" className="inline-block mt-4 px-6 py-2 bg-[#4B1F7A] text-[#FAF7F0] text-xs rounded-sm">
+        <h1 className="font-serif text-2xl text-heading">ไม่พบข่าวสารที่ต้องการ</h1>
+        <p className="text-xs text-text-muted">ข่าวสารนี้อาจถูกลบ ย้าย หรือยังไม่ได้รับการเผยแพร่</p>
+        <Link to="/news" className="inline-block mt-4 px-6 py-2 bg-brand text-brand-contrast hover:bg-brand-hover text-xs rounded-sm transition-colors">
           กลับสู่หน้ารวมข่าว
         </Link>
       </div>
@@ -176,21 +176,21 @@ export const NewsDetail: React.FC = () => {
     <article className="py-6 sm:py-12">
       <div className="max-w-[760px] mx-auto px-4 sm:px-6 space-y-6 sm:space-y-8">
         {/* Navigation Breadcrumb */}
-        <div className="flex flex-wrap items-center gap-2 text-xs text-[#1B1226]/60">
-          <Link to="/" className="hover:text-[#4B1F7A]">หน้าหลัก</Link>
+        <div className="flex flex-wrap items-center gap-2 text-xs text-text-muted">
+          <Link to="/" className="hover:text-accent">หน้าหลัก</Link>
           <span>/</span>
-          <Link to="/news" className="hover:text-[#4B1F7A]">ข่าวสาร</Link>
+          <Link to="/news" className="hover:text-accent">ข่าวสาร</Link>
           <span>/</span>
           <NewsCategoryBadge category={news.category} />
         </div>
 
         {/* Article Header */}
-        <div className="space-y-4 border-b border-[#B8923A]/30 pb-6">
-          <h1 className="font-serif text-2xl sm:text-3xl md:text-4xl font-semibold text-[#1B1226] leading-tight">
+        <div className="space-y-4 border-b border-gold-border/30 pb-6">
+          <h1 className="font-serif text-2xl sm:text-3xl md:text-4xl font-semibold text-heading leading-tight">
             {news.title}
           </h1>
 
-          <div className="flex flex-wrap items-center justify-between text-xs text-[#1B1226]/70 gap-4 pt-2">
+          <div className="flex flex-wrap items-center justify-between text-xs text-text-muted gap-4 pt-2">
             <div className="flex items-center gap-3">
               <span>{formatThaiDate(news.createdAt)}</span>
               <span aria-hidden="true">·</span>
@@ -202,7 +202,7 @@ export const NewsDetail: React.FC = () => {
               <button
                 type="button"
                 onClick={handleCopyLink}
-                className="px-2.5 py-1 border border-[#4B1F7A]/20 hover:border-[#B8923A] rounded-sm text-[11px] transition-colors"
+                className="px-2.5 py-1 border border-gold-border/25 hover:border-gold text-text rounded-sm text-[11px] transition-colors"
                 title="คัดลอกลิงก์"
               >
                 {copyNotice ? 'คัดลอกแล้ว ✓' : 'คัดลอกลิงก์'}
@@ -210,14 +210,14 @@ export const NewsDetail: React.FC = () => {
               <button
                 type="button"
                 onClick={handleShareFacebook}
-                className="px-2.5 py-1 bg-[#1877F2]/10 hover:bg-[#1877F2]/20 text-[#1877F2] rounded-sm text-[11px] transition-colors"
+                className="px-2.5 py-1 bg-[var(--social-fb)]/10 hover:bg-[var(--social-fb)]/20 text-[var(--social-fb)] rounded-sm text-[11px] transition-colors"
               >
                 Facebook
               </button>
               <button
                 type="button"
                 onClick={handleShareLine}
-                className="px-2.5 py-1 bg-[#06C755]/10 hover:bg-[#06C755]/20 text-[#06C755] rounded-sm text-[11px] transition-colors"
+                className="px-2.5 py-1 bg-[var(--social-line)]/10 hover:bg-[var(--social-line)]/20 text-[var(--social-line)] rounded-sm text-[11px] transition-colors"
               >
                 LINE
               </button>
@@ -229,7 +229,7 @@ export const NewsDetail: React.FC = () => {
         {showHeroYouTube && primaryYouTubeUrl ? (
           <SocialMediaEmbed url={primaryYouTubeUrl} title={news.title} eagerYouTube />
         ) : explicitCover ? (
-          <div className="aspect-[16/9] overflow-hidden rounded-sm border border-[#4B1F7A]/20 shadow-editorial bg-stone-100">
+          <div className="aspect-[16/9] overflow-hidden rounded-sm border border-gold-border/25 shadow-editorial bg-bg-alt">
             <img
               src={explicitCover}
               alt={news.coverImage?.alt || news.title}
@@ -242,14 +242,14 @@ export const NewsDetail: React.FC = () => {
 
         {/* Excerpt if present */}
         {news.excerpt && (
-          <div className="text-base font-serif italic text-[#4B1F7A] bg-[#EDE6F5]/40 p-4 border-l-2 border-[#B8923A] rounded-r-sm">
+          <div className="text-base font-serif italic text-accent bg-brand-soft/45 p-4 border-l-2 border-gold rounded-r-sm">
             {news.excerpt}
           </div>
         )}
 
         {/* Rich HTML Content from Tiptap */}
         <div
-          className="text-[15px] sm:text-[17px] md:text-[18px] text-[#1B1226] leading-[1.8] space-y-4 font-sans prose-custom break-words"
+          className="text-[15px] sm:text-[17px] md:text-[18px] text-text leading-[1.8] space-y-4 font-sans prose-custom break-words"
           dangerouslySetInnerHTML={{ __html: sanitizedContent }}
         />
 
@@ -267,8 +267,8 @@ export const NewsDetail: React.FC = () => {
 
         {/* Gallery Lightbox */}
         {galleryImages.length > 0 && (
-          <div className="pt-8 space-y-4 border-t border-[#4B1F7A]/15">
-            <h3 className="font-serif text-lg font-semibold text-[#1B1226]">
+          <div className="pt-8 space-y-4 border-t border-gold-border/20">
+            <h3 className="font-serif text-lg font-semibold text-heading">
               ภาพประกอบกิจกรรม ({galleryImages.length} รูป)
             </h3>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
@@ -279,7 +279,7 @@ export const NewsDetail: React.FC = () => {
                     setLightboxIndex(idx);
                     setLightboxOpen(true);
                   }}
-                  className="aspect-[4/3] rounded-sm overflow-hidden border border-[#4B1F7A]/15 bg-stone-100 cursor-pointer group"
+                  className="aspect-[4/3] rounded-sm overflow-hidden border border-gold-border/20 bg-bg-alt cursor-pointer group"
                 >
                   <img
                     src={img.url}
@@ -303,8 +303,8 @@ export const NewsDetail: React.FC = () => {
 
         {/* File Attachments */}
         {news.attachments && news.attachments.length > 0 && (
-          <div className="pt-6 space-y-3 border-t border-[#4B1F7A]/15">
-            <h3 className="font-serif text-lg font-semibold text-[#1B1226]">
+          <div className="pt-6 space-y-3 border-t border-gold-border/20">
+            <h3 className="font-serif text-lg font-semibold text-heading">
               เอกสารแนบที่เกี่ยวข้อง
             </h3>
             <div className="space-y-2">
@@ -314,10 +314,10 @@ export const NewsDetail: React.FC = () => {
                   href={att.url}
                   target="_blank"
                   rel="noreferrer"
-                  className="flex items-center justify-between p-3 border border-[#4B1F7A]/15 bg-[#FAF7F0] hover:bg-[#EDE6F5] rounded-sm text-xs transition-colors"
+                  className="flex items-center justify-between p-3 border border-gold-border/20 bg-surface hover:bg-brand-soft rounded-sm text-xs transition-colors"
                 >
-                  <span className="font-medium text-[#2A1245]">📄 {att.name}</span>
-                  <span className="text-[#9C7A2B]">ดาวน์โหลด ↗</span>
+                  <span className="font-medium text-heading">📄 {att.name}</span>
+                  <span className="text-gold-text">ดาวน์โหลด ↗</span>
                 </a>
               ))}
             </div>
@@ -335,9 +335,9 @@ export const NewsDetail: React.FC = () => {
                 <Link
                   key={item.id}
                   to={`/news/read/${item.id}`}
-                  className="group block border border-[#4B1F7A]/15 p-3 rounded-sm hover:border-[#B8923A] transition-colors"
+                  className="group block border border-gold-border/20 bg-surface p-3 rounded-sm hover:border-gold transition-colors"
                 >
-                  <div className="aspect-[16/9] bg-stone-100 rounded-sm overflow-hidden mb-2">
+                  <div className="aspect-[16/9] bg-bg-alt rounded-sm overflow-hidden mb-2">
                     {getNewsCoverUrl(item) ? (
                       <img
                         src={getNewsCoverUrl(item) || ''}
@@ -347,15 +347,15 @@ export const NewsDetail: React.FC = () => {
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform"
                       />
                     ) : (
-                      <div className="w-full h-full bg-[#EDE6F5] flex items-center justify-center">
+                      <div className="w-full h-full bg-brand-soft flex items-center justify-center">
                         <Emblem size={24} />
                       </div>
                     )}
                   </div>
-                  <h4 className="font-serif text-xs font-semibold text-[#1B1226] group-hover:text-[#4B1F7A] line-clamp-2">
+                  <h4 className="font-serif text-xs font-semibold text-heading group-hover:text-accent line-clamp-2">
                     {item.title}
                   </h4>
-                  <p className="text-[10px] text-[#1B1226]/60 mt-1">
+                  <p className="text-[10px] text-text-muted mt-1">
                     {formatThaiDate(item.createdAt, true)}
                   </p>
                 </Link>

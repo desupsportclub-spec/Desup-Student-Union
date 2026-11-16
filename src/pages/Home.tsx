@@ -193,12 +193,12 @@ export const Home: React.FC = () => {
          ======================================================== */}
       {pinnedNews.length > 0 && (
         <section className="max-w-[1240px] mx-auto px-4 sm:px-6 md:px-12">
-          <div className="flex flex-wrap items-center justify-between gap-2 mb-5 sm:mb-6 pb-3 border-b border-[#B8923A]/30">
-            <div className="inline-flex items-center gap-2 text-[11px] tracking-[0.18em] uppercase font-semibold text-[#9C7A2B]">
-              <PinIcon className="w-3.5 h-3.5 text-[#9C7A2B]" />
+          <div className="flex flex-wrap items-center justify-between gap-2 mb-5 sm:mb-6 pb-3 border-b border-gold-border/30">
+            <div className="inline-flex items-center gap-2 text-[11px] tracking-[0.18em] uppercase font-semibold text-gold-text">
+              <PinIcon className="w-3.5 h-3.5 text-gold-text" />
               <span>PINNED HIGHLIGHTS</span>
             </div>
-            <span className="text-xs text-[#1B1226]/60">
+            <span className="text-xs text-text-muted">
               ปักหมุดทั้งหมด {pinnedNews.length} รายการ
             </span>
           </div>
@@ -209,7 +209,7 @@ export const Home: React.FC = () => {
               const ytUrl = getNewsYouTubeUrl(item);
               const coverUrl = getNewsCoverUrl(item);
               return (
-                <div className="relative border border-[#B8923A]/45 bg-[#FAF7F0] p-4 sm:p-6 rounded-sm shadow-editorial">
+                <div className="relative border border-gold-border/45 bg-surface p-4 sm:p-6 rounded-sm shadow-editorial">
                   <CornerBracket position="top-left" />
                   <CornerBracket position="top-right" />
                   <CornerBracket position="bottom-left" />
@@ -220,7 +220,7 @@ export const Home: React.FC = () => {
                       {ytUrl ? (
                         <YouTubeLitePlayer url={ytUrl} title={item.title} />
                       ) : coverUrl ? (
-                        <Link to={`/news/read/${item.id}`} className="block aspect-[16/9] bg-stone-100 rounded-sm overflow-hidden">
+                        <Link to={`/news/read/${item.id}`} className="block aspect-[16/9] bg-bg-alt rounded-sm overflow-hidden">
                           <img
                             src={coverUrl}
                             alt={item.title}
@@ -230,16 +230,16 @@ export const Home: React.FC = () => {
                           />
                         </Link>
                       ) : (
-                        <Link to={`/news/read/${item.id}`} className="aspect-[16/9] bg-[#EDE6F5] rounded-sm flex items-center justify-center text-[#4B1F7A]">
+                        <Link to={`/news/read/${item.id}`} className="aspect-[16/9] bg-brand-soft rounded-sm flex items-center justify-center text-accent">
                           <Emblem size={56} />
                         </Link>
                       )}
                     </div>
 
                     <div className="lg:col-span-5 space-y-3">
-                      <div className="flex flex-wrap items-center gap-2 text-xs text-[#1B1226]/65">
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-sm bg-[#4B1F7A] text-[#FAF7F0] text-[10px] font-medium">
-                          <PinIcon className="w-3 h-3 text-[#D9B867]" />
+                      <div className="flex flex-wrap items-center gap-2 text-xs text-text-muted">
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-sm bg-brand text-brand-contrast text-[10px] font-medium">
+                          <PinIcon className="w-3 h-3 text-gold-light" />
                           <span>ปักหมุด</span>
                         </span>
                         <NewsCategoryBadge category={item.category} />
@@ -248,27 +248,27 @@ export const Home: React.FC = () => {
                       </div>
 
                       <Link to={`/news/read/${item.id}`} className="block group">
-                        <h3 className="font-serif text-xl sm:text-2xl font-semibold text-[#1B1226] group-hover:text-[#4B1F7A] transition-colors leading-snug">
+                        <h3 className="font-serif text-xl sm:text-2xl font-semibold text-heading group-hover:text-accent transition-colors leading-snug">
                           {item.title}
                         </h3>
                       </Link>
 
                       {item.excerpt && (
-                        <p className="text-xs sm:text-sm text-[#1B1226]/75 line-clamp-3 leading-relaxed">
+                        <p className="text-xs sm:text-sm text-text-muted line-clamp-3 leading-relaxed">
                           {item.excerpt}
                         </p>
                       )}
 
-                      <div className="pt-2 flex flex-wrap items-center justify-between gap-3 border-t border-[#4B1F7A]/10">
-                        <span className="text-xs text-[#1B1226]/55">
+                      <div className="pt-2 flex flex-wrap items-center justify-between gap-3 border-t border-gold-border/15">
+                        <span className="text-xs text-text-muted">
                           อ่าน {formatNumber(item.views)} ครั้ง
                         </span>
                         <Link
                           to={`/news/read/${item.id}`}
-                          className="inline-flex items-center gap-1.5 px-4 py-2 bg-[#4B1F7A] text-[#FAF7F0] hover:bg-[#2A1245] text-xs font-medium rounded-sm transition-colors"
+                          className="inline-flex items-center gap-1.5 px-4 py-2 bg-brand text-brand-contrast hover:bg-brand-hover text-xs font-medium rounded-sm transition-colors"
                         >
                           <span>เปิดอ่านรายละเอียด</span>
-                          <span className="text-[#D9B867]">→</span>
+                          <span className="text-gold-light">→</span>
                         </Link>
                       </div>
                     </div>
@@ -288,7 +288,7 @@ export const Home: React.FC = () => {
                 return (
                   <div
                     key={item.id}
-                    className="relative border border-[#B8923A]/45 bg-[#FAF7F0] p-4 sm:p-5 rounded-sm shadow-editorial flex flex-col justify-between space-y-4"
+                    className="relative border border-gold-border/45 bg-surface p-4 sm:p-5 rounded-sm shadow-editorial flex flex-col justify-between space-y-4"
                   >
                     <CornerBracket position="top-left" />
                     <CornerBracket position="top-right" />
@@ -299,7 +299,7 @@ export const Home: React.FC = () => {
                       {ytUrl ? (
                         <YouTubeLitePlayer url={ytUrl} title={item.title} />
                       ) : coverUrl ? (
-                        <Link to={`/news/read/${item.id}`} className="block aspect-[16/9] bg-stone-100 rounded-sm overflow-hidden">
+                        <Link to={`/news/read/${item.id}`} className="block aspect-[16/9] bg-bg-alt rounded-sm overflow-hidden">
                           <img
                             src={coverUrl}
                             alt={item.title}
@@ -309,14 +309,14 @@ export const Home: React.FC = () => {
                           />
                         </Link>
                       ) : (
-                        <Link to={`/news/read/${item.id}`} className="aspect-[16/9] bg-[#EDE6F5] rounded-sm flex items-center justify-center text-[#4B1F7A]">
+                        <Link to={`/news/read/${item.id}`} className="aspect-[16/9] bg-brand-soft rounded-sm flex items-center justify-center text-accent">
                           <Emblem size={44} />
                         </Link>
                       )}
 
-                      <div className="flex flex-wrap items-center gap-2 text-[11px] text-[#1B1226]/65">
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-sm bg-[#4B1F7A] text-[#FAF7F0] text-[10px] font-medium">
-                          <PinIcon className="w-3 h-3 text-[#D9B867]" />
+                      <div className="flex flex-wrap items-center gap-2 text-[11px] text-text-muted">
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-sm bg-brand text-brand-contrast text-[10px] font-medium">
+                          <PinIcon className="w-3 h-3 text-gold-light" />
                           <span>ปักหมุด</span>
                         </span>
                         <NewsCategoryBadge category={item.category} />
@@ -325,23 +325,23 @@ export const Home: React.FC = () => {
                       </div>
 
                       <Link to={`/news/read/${item.id}`} className="block group">
-                        <h3 className="font-serif text-base sm:text-lg font-semibold text-[#1B1226] group-hover:text-[#4B1F7A] transition-colors line-clamp-2 leading-snug">
+                        <h3 className="font-serif text-base sm:text-lg font-semibold text-heading group-hover:text-accent transition-colors line-clamp-2 leading-snug">
                           {item.title}
                         </h3>
                       </Link>
 
                       {item.excerpt && (
-                        <p className="text-xs text-[#1B1226]/70 line-clamp-2 leading-relaxed">
+                        <p className="text-xs text-text-muted line-clamp-2 leading-relaxed">
                           {item.excerpt}
                         </p>
                       )}
                     </div>
 
-                    <div className="pt-3 border-t border-[#4B1F7A]/10 flex items-center justify-between text-xs">
-                      <span className="text-[#1B1226]/55">อ่าน {formatNumber(item.views)} ครั้ง</span>
+                    <div className="pt-3 border-t border-gold-border/15 flex items-center justify-between text-xs">
+                      <span className="text-text-muted">อ่าน {formatNumber(item.views)} ครั้ง</span>
                       <Link
                         to={`/news/read/${item.id}`}
-                        className="text-[#4B1F7A] font-medium hover:text-[#9C7A2B] transition-colors"
+                        className="text-accent font-medium hover:text-gold-text transition-colors"
                       >
                         เปิดอ่านรายละเอียด →
                       </Link>
@@ -358,34 +358,34 @@ export const Home: React.FC = () => {
           01. ข่าวเด่น & ข่าวรอง (Lead story left + 4 vertical items right)
          ======================================================== */}
       <section className="max-w-[1240px] mx-auto px-4 sm:px-6 md:px-12">
-        <div className="flex flex-col md:flex-row md:items-end justify-between mb-6 sm:mb-10 pb-4 border-b border-[#B8923A]/30">
+        <div className="flex flex-col md:flex-row md:items-end justify-between mb-6 sm:mb-10 pb-4 border-b border-gold-border/30">
           <div>
             <SectionEyebrow number="01" enText="NEWS" thText="ข่าวสาร" />
-            <h2 className="font-serif text-2xl md:text-3xl text-[#1B1226] font-semibold mt-2">
+            <h2 className="font-serif text-2xl md:text-3xl text-heading font-semibold mt-2">
               ข่าวประชาสัมพันธ์
             </h2>
           </div>
-          <Link to="/news" className="btn-secondary-link text-xs font-medium text-[#4B1F7A] mt-3 md:mt-0 self-start md:self-auto">
+          <Link to="/news" className="btn-secondary-link text-xs font-medium text-accent mt-3 md:mt-0 self-start md:self-auto">
             <span>อ่านทั้งหมด</span>
-            <span className="text-[#B8923A]">→</span>
+            <span className="text-gold-text">→</span>
           </Link>
         </div>
 
         {newsLoading && !featuredNews ? (
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8 animate-pulse">
-            <div className="lg:col-span-7 border border-[#4B1F7A]/10 bg-[#FAF7F0] p-4 sm:p-6 rounded-sm space-y-4">
-              <div className="aspect-[16/9] bg-stone-200 rounded-sm" />
-              <div className="h-4 bg-stone-200 rounded w-1/3" />
-              <div className="h-6 bg-stone-200 rounded w-4/5" />
-              <div className="h-4 bg-stone-200 rounded w-2/3" />
+            <div className="lg:col-span-7 border border-gold-border/15 bg-surface p-4 sm:p-6 rounded-sm space-y-4">
+              <div className="aspect-[16/9] bg-bg-alt rounded-sm" />
+              <div className="h-4 bg-bg-alt rounded w-1/3" />
+              <div className="h-6 bg-bg-alt rounded w-4/5" />
+              <div className="h-4 bg-bg-alt rounded w-2/3" />
             </div>
             <div className="lg:col-span-5 flex flex-col justify-between space-y-3 sm:space-y-4">
               {[1, 2, 3, 4].map((i) => (
-                <div key={i} className="flex gap-3 sm:gap-4 p-3 sm:p-3.5 border border-[#4B1F7A]/10 bg-[#FAF7F0] rounded-sm">
-                  <div className="w-20 h-16 sm:w-24 sm:h-20 bg-stone-200 rounded-sm shrink-0" />
+                <div key={i} className="flex gap-3 sm:gap-4 p-3 sm:p-3.5 border border-gold-border/15 bg-surface rounded-sm">
+                  <div className="w-20 h-16 sm:w-24 sm:h-20 bg-bg-alt rounded-sm shrink-0" />
                   <div className="flex-1 space-y-2 py-1">
-                    <div className="h-3 bg-stone-200 rounded w-1/2" />
-                    <div className="h-4 bg-stone-200 rounded w-full" />
+                    <div className="h-3 bg-bg-alt rounded w-1/2" />
+                    <div className="h-4 bg-bg-alt rounded w-full" />
                   </div>
                 </div>
               ))}
@@ -397,14 +397,14 @@ export const Home: React.FC = () => {
             <div className="lg:col-span-7">
               <Link
                 to={`/news/read/${featuredNews.id}`}
-                className="group block relative border border-[#4B1F7A]/15 bg-[#FAF7F0] p-4 sm:p-6 rounded-sm shadow-editorial transition-all duration-300 hover:border-[#B8923A]/70"
+                className="group block relative border border-gold-border/20 bg-surface p-4 sm:p-6 rounded-sm shadow-editorial transition-all duration-300 hover:border-gold"
               >
                 <CornerBracket position="top-left" />
                 <CornerBracket position="top-right" />
                 <CornerBracket position="bottom-left" />
                 <CornerBracket position="bottom-right" />
 
-                <div className="aspect-[16/9] bg-stone-100 overflow-hidden mb-4 sm:mb-5 rounded-sm relative">
+                <div className="aspect-[16/9] bg-bg-alt overflow-hidden mb-4 sm:mb-5 rounded-sm relative">
                   {getNewsCoverUrl(featuredNews) ? (
                     <img
                       src={getNewsCoverUrl(featuredNews) || ''}
@@ -414,14 +414,14 @@ export const Home: React.FC = () => {
                       className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.04]"
                     />
                   ) : (
-                    <div className="w-full h-full bg-[#EDE6F5] flex items-center justify-center text-[#4B1F7A]">
+                    <div className="w-full h-full bg-brand-soft flex items-center justify-center text-accent">
                       <Emblem size={64} />
                     </div>
                   )}
 
                   {(featuredNews.category === 'video' || getNewsYouTubeUrl(featuredNews)) && (
-                    <div className="absolute inset-0 bg-black/20 flex items-center justify-center">
-                      <div className="w-12 h-12 rounded-full bg-[#B8923A] text-white flex items-center justify-center shadow-lg">
+                    <div className="absolute inset-0 bg-anchor-bg-deep/25 flex items-center justify-center">
+                      <div className="w-12 h-12 rounded-full bg-gold text-anchor-bg-deep flex items-center justify-center shadow-lg">
                         ▶
                       </div>
                     </div>
@@ -429,7 +429,7 @@ export const Home: React.FC = () => {
                 </div>
 
                 <div className="space-y-2">
-                  <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-[#1B1226]/60">
+                  <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-text-muted">
                     <NewsCategoryBadge category={featuredNews.category} />
                     <span aria-hidden="true">·</span>
                     <span>{formatThaiDate(featuredNews.createdAt)}</span>
@@ -437,11 +437,11 @@ export const Home: React.FC = () => {
                     <span>อ่าน {formatNumber(featuredNews.views)} ครั้ง</span>
                   </div>
 
-                  <h3 className="font-serif text-lg sm:text-xl md:text-2xl font-semibold text-[#1B1226] group-hover:text-[#4B1F7A] transition-colors line-clamp-2">
+                  <h3 className="font-serif text-lg sm:text-xl md:text-2xl font-semibold text-heading group-hover:text-accent transition-colors line-clamp-2">
                     {featuredNews.title}
                   </h3>
 
-                  <p className="text-xs md:text-sm text-[#1B1226]/70 line-clamp-2 leading-relaxed">
+                  <p className="text-xs md:text-sm text-text-muted line-clamp-2 leading-relaxed">
                     {featuredNews.excerpt || 'คลิกเพื่ออ่านรายละเอียดเนื้อหาข่าวสารฉบับเต็ม'}
                   </p>
                 </div>
@@ -458,9 +458,9 @@ export const Home: React.FC = () => {
                     <Link
                       key={item.id}
                       to={`/news/read/${item.id}`}
-                      className="group flex gap-3 sm:gap-4 p-3 sm:p-3.5 border border-[#4B1F7A]/10 hover:border-[#B8923A]/50 bg-[#FAF7F0] rounded-sm transition-all duration-300"
+                      className="group flex gap-3 sm:gap-4 p-3 sm:p-3.5 border border-gold-border/15 hover:border-gold bg-surface rounded-sm transition-all duration-300"
                     >
-                      <div className="w-20 h-16 sm:w-24 sm:h-20 bg-stone-100 rounded-sm shrink-0 overflow-hidden relative">
+                      <div className="w-20 h-16 sm:w-24 sm:h-20 bg-bg-alt rounded-sm shrink-0 overflow-hidden relative">
                         {thumb ? (
                           <img
                             src={thumb}
@@ -470,25 +470,25 @@ export const Home: React.FC = () => {
                             className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                           />
                         ) : (
-                          <div className="w-full h-full bg-[#EDE6F5] flex items-center justify-center text-[#4B1F7A]/50">
+                          <div className="w-full h-full bg-brand-soft flex items-center justify-center text-accent/60">
                             <Emblem size={28} />
                           </div>
                         )}
                         {hasVideo && (
-                          <div className="absolute inset-0 bg-black/25 flex items-center justify-center">
-                            <span className="w-6 h-6 rounded-full bg-[#B8923A] text-white text-[10px] flex items-center justify-center">
+                          <div className="absolute inset-0 bg-anchor-bg-deep/30 flex items-center justify-center">
+                            <span className="w-6 h-6 rounded-full bg-gold text-anchor-bg-deep text-[10px] flex items-center justify-center">
                               ▶
                             </span>
                           </div>
                         )}
                       </div>
                       <div className="flex flex-col justify-center space-y-1 min-w-0">
-                        <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[11px] text-[#1B1226]/60">
+                        <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[11px] text-text-muted">
                           <NewsCategoryBadge category={item.category} />
                           <span aria-hidden="true">·</span>
                           <span>{formatThaiDate(item.createdAt, true)}</span>
                         </div>
-                        <h4 className="font-serif text-sm font-semibold text-[#1B1226] group-hover:text-[#4B1F7A] transition-colors line-clamp-2">
+                        <h4 className="font-serif text-sm font-semibold text-heading group-hover:text-accent transition-colors line-clamp-2">
                           {item.title}
                         </h4>
                       </div>
@@ -496,62 +496,62 @@ export const Home: React.FC = () => {
                   );
                 })
               ) : (
-                <div className="p-8 text-center border border-dashed border-[#4B1F7A]/20 rounded-sm text-xs text-[#1B1226]/60">
+                <div className="p-8 text-center border border-dashed border-gold-border/25 rounded-sm text-xs text-text-muted">
                   กำลังรอการเผยแพร่ข่าวสารเพิ่มเติม
                 </div>
               )}
             </div>
           </div>
         ) : (
-          <div className="p-12 text-center border border-dashed border-[#4B1F7A]/25 rounded-sm bg-white/40">
-            <p className="font-serif text-lg text-[#2A1245] mb-2">ยังไม่มีข่าวประชาสัมพันธ์ในขณะนี้</p>
-            <p className="text-xs text-[#1B1226]/60">สามารถติดตามข่าวสารและการประกาศกิจกรรมที่จะอัปเดตผ่านหน้านี้เร็ว ๆ นี้</p>
+          <div className="p-12 text-center border border-dashed border-gold-border/30 rounded-sm bg-surface/50">
+            <p className="font-serif text-lg text-heading mb-2">ยังไม่มีข่าวประชาสัมพันธ์ในขณะนี้</p>
+            <p className="text-xs text-text-muted">สามารถติดตามข่าวสารและการประกาศกิจกรรมที่จะอัปเดตผ่านหน้านี้เร็ว ๆ นี้</p>
           </div>
         )}
       </section>
 
       {/* ========================================================
-          02. รายงานผลการดำเนินงาน (Dark violet-900 section)
+          02. รายงานผลการดำเนินงาน (Anchor dark royal violet section)
          ======================================================== */}
       {(() => {
         const displayStats = adminComplaintStats || complaintStats;
         return (
-          <section className="bg-[#2A1245] text-[#FAF7F0] py-14 sm:py-20 relative overflow-hidden border-y border-[#B8923A]/30">
+          <section className="bg-anchor-bg text-anchor-text py-14 sm:py-20 relative overflow-hidden border-y border-gold/30">
             <div className="max-w-[1240px] mx-auto px-4 sm:px-6 md:px-12 relative z-10">
               <div className="mb-8 sm:mb-12 text-center max-w-xl mx-auto space-y-2">
                 <SectionEyebrow number="02" enText="PERFORMANCE REPORT" thText="รายงานผลการดำเนินงาน" light />
-                <h2 className="font-serif text-2xl md:text-3xl font-semibold text-[#FAF7F0]">
+                <h2 className="font-serif text-2xl md:text-3xl font-semibold text-anchor-text">
                   ส่งเสริมอัตลักษณ์ พิทักษ์สิทธินักเรียน
                 </h2>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 sm:gap-8 md:gap-12 text-center max-w-4xl mx-auto">
                 {/* Stat 1: Total Complaints */}
-                <div className="space-y-1.5 sm:space-y-2 border-b sm:border-b-0 sm:border-r border-[#B8923A]/20 pb-5 sm:pb-0 sm:pr-4">
-                  <div className="font-serif text-3xl sm:text-4xl md:text-5xl lg:text-6xl text-[#D9B867] tabular-numbers font-medium">
+                <div className="space-y-1.5 sm:space-y-2 border-b sm:border-b-0 sm:border-r border-gold/20 pb-5 sm:pb-0 sm:pr-4">
+                  <div className="font-serif text-3xl sm:text-4xl md:text-5xl lg:text-6xl text-anchor-gold tabular-numbers font-medium">
                     {formatNumber(displayStats.total)}
                   </div>
-                  <div className="text-[11px] sm:text-xs tracking-wider text-[#FAF7F0]/80 uppercase">
+                  <div className="text-[11px] sm:text-xs tracking-wider text-anchor-text/80 uppercase">
                     เรื่องร้องเรียนทั้งหมด
                   </div>
                 </div>
 
                 {/* Stat 2: In Progress Complaints */}
-                <div className="space-y-1.5 sm:space-y-2 border-b sm:border-b-0 sm:border-r border-[#B8923A]/20 pb-5 sm:pb-0 sm:px-4">
-                  <div className="font-serif text-3xl sm:text-4xl md:text-5xl lg:text-6xl text-[#FAF7F0] tabular-numbers font-medium">
+                <div className="space-y-1.5 sm:space-y-2 border-b sm:border-b-0 sm:border-r border-gold/20 pb-5 sm:pb-0 sm:px-4">
+                  <div className="font-serif text-3xl sm:text-4xl md:text-5xl lg:text-6xl text-anchor-text tabular-numbers font-medium">
                     {formatNumber(displayStats.inProgress)}
                   </div>
-                  <div className="text-[11px] sm:text-xs tracking-wider text-[#FAF7F0]/80 uppercase">
+                  <div className="text-[11px] sm:text-xs tracking-wider text-anchor-text/80 uppercase">
                     กำลังดำเนินการ
                   </div>
                 </div>
 
                 {/* Stat 3: Resolved Complaints (Case count, no %) */}
                 <div className="space-y-1.5 sm:space-y-2 pt-1 sm:pt-0 sm:pl-4">
-                  <div className="font-serif text-3xl sm:text-4xl md:text-5xl lg:text-6xl text-[#D9B867] tabular-numbers font-medium">
+                  <div className="font-serif text-3xl sm:text-4xl md:text-5xl lg:text-6xl text-anchor-gold tabular-numbers font-medium">
                     {formatNumber(displayStats.resolved)}
                   </div>
-                  <div className="text-[11px] sm:text-xs tracking-wider text-[#FAF7F0]/80 uppercase">
+                  <div className="text-[11px] sm:text-xs tracking-wider text-anchor-text/80 uppercase">
                     ดำเนินการเสร็จสิ้น
                   </div>
                 </div>
@@ -565,16 +565,16 @@ export const Home: React.FC = () => {
           03. กิจกรรมที่กำลังจะมาถึง (Upcoming Events carousel)
          ======================================================== */}
       <section className="max-w-[1240px] mx-auto px-4 sm:px-6 md:px-12">
-        <div className="flex flex-col md:flex-row md:items-end justify-between mb-6 sm:mb-10 pb-4 border-b border-[#B8923A]/30">
+        <div className="flex flex-col md:flex-row md:items-end justify-between mb-6 sm:mb-10 pb-4 border-b border-gold-border/30">
           <div>
             <SectionEyebrow number="03" enText="SCHEDULE" thText="ปฏิทินกิจกรรม" />
-            <h2 className="font-serif text-2xl md:text-3xl text-[#1B1226] font-semibold mt-2">
+            <h2 className="font-serif text-2xl md:text-3xl text-heading font-semibold mt-2">
               กิจกรรมที่กำลังจะมาถึง
             </h2>
           </div>
-          <Link to="/calendar" className="btn-secondary-link text-xs font-medium text-[#4B1F7A] mt-3 md:mt-0 self-start md:self-auto">
+          <Link to="/calendar" className="btn-secondary-link text-xs font-medium text-accent mt-3 md:mt-0 self-start md:self-auto">
             <span>ดูปฏิทินทั้งหมด</span>
-            <span className="text-[#B8923A]">→</span>
+            <span className="text-gold-text">→</span>
           </Link>
         </div>
 
@@ -590,39 +590,39 @@ export const Home: React.FC = () => {
                 return (
                   <div
                     key={evt.id}
-                    className="flex-[0_0_86%] sm:flex-[0_0_46%] lg:flex-[0_0_32%] min-w-0 border border-[#4B1F7A]/15 bg-[#FAF7F0] p-5 sm:p-6 rounded-sm shadow-editorial flex flex-col justify-between"
+                    className="flex-[0_0_86%] sm:flex-[0_0_46%] lg:flex-[0_0_32%] min-w-0 border border-gold-border/20 bg-surface p-5 sm:p-6 rounded-sm shadow-editorial flex flex-col justify-between"
                   >
                     <div>
                       <div className="flex items-start gap-4 mb-4">
-                        <div className="bg-[#EDE6F5] border border-[#B8923A]/30 p-2 text-center rounded-sm min-w-[56px]">
-                          <div className="font-serif text-2xl font-bold text-[#4B1F7A] leading-none">
+                        <div className="bg-brand-soft border border-gold-border/30 p-2 text-center rounded-sm min-w-[56px]">
+                          <div className="font-serif text-2xl font-bold text-accent leading-none">
                             {dateParts.day}
                           </div>
-                          <div className="text-[11px] text-[#9C7A2B] font-medium mt-1">
+                          <div className="text-[11px] text-gold-text font-medium mt-1">
                             {dateParts.monthShort}
                           </div>
                         </div>
                         <div className="min-w-0 flex-1">
                           {scheduleStatus === 'ongoing' && (
                             <div className="mb-1">
-                              <span className="px-1.5 py-0.5 rounded-sm bg-emerald-50 border border-emerald-200 text-emerald-800 text-[10px] font-medium">
+                              <span className="px-1.5 py-0.5 rounded-sm bg-success-bg border border-success/30 text-success text-[10px] font-medium">
                                 อยู่ในช่วงจัดกิจกรรม
                               </span>
                             </div>
                           )}
-                          <h3 className="font-serif text-lg font-semibold text-[#1B1226] line-clamp-2">
+                          <h3 className="font-serif text-lg font-semibold text-heading line-clamp-2">
                             {evt.title}
                           </h3>
                         </div>
                       </div>
-                      <p className="text-xs text-[#1B1226]/70 line-clamp-2 mb-4 leading-relaxed">
+                      <p className="text-xs text-text-muted line-clamp-2 mb-4 leading-relaxed">
                         {evt.description || 'ไม่มีคำอธิบายเพิ่มเติม'}
                       </p>
                     </div>
 
-                    <div className="pt-3 border-t border-[#4B1F7A]/10 text-xs text-[#1B1226]/60 flex items-center justify-between gap-2">
+                    <div className="pt-3 border-t border-gold-border/15 text-xs text-text-muted flex items-center justify-between gap-2">
                       <span className="truncate">📍 {evt.location || 'โรงเรียนสาธิต มพ.'}</span>
-                      <span className="text-[#9C7A2B] shrink-0">
+                      <span className="text-gold-text shrink-0">
                         {hasDateRange && evt.endAt
                           ? `ถึง ${formatThaiDate(evt.endAt, true)}`
                           : `พ.ศ. ${dateParts.yearBE}`}
@@ -634,9 +634,9 @@ export const Home: React.FC = () => {
             </div>
           </div>
         ) : (
-          <div className="p-12 text-center border border-dashed border-[#4B1F7A]/25 rounded-sm bg-white/40">
-            <p className="font-serif text-lg text-[#2A1245] mb-2">ยังไม่มีกิจกรรมที่กำหนดไว้ในเร็ว ๆ นี้</p>
-            <p className="text-xs text-[#1B1226]/60">สามารถตรวจสอบกำหนดการในหน้าปฏิทินกิจกรรมฉบับเต็มได้</p>
+          <div className="p-12 text-center border border-dashed border-gold-border/30 rounded-sm bg-surface/50">
+            <p className="font-serif text-lg text-heading mb-2">ยังไม่มีกิจกรรมที่กำหนดไว้ในเร็ว ๆ นี้</p>
+            <p className="text-xs text-text-muted">สามารถตรวจสอบกำหนดการในหน้าปฏิทินกิจกรรมฉบับเต็มได้</p>
           </div>
         )}
       </section>
@@ -646,16 +646,16 @@ export const Home: React.FC = () => {
          ======================================================== */}
       {galleryPhotos.length > 0 && (
         <section className="max-w-[1240px] mx-auto px-4 sm:px-6 md:px-12">
-          <div className="flex flex-col md:flex-row md:items-end justify-between mb-6 sm:mb-10 pb-4 border-b border-[#B8923A]/30">
+          <div className="flex flex-col md:flex-row md:items-end justify-between mb-6 sm:mb-10 pb-4 border-b border-gold-border/30">
             <div>
               <SectionEyebrow number="04" enText="GALLERY" thText="ภาพข่าวกิจกรรม" />
-              <h2 className="font-serif text-2xl md:text-3xl text-[#1B1226] font-semibold mt-2">
+              <h2 className="font-serif text-2xl md:text-3xl text-heading font-semibold mt-2">
                 ประมวลภาพบรรยากาศ
               </h2>
             </div>
-            <Link to="/news/activity" className="btn-secondary-link text-xs font-medium text-[#4B1F7A] mt-3 md:mt-0 self-start md:self-auto">
+            <Link to="/news/activity" className="btn-secondary-link text-xs font-medium text-accent mt-3 md:mt-0 self-start md:self-auto">
               <span>ภาพกิจกรรมทั้งหมด</span>
-              <span className="text-[#B8923A]">→</span>
+              <span className="text-gold-text">→</span>
             </Link>
           </div>
 
@@ -667,7 +667,7 @@ export const Home: React.FC = () => {
                   setLightboxIndex(index);
                   setLightboxOpen(true);
                 }}
-                className="cursor-pointer group relative overflow-hidden bg-stone-100 border border-[#4B1F7A]/15 rounded-sm aspect-[4/3]"
+                className="cursor-pointer group relative overflow-hidden bg-bg-alt border border-gold-border/20 rounded-sm aspect-[4/3]"
               >
                 <img
                   src={photo.src}
@@ -676,7 +676,7 @@ export const Home: React.FC = () => {
                   decoding="async"
                   className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                 />
-                <div className="absolute inset-0 bg-[#2A1245]/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-3 sm:p-4 text-white text-xs">
+                <div className="absolute inset-0 bg-anchor-bg/70 opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-3 sm:p-4 text-anchor-text text-xs">
                   <span className="line-clamp-2 font-medium">{photo.title}</span>
                 </div>
               </div>
@@ -696,7 +696,7 @@ export const Home: React.FC = () => {
           05. สารจากนายกองค์การนักเรียน (Editorial portrait overlap)
          ======================================================== */}
       <section className="max-w-[1240px] mx-auto px-4 sm:px-6 md:px-12 pb-8 sm:pb-12">
-        <div className="bg-[#FAF7F0] border border-[#B8923A]/40 p-5 sm:p-8 md:p-14 rounded-sm shadow-editorial relative overflow-hidden">
+        <div className="bg-surface border border-gold-border/40 p-5 sm:p-8 md:p-14 rounded-sm shadow-editorial relative overflow-hidden">
           <CornerBracket position="top-left" />
           <CornerBracket position="top-right" />
           <CornerBracket position="bottom-left" />
@@ -705,7 +705,7 @@ export const Home: React.FC = () => {
           <div className="grid grid-cols-1 md:grid-cols-12 gap-6 sm:gap-8 md:gap-12 items-center">
             {/* Left 4 cols: President photo with greyscale-to-color transition */}
             <div className="md:col-span-4 flex justify-center">
-              <div className="relative w-36 h-44 sm:w-48 sm:h-60 md:w-56 md:h-72 border border-[#B8923A] rounded-sm overflow-hidden shadow-editorial bg-stone-100">
+              <div className="relative w-36 h-44 sm:w-48 sm:h-60 md:w-56 md:h-72 border border-gold rounded-sm overflow-hidden shadow-editorial bg-bg-alt">
                 {president?.photo?.url || president?.photoUrl ? (
                   <img
                     src={president.photo?.url || president.photoUrl}
@@ -715,9 +715,9 @@ export const Home: React.FC = () => {
                     className="w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-500"
                   />
                 ) : (
-                  <div className="w-full h-full bg-[#EDE6F5] flex flex-col items-center justify-center p-4 text-center">
+                  <div className="w-full h-full bg-brand-soft flex flex-col items-center justify-center p-4 text-center">
                     <Emblem size={56} />
-                    <span className="text-xs text-[#4B1F7A] mt-3 font-medium">นายกองค์การนักเรียน</span>
+                    <span className="text-xs text-accent mt-3 font-medium">นายกองค์การนักเรียน</span>
                   </div>
                 )}
               </div>
@@ -726,19 +726,19 @@ export const Home: React.FC = () => {
             {/* Right 8 cols: Editorial Message */}
             <div className="md:col-span-8 space-y-3 sm:space-y-4">
               <SectionEyebrow number="05" enText="MESSAGE FROM THE PRESIDENT" thText="สารจากนายกองค์การนักเรียน" />
-              <h2 className="font-serif text-xl sm:text-2xl md:text-3xl text-[#1B1226] font-semibold leading-snug">
+              <h2 className="font-serif text-xl sm:text-2xl md:text-3xl text-heading font-semibold leading-snug">
                 {presidentHeadline}
               </h2>
-              <p className="text-sm md:text-base text-[#1B1226]/80 leading-relaxed font-sans whitespace-pre-line">
+              <p className="text-sm md:text-base text-text/85 leading-relaxed font-sans whitespace-pre-line">
                 {presidentMessage?.trim() ||
                   president?.quote ||
                   "องค์การนักเรียนยินดีต้อนรับนักเรียน ครู อาจารย์ และผู้ปกครองทุกท่าน เว็บไซต์นี้จัดทำขึ้นเพื่อเป็นช่องทางหลักในการสื่อสารความเคลื่อนไหว ประกาศระเบียบ กิจกรรม และที่สำคัญที่สุดคือเป็นช่องทางรับฟังความคิดเห็นและข้อเสนอแนะเพื่อร่วมสร้างสรรค์สังคมโรงเรียนของเราให้น่าอยู่และเปี่ยมด้วยคุณภาพ"}
               </p>
-              <div className="pt-2 border-t border-[#4B1F7A]/10">
-                <div className="font-serif text-base font-semibold text-[#4B1F7A]">
+              <div className="pt-2 border-t border-gold-border/15">
+                <div className="font-serif text-base font-semibold text-accent">
                   {president?.name || 'นายกองค์การนักเรียน'}
                 </div>
-                <div className="text-xs text-[#9C7A2B]">
+                <div className="text-xs text-gold-text">
                   นายกองค์การนักเรียน ประจำปีการศึกษา {president?.yearTH || academicYearTH}
                 </div>
               </div>

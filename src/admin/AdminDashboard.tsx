@@ -63,12 +63,12 @@ export const AdminDashboard: React.FC = () => {
   return (
     <div className="space-y-8">
       {/* Title */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-[#4B1F7A]/15 pb-4">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-gold-border/20 pb-4">
         <div>
-          <h1 className="font-serif text-2xl md:text-3xl font-semibold text-[#2A1245]">
+          <h1 className="font-serif text-2xl md:text-3xl font-semibold text-heading">
             ภาพรวมระบบบริหารจัดการ
           </h1>
-          <p className="text-xs text-[#1B1226]/60 mt-1">
+          <p className="text-xs text-text-muted mt-1">
             ยินดีต้อนรับสู่ระบบหลังบ้าน องค์การนักเรียน โรงเรียนสาธิตมหาวิทยาลัยพะเยา
           </p>
         </div>
@@ -77,13 +77,13 @@ export const AdminDashboard: React.FC = () => {
         <div className="flex items-center gap-3">
           <Link
             to="/admin/news"
-            className="px-4 py-2 bg-[#4B1F7A] text-[#FAF7F0] text-xs font-medium rounded-sm hover:bg-[#2A1245] transition-colors"
+            className="px-4 py-2 bg-brand text-brand-contrast text-xs font-medium rounded-sm hover:bg-brand-hover transition-colors"
           >
             + เขียนข่าวใหม่
           </Link>
           <Link
             to="/admin/complaints"
-            className="px-4 py-2 bg-white border border-[#4B1F7A]/20 text-[#2A1245] text-xs font-medium rounded-sm hover:border-[#B8923A] transition-colors"
+            className="px-4 py-2 bg-surface-elevated border border-gold-border/30 text-heading text-xs font-medium rounded-sm hover:border-gold transition-colors"
           >
             ตรวจเรื่องร้องเรียน ({pendingComplaints.length})
           </Link>
@@ -92,62 +92,62 @@ export const AdminDashboard: React.FC = () => {
 
       {/* Metric Cards Grid */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-5">
-        <div className="bg-white border border-[#4B1F7A]/15 p-5 rounded-sm shadow-editorial-sm">
-          <span className="text-[11px] text-[#9C7A2B] font-semibold uppercase tracking-wider">
+        <div className="bg-surface-elevated border border-gold-border/20 p-5 rounded-sm shadow-editorial-sm">
+          <span className="text-[11px] text-gold-text font-semibold uppercase tracking-wider">
             เรื่องร้องเรียนรอตรวจ
           </span>
-          <div className="font-serif text-3xl font-bold text-[#4B1F7A] mt-2">
+          <div className="font-serif text-3xl font-bold text-accent mt-2">
             {pendingComplaints.length}
           </div>
-          <p className="text-[10px] text-[#1B1226]/60 mt-1">
+          <p className="text-[10px] text-text-muted mt-1">
             จากทั้งหมด {complaints.length} เรื่อง
           </p>
         </div>
 
-        <div className="bg-white border border-[#4B1F7A]/15 p-5 rounded-sm shadow-editorial-sm">
-          <span className="text-[11px] text-[#9C7A2B] font-semibold uppercase tracking-wider">
+        <div className="bg-surface-elevated border border-gold-border/20 p-5 rounded-sm shadow-editorial-sm">
+          <span className="text-[11px] text-gold-text font-semibold uppercase tracking-wider">
             ข่าวสารในระบบ
           </span>
-          <div className="font-serif text-3xl font-bold text-[#2A1245] mt-2">
+          <div className="font-serif text-3xl font-bold text-heading mt-2">
             {newsCount}
           </div>
-          <p className="text-[10px] text-[#1B1226]/60 mt-1">
+          <p className="text-[10px] text-text-muted mt-1">
             บทความและประกาศ
           </p>
         </div>
 
-        <div className="bg-white border border-[#4B1F7A]/15 p-5 rounded-sm shadow-editorial-sm">
-          <span className="text-[11px] text-[#9C7A2B] font-semibold uppercase tracking-wider">
+        <div className="bg-surface-elevated border border-gold-border/20 p-5 rounded-sm shadow-editorial-sm">
+          <span className="text-[11px] text-gold-text font-semibold uppercase tracking-wider">
             กิจกรรมในปฏิทิน
           </span>
-          <div className="font-serif text-3xl font-bold text-[#2A1245] mt-2">
+          <div className="font-serif text-3xl font-bold text-heading mt-2">
             {eventsCount}
           </div>
-          <p className="text-[10px] text-[#1B1226]/60 mt-1">
+          <p className="text-[10px] text-text-muted mt-1">
             กำหนดการตลอดปีการศึกษา
           </p>
         </div>
 
-        <div className="bg-white border border-[#4B1F7A]/15 p-5 rounded-sm shadow-editorial-sm">
-          <span className="text-[11px] text-[#9C7A2B] font-semibold uppercase tracking-wider">
+        <div className="bg-surface-elevated border border-gold-border/20 p-5 rounded-sm shadow-editorial-sm">
+          <span className="text-[11px] text-gold-text font-semibold uppercase tracking-wider">
             ผู้เข้าชมเว็บไซต์
           </span>
-          <div className="font-serif text-3xl font-bold text-[#9C7A2B] mt-2">
+          <div className="font-serif text-3xl font-bold text-gold-text mt-2">
             {formatNumber(totalVisits)}
           </div>
-          <p className="text-[10px] text-[#1B1226]/60 mt-1">
+          <p className="text-[10px] text-text-muted mt-1">
             ครั้งสะสม
           </p>
         </div>
       </div>
 
       {/* Recent Complaints Triage Table */}
-      <div className="bg-white border border-[#4B1F7A]/15 rounded-sm shadow-editorial-sm overflow-hidden">
-        <div className="p-4 border-b border-[#4B1F7A]/10 flex items-center justify-between">
-          <h2 className="font-serif text-base font-semibold text-[#2A1245]">
+      <div className="bg-surface-elevated border border-gold-border/20 rounded-sm shadow-editorial-sm overflow-hidden">
+        <div className="p-4 border-b border-gold-border/15 flex items-center justify-between">
+          <h2 className="font-serif text-base font-semibold text-heading">
             เรื่องร้องเรียนล่าสุด
           </h2>
-          <Link to="/admin/complaints" className="text-xs text-[#9C7A2B] hover:underline">
+          <Link to="/admin/complaints" className="text-xs text-gold-text hover:underline">
             ดูทั้งหมด ({complaints.length}) →
           </Link>
         </div>
@@ -155,7 +155,7 @@ export const AdminDashboard: React.FC = () => {
         {complaints.length > 0 ? (
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs">
-              <thead className="bg-[#FAF7F0] border-b border-[#4B1F7A]/10 text-[#9C7A2B] uppercase tracking-wider font-medium">
+              <thead className="bg-surface border-b border-gold-border/15 text-gold-text uppercase tracking-wider font-medium">
                 <tr>
                   <th className="py-2.5 px-4">รหัสติดตาม</th>
                   <th className="py-2.5 px-4">หัวข้อเรื่อง</th>
@@ -164,25 +164,25 @@ export const AdminDashboard: React.FC = () => {
                   <th className="py-2.5 px-4 text-center">การจัดการ</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-stone-100">
+              <tbody className="divide-y divide-gold-border/10">
                 {complaints.slice(0, 5).map((comp) => (
-                  <tr key={comp.id} className="hover:bg-stone-50">
-                    <td className="py-3 px-4 font-mono font-bold text-[#4B1F7A]">
+                  <tr key={comp.id} className="hover:bg-bg-alt/60 transition-colors">
+                    <td className="py-3 px-4 font-mono font-bold text-accent">
                       {comp.trackingCode}
                     </td>
-                    <td className="py-3 px-4 font-medium text-[#1B1226] max-w-xs truncate">
+                    <td className="py-3 px-4 font-medium text-text max-w-xs truncate">
                       {comp.title}
                     </td>
                     <td className="py-3 px-4">
                       <ComplaintStatusBadge status={comp.status} />
                     </td>
-                    <td className="py-3 px-4 text-[#1B1226]/60">
+                    <td className="py-3 px-4 text-text-muted">
                       {formatThaiDate(comp.createdAt, true)}
                     </td>
                     <td className="py-3 px-4 text-center">
                       <Link
                         to="/admin/complaints"
-                        className="text-xs text-[#4B1F7A] hover:underline"
+                        className="text-xs text-accent hover:underline"
                       >
                         ตรวจดู
                       </Link>
@@ -193,7 +193,7 @@ export const AdminDashboard: React.FC = () => {
             </table>
           </div>
         ) : (
-          <div className="p-8 text-center text-xs text-[#1B1226]/60">
+          <div className="p-8 text-center text-xs text-text-muted">
             ยังไม่มีเรื่องร้องเรียนในระบบ
           </div>
         )}

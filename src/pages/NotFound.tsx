@@ -14,7 +14,7 @@ export const NotFound: React.FC = () => {
         <span
           className="font-serif text-8xl md:text-9xl font-bold tracking-widest select-none"
           style={{
-            WebkitTextStroke: '2px #B8923A',
+            WebkitTextStroke: '2px var(--color-gold)',
             color: 'transparent'
           }}
         >
@@ -25,18 +25,18 @@ export const NotFound: React.FC = () => {
         </div>
       </div>
 
-      <h1 className="font-serif text-2xl md:text-3xl font-semibold text-[#1B1226] mb-3">
+      <h1 className="font-serif text-2xl md:text-3xl font-semibold text-heading mb-3">
         หน้านี้หายไปเหมือนการบ้านที่ลืมส่ง
       </h1>
 
-      <p className="text-xs md:text-sm text-[#1B1226]/60 max-w-md mx-auto mb-8 leading-relaxed">
+      <p className="text-xs md:text-sm text-text-muted max-w-md mx-auto mb-8 leading-relaxed">
         หน้าที่คุณกำลังค้นหาอาจถูกย้าย เปลี่ยนชื่อ หรือไม่มีอยู่จริงในระบบ
         ลองตรวจสอบที่อยู่ URL หรือกดปุ่มด้านล่างเพื่อกลับสู่หน้าหลัก
       </p>
 
       <Link
         to="/"
-        className="px-8 py-3 bg-[#4B1F7A] text-[#FAF7F0] text-xs font-medium rounded-full border border-[#D9B867]/40 hover:bg-[#2A1245] transition-colors shadow-editorial inline-flex items-center gap-2"
+        className="px-8 py-3 bg-brand text-brand-contrast text-xs font-medium rounded-full border border-gold-light/40 hover:bg-brand-hover transition-colors shadow-editorial inline-flex items-center gap-2"
       >
         <span>← กลับสู่หน้าหลัก</span>
       </Link>
