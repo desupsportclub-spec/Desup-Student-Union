@@ -193,19 +193,15 @@ export const Navbar: React.FC<NavbarProps> = ({ tickerItems = [] }) => {
                     </Link>
                     <Link to="/news/activity" className="block px-3 py-2 text-xs hover:bg-[#EDE6F5] rounded transition-colors">
                       <div className="font-medium text-[#2A1245]">ภาพข่าวกิจกรรม</div>
-                      <div className="text-[11px] text-[#1B1226]/60">ภาพบรรยากาศและบันทึกกิจกรรมนักเรียน</div>
                     </Link>
                     <Link to="/news/regulation" className="block px-3 py-2 text-xs hover:bg-[#EDE6F5] rounded transition-colors">
                       <div className="font-medium text-[#2A1245]">ข้อบังคับ ระเบียบ คำสั่งและประกาศ</div>
-                      <div className="text-[11px] text-[#1B1226]/60">ธรรมนูญ กฎระเบียบ คำสั่ง และประกาศทางการ</div>
                     </Link>
                     <Link to="/news/knowledge" className="block px-3 py-2 text-xs hover:bg-[#EDE6F5] rounded transition-colors">
                       <div className="font-medium text-[#2A1245]">สาระน่ารู้</div>
-                      <div className="text-[11px] text-[#1B1226]/60">บทความและสาระที่เป็นประโยชน์</div>
                     </Link>
                     <Link to="/news/video" className="block px-3 py-2 text-xs hover:bg-[#EDE6F5] rounded transition-colors">
                       <div className="font-medium text-[#2A1245]">คลิปวิดีโอ</div>
-                      <div className="text-[11px] text-[#1B1226]/60">วิดีโอสรุปกิจกรรมและสื่อมัลติมีเดีย</div>
                     </Link>
                   </motion.div>
                 )}

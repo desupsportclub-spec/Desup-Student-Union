@@ -24,9 +24,9 @@ export const Contact: React.FC = () => {
         </p>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-stretch">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start">
         {/* Left 5 Cols: Contact Information */}
-        <div className="lg:col-span-5 space-y-5 sm:space-y-6 flex flex-col justify-between">
+        <div className="lg:col-span-5">
           <div className="bg-[#FAF7F0] border border-[#B8923A]/30 p-5 sm:p-6 rounded-sm shadow-editorial space-y-4">
             <h2 className="font-serif text-xl font-semibold text-[#2A1245]">
               ข้อมูลการติดต่อ
@@ -55,12 +55,6 @@ export const Contact: React.FC = () => {
                 </a>
               </div>
             </div>
-          </div>
-
-          {/* School Coordinates Note */}
-          <div className="p-4 bg-[#EDE6F5]/50 border-l-2 border-[#B8923A] rounded-r-sm text-xs text-[#2A1245]">
-            <p className="font-medium font-serif">เวลาทำการสำนักงานองค์การนักเรียน:</p>
-            <p className="text-[#1B1226]/70 mt-1">วันจันทร์ - วันศุกร์ เวลา 07:30 - 17:00 น. (เว้นวันหยุดราชการ)</p>
           </div>
         </div>
 

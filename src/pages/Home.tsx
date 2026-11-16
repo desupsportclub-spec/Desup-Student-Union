@@ -362,7 +362,7 @@ export const Home: React.FC = () => {
           <div>
             <SectionEyebrow number="01" enText="NEWS" thText="ข่าวประชาสัมพันธ์" />
             <h2 className="font-serif text-2xl md:text-3xl text-[#1B1226] font-semibold mt-2">
-              ข่าวสารและความเคลื่อนไหว
+              ข่าวประชาสัมพันธ์
             </h2>
           </div>
           <Link to="/news" className="btn-secondary-link text-xs font-medium text-[#4B1F7A] mt-3 md:mt-0 self-start md:self-auto">
@@ -521,7 +521,7 @@ export const Home: React.FC = () => {
               <div className="mb-8 sm:mb-12 text-center max-w-xl mx-auto space-y-2">
                 <SectionEyebrow number="02" enText="PERFORMANCE REPORT" thText="รายงานผลการดำเนินงาน" light />
                 <h2 className="font-serif text-2xl md:text-3xl font-semibold text-[#FAF7F0]">
-                  เปิดเผย โปร่งใส มุ่งมั่นเพื่อนักเรียน
+                  ส่งเสริมอัตลักษณ์ พิทักษ์สิทธินักเรียน
                 </h2>
               </div>
 
@@ -739,7 +739,7 @@ export const Home: React.FC = () => {
                   {president?.name || 'นายกองค์การนักเรียน'}
                 </div>
                 <div className="text-xs text-[#9C7A2B]">
-                  {president?.position || 'นายกองค์การนักเรียน'} โรงเรียนสาธิตมหาวิทยาลัยพะเยา {president?.yearTH ? `ปีการศึกษา ${president.yearTH}` : `ปีการศึกษา ${academicYearTH}`}
+                  นายกองค์การนักเรียน ประจำปีการศึกษา {president?.yearTH || academicYearTH}
                 </div>
               </div>
             </div>
