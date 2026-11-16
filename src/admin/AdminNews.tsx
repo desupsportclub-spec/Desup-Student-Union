@@ -596,7 +596,7 @@ export const AdminNews: React.FC = () => {
                   >
                     <option value="pr">ข่าวประชาสัมพันธ์</option>
                     <option value="activity">ภาพข่าวกิจกรรม</option>
-                    <option value="regulation">ข้อบังคับ ระเบียบ คำสั่งและประกาศ</option>
+                    <option value="regulation">ข้อบังคับ ระเบียบ คำสั่ง ประกาศ</option>
                     <option value="knowledge">สาระน่ารู้</option>
                     <option value="video">คลิปวิดีโอ</option>
                   </select>

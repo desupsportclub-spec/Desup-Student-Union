@@ -107,9 +107,6 @@ export const News: React.FC = () => {
         <h1 className="font-serif text-3xl md:text-4xl font-semibold text-heading mt-2">
           {t('news.title')}
         </h1>
-        <p className="text-xs md:text-sm text-text-muted mt-1">
-          {t('news.subtitle')}
-        </p>
       </div>
 
       {/* แถบตัวกรองหมวดหมู่และช่องค้นหา */}

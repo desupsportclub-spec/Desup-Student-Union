@@ -71,9 +71,6 @@ export const AboutAdvisors: React.FC = () => {
         <h1 className="font-serif text-3xl md:text-4xl font-semibold text-heading">
           {t('about.advisors.title')}
         </h1>
-        <p className="text-xs md:text-sm text-text-muted">
-          {t('about.advisors.subtitle')}
-        </p>
       </div>
 
       {loading ? (

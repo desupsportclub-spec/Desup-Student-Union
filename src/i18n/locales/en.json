@@ -36,20 +36,20 @@
       "hall": "Hall of Presidents"
     },
     "news": "News",
-    "newsAndAnnouncements": "News & Announcements",
+    "newsAndAnnouncements": "News",
     "newsSub": {
       "pr": "Public Relations",
       "activity": "Activities Gallery",
-      "regulation": "Regulations, Orders & Announcements",
+      "regulation": "Regulations, Rules, Orders & Announcements",
       "knowledge": "Knowledge Hub",
       "video": "Video Clips"
     },
     "calendar": "Calendar",
     "downloads": "Downloads",
-    "downloadsFull": "Document Downloads",
+    "downloadsFull": "Download Documents",
     "trackComplaint": "Track Submission",
     "contact": "Contact",
-    "contactUs": "Contact Us",
+    "contactUs": "Contact",
     "reportButton": "DeSUP CARE",
     "reportFull": "Submit Feedback / Complaint",
     "openMenu": "Open navigation menu",
@@ -163,7 +163,7 @@
     "pinnedTotal": "{{count}} pinned items",
     "pinnedTag": "Pinned",
     "newsEyebrowEn": "NEWS",
-    "newsEyebrowTh": "PRESS & UPDATES",
+    "newsEyebrowTh": "INFO",
     "newsHeading": "Public Relations",
     "viewAllNews": "View All",
     "defaultExcerpt": "Click to read the full news article and details",
@@ -197,10 +197,10 @@
     "defaultPresidentMessage": "Welcome students, faculty, and parents to the official Student Union portal. This platform serves as our primary channel for news, regulations, activities, and most importantly, listening to your feedback and ideas to build a better school community together."
   },
   "news": {
-    "eyebrowEn": "PRESS & UPDATES",
-    "eyebrowTh": "NEWS ARCHIVE",
+    "eyebrowEn": "INFO",
+    "eyebrowTh": "NEWS",
     "title": "Student Union News",
-    "subtitle": "Public relations, event recaps, regulations, announcements, and educational articles",
+    "subtitle": "",
     "searchPlaceholder": "Search by headline...",
     "categories": {
       "all": "All",
@@ -230,8 +230,8 @@
   "calendar": {
     "eyebrowEn": "CALENDAR",
     "eyebrowTh": "STUDENT SCHEDULE",
-    "title": "Schedules & Student Activities",
-    "subtitle": "Follow activity schedules, student projects, and important campus dates",
+    "title": "Student Activity Schedule",
+    "subtitle": "",
     "monthYear": "{{month}} {{year}}",
     "prevMonth": "← Prev",
     "prevMonthTitle": "Previous month",
@@ -251,13 +251,13 @@
     "noUpcomingEvents": "No ongoing or upcoming activities scheduled"
   },
   "downloads": {
-    "eyebrowEn": "DOCUMENTS",
+    "eyebrowEn": "Download document",
     "eyebrowTh": "DOCUMENT CENTER",
-    "title": "Documents & Official Forms",
-    "subtitle": "Preview PDF documents online, download forms, or print directly",
+    "title": "Download Documents",
+    "subtitle": "",
     "searchPlaceholder": "Search document name...",
     "view": "Preview",
-    "viewWithIcon": "👁️ Preview",
+    "viewWithIcon": "Preview",
     "download": "Download",
     "preparing": "Preparing...",
     "preparingFile": "Preparing file...",
@@ -333,7 +333,7 @@
       "eyebrowEn": "ADVISORY BOARD",
       "eyebrowTh": "ADVISORS",
       "title": "Student Union Advisory Board",
-      "subtitle": "School administrators, faculty advisors, and experienced students appointed by the school to advise, guide, oversee, and support Student Union activities",
+      "subtitle": "",
       "groups": {
         "executive": {
           "label": "Executive Advisory Committee",
@@ -504,7 +504,7 @@
   "contact": {
     "eyebrowEn": "CONTACT",
     "eyebrowTh": "GET IN TOUCH",
-    "title": "Contact Us",
+    "title": "Contact",
     "subtitle": "Demonstration School, University of Phayao",
     "infoHeading": "Contact Information",
     "addressLabel": "Location:",
@@ -535,8 +535,8 @@
         "desc": "Follow campus activity schedules, projects, and important Student Union dates."
       },
       "downloads": {
-        "title": "Documents & Official Forms",
-        "desc": "Preview, download, and print official Student Union PDF documents and forms."
+        "title": "Download Documents",
+        "desc": "Download official Student Union documents and forms."
       },
       "emblem": {
         "title": "Official Emblem & Identity",
@@ -567,7 +567,7 @@
         "desc": "Check the progress of your submitted complaint or suggestion using your tracking code."
       },
       "contact": {
-        "title": "Contact Us",
+        "title": "Contact",
         "desc": "Contact information and location map of Demonstration School of University of Phayao Student Union."
       }
     }

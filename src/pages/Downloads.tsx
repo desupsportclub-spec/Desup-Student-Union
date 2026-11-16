@@ -181,9 +181,6 @@ export const Downloads: React.FC = () => {
           <h1 className="font-serif text-3xl md:text-4xl font-semibold text-heading mt-2">
             {t('downloads.title')}
           </h1>
-          <p className="text-xs md:text-sm text-text-muted mt-1">
-            {t('downloads.subtitle')}
-          </p>
         </div>
 
         <div className="w-full md:w-64">
@@ -255,7 +252,7 @@ export const Downloads: React.FC = () => {
                   <th className="py-3 px-4">{t('downloads.table.name')}</th>
                   <th className="py-3 px-4">{t('downloads.table.type')}</th>
                   <th className="py-3 px-4">{t('downloads.table.date')}</th>
-                  <th className="py-3 px-4 text-center">{t('downloads.table.actions')}</th>
+                  <th className="py-3 px-4 text-center" aria-label={t('downloads.table.actions')} />
                 </tr>
               </thead>
               <tbody className="divide-y divide-gold-border/15">

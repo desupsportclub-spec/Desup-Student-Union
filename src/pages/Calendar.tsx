@@ -130,9 +130,6 @@ export const CalendarPage: React.FC = () => {
         <h1 className="font-serif text-3xl md:text-4xl font-semibold text-heading mt-2">
           {t('calendar.title')}
         </h1>
-        <p className="text-xs md:text-sm text-text-muted mt-1">
-          {t('calendar.subtitle')}
-        </p>
       </div>
 
       {/* มุมมองเดสก์ท็อป: ตารางปฏิทิน 8 คอลัมน์ + รายละเอียดวันที่เลือก 4 คอลัมน์ */}
