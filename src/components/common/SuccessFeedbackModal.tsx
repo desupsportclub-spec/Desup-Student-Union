@@ -5,6 +5,7 @@
 
 import React from 'react';
 import { motion, AnimatePresence } from 'motion/react';
+import { useTranslation } from 'react-i18next';
 import { SuccessCheck } from '../SuccessCheck';
 import { CornerBracket } from './Ornament';
 
@@ -21,6 +22,7 @@ export const SuccessFeedbackModal: React.FC<SuccessFeedbackModalProps> = ({
   description,
   onClose,
 }) => {
+  const { t } = useTranslation();
   return (
     <AnimatePresence>
       {open && (
@@ -68,7 +70,7 @@ export const SuccessFeedbackModal: React.FC<SuccessFeedbackModalProps> = ({
                   onClick={onClose}
                   className="px-6 py-2 bg-brand text-brand-contrast text-xs font-medium rounded-full border border-gold-light/40 hover:bg-brand-hover transition-colors"
                 >
-                  ตกลง
+                  {t('site.ok')}
                 </button>
               </div>
             </motion.div>

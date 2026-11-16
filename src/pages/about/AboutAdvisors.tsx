@@ -4,9 +4,11 @@
  */
 
 import React, { useState, useEffect, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { AdvisorGroup, PersonItem } from '../../types';
 import { SectionEyebrow, CornerBracket } from '../../components/common/Ornament';
 import { Emblem } from '../../components/common/Emblem';
+import { SeoHead } from '../../components/common/SeoHead';
 import { getCachedPeopleSync, loadPeopleList } from '../../lib/publicDataService';
 import { ADVISOR_GROUPS, resolveAdvisorGroup } from '../../config/site';
 
@@ -17,6 +19,7 @@ function filterAdvisors(list: PersonItem[]): PersonItem[] {
 }
 
 export const AboutAdvisors: React.FC = () => {
+  const { t } = useTranslation();
   const initialPeople = getCachedPeopleSync();
   const [advisors, setAdvisors] = useState<PersonItem[]>(
     initialPeople ? filterAdvisors(initialPeople) : []
@@ -56,14 +59,16 @@ export const AboutAdvisors: React.FC = () => {
 
   return (
     <div className="max-w-[1040px] mx-auto px-4 sm:px-6 py-6 sm:py-10 space-y-8 sm:space-y-12">
-      {/* Header */}
+      <SeoHead titleKey="seo.pages.advisors.title" descriptionKey="seo.pages.advisors.desc" />
+
+      {/* ส่วนหัวหน้า */}
       <div className="border-b border-gold-border/30 pb-5 sm:pb-6 text-center max-w-2xl mx-auto space-y-2">
-        <SectionEyebrow enText="ADVISORY BOARD" thText="คณะกรรมการที่ปรึกษา" />
+        <SectionEyebrow enText={t('about.advisors.eyebrowEn')} thText={t('about.advisors.eyebrowTh')} />
         <h1 className="font-serif text-3xl md:text-4xl font-semibold text-heading">
-          คณะกรรมการที่ปรึกษาองค์การนักเรียน
+          {t('about.advisors.title')}
         </h1>
         <p className="text-xs md:text-sm text-text-muted">
-          บุคลากรโรงเรียนหรือนักเรียนผู้มีประสบการณ์ ซึ่งโรงเรียนแต่งตั้งเพื่อให้คำปรึกษา แนะนำ ดูแล และช่วยเหลือในการดำเนินกิจกรรมขององค์การนักเรียน
+          {t('about.advisors.subtitle')}
         </p>
       </div>
 
@@ -81,6 +86,9 @@ export const AboutAdvisors: React.FC = () => {
         <div className="space-y-10 sm:space-y-12">
           {ADVISOR_GROUPS.map((group, idx) => {
             const members = groupedAdvisors[group.id];
+            const groupLabel = t(`about.advisors.groups.${group.id}.label`);
+            const groupShortLabel = t(`about.advisors.groups.${group.id}.shortLabel`);
+
             return (
               <section key={group.id} className="space-y-5">
                 <div className="border-b border-gold-border/35 pb-3 flex items-baseline gap-3">
@@ -88,7 +96,7 @@ export const AboutAdvisors: React.FC = () => {
                     {String(idx + 1).padStart(2, '0')}
                   </span>
                   <h2 className="font-serif text-lg sm:text-xl md:text-2xl font-semibold text-heading leading-snug">
-                    {group.label}
+                    {groupLabel}
                   </h2>
                 </div>
 
@@ -117,7 +125,7 @@ export const AboutAdvisors: React.FC = () => {
                             <div className="w-full h-full bg-brand-soft flex flex-col items-center justify-center p-3 text-text-muted">
                               <Emblem size={44} />
                               <span className="text-[11px] text-accent mt-2 font-medium text-center">
-                                {group.shortLabel}
+                                {groupShortLabel}
                               </span>
                             </div>
                           )}
@@ -144,7 +152,7 @@ export const AboutAdvisors: React.FC = () => {
                   </div>
                 ) : (
                   <div className="p-8 text-center border border-dashed border-gold-border/25 rounded-sm bg-surface/60 text-xs text-text-muted">
-                    ยังไม่มีรายชื่อใน{group.shortLabel}
+                    {t('about.advisors.emptyGroup', { group: groupShortLabel })}
                   </div>
                 )}
               </section>

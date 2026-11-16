@@ -4,23 +4,20 @@
  */
 
 import React, { useState, useEffect, useMemo } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { getCachedNewsSync, loadPublishedNews } from '../lib/publicDataService';
 import { NewsItem } from '../types';
-import { formatThaiDate, formatNumber } from '../lib/format';
+import { formatDate, formatNumber } from '../lib/format';
 import { NewsCategoryBadge } from '../components/common/StatusBadge';
 import { SectionEyebrow, CornerBracket, PinIcon } from '../components/common/Ornament';
 import { Emblem } from '../components/common/Emblem';
 import { getNewsCoverUrl, getNewsYouTubeUrl } from '../components/news/SocialMediaEmbed';
+import { LocLink } from '../components/common/LocLink';
+import { SeoHead } from '../components/common/SeoHead';
+import { useLanguage } from '../context/LanguageContext';
 
-const CATEGORIES: { id: string; label: string; en: string }[] = [
-  { id: 'all', label: 'ทั้งหมด', en: 'ALL' },
-  { id: 'pr', label: 'ข่าวประชาสัมพันธ์', en: 'PR' },
-  { id: 'activity', label: 'ภาพข่าวกิจกรรม', en: 'ACTIVITIES' },
-  { id: 'regulation', label: 'ข้อบังคับ ระเบียบ คำสั่งและประกาศ', en: 'REGULATIONS & ANNOUNCEMENTS' },
-  { id: 'knowledge', label: 'สาระน่ารู้', en: 'KNOWLEDGE' },
-  { id: 'video', label: 'คลิปวิดีโอ', en: 'VIDEOS' },
-];
+const CATEGORY_IDS = ['all', 'pr', 'activity', 'regulation', 'knowledge', 'video'] as const;
 
 function normalizeNewsFilterCategory(cat?: string): string {
   if (!cat) return 'all';
@@ -29,6 +26,8 @@ function normalizeNewsFilterCategory(cat?: string): string {
 }
 
 export const News: React.FC = () => {
+  const { t } = useTranslation();
+  const { lang } = useLanguage();
   const { category: urlCategory } = useParams<{ category?: string }>();
   const [selectedCat, setSelectedCat] = useState<string>(normalizeNewsFilterCategory(urlCategory));
   const [searchTerm, setSearchTerm] = useState('');
@@ -39,13 +38,11 @@ export const News: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(() => !initialCached);
   const [displayCount, setDisplayCount] = useState(9);
 
-  // Sync with URL param if changes and reset pagination count
   useEffect(() => {
     setSelectedCat(normalizeNewsFilterCategory(urlCategory));
     setDisplayCount(9);
   }, [urlCategory]);
 
-  // Debounce search input by 200ms
   useEffect(() => {
     const handler = setTimeout(() => {
       setDebouncedSearch(searchTerm);
@@ -53,7 +50,6 @@ export const News: React.FC = () => {
     return () => clearTimeout(handler);
   }, [searchTerm]);
 
-  // Fetch published news ONCE via cache-first publicDataService (switching categories never re-fetches!)
   useEffect(() => {
     let active = true;
 
@@ -74,7 +70,6 @@ export const News: React.FC = () => {
     };
   }, []);
 
-  // Filter instantaneously client-side by selected category & debounced search term
   const filteredNews = useMemo(() => {
     const term = debouncedSearch.trim().toLowerCase();
     return allNews.filter((item) => {
@@ -100,54 +95,55 @@ export const News: React.FC = () => {
 
   return (
     <div className="max-w-[1240px] mx-auto px-4 sm:px-6 md:px-12 py-6 sm:py-10 space-y-6 sm:space-y-10">
-      {/* Page Header */}
+      <SeoHead titleKey="seo.pages.news.title" descriptionKey="seo.pages.news.desc" />
+
+      {/* ส่วนหัวหน้าข่าวสาร */}
       <div className="border-b border-gold-border/30 pb-5 sm:pb-6">
-        <SectionEyebrow enText="PRESS & UPDATES" thText="ข่าวสารและประกาศ" />
+        <SectionEyebrow enText={t('news.eyebrowEn')} thText={t('news.eyebrowTh')} />
         <h1 className="font-serif text-3xl md:text-4xl font-semibold text-heading mt-2">
-          ข่าวสารองค์การนักเรียน
+          {t('news.title')}
         </h1>
         <p className="text-xs md:text-sm text-text-muted mt-1">
-          รวมข่าวประชาสัมพันธ์ กิจกรรม ข้อบังคับ ประกาศ และสาระน่ารู้
+          {t('news.subtitle')}
         </p>
       </div>
 
-      {/* Filter Tabs & Live Search */}
+      {/* แถบตัวกรองหมวดหมู่และช่องค้นหา */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-gold-border/15">
-        {/* Underline tabs */}
         <div className="flex items-center gap-6 overflow-x-auto pb-2 scrollbar-none text-xs font-medium">
-          {CATEGORIES.map((cat) => (
+          {CATEGORY_IDS.map((catId) => (
             <button
-              key={cat.id}
+              key={catId}
               onClick={() => {
-                setSelectedCat(cat.id);
+                setSelectedCat(catId);
                 setDisplayCount(9);
               }}
               className={`pb-2 whitespace-nowrap transition-colors relative ${
-                selectedCat === cat.id
+                selectedCat === catId
                   ? 'text-accent font-semibold'
                   : 'text-text-muted hover:text-heading'
               }`}
             >
-              <span>{cat.label}</span>
-              {selectedCat === cat.id && (
+              <span>{t(`news.categories.${catId}`)}</span>
+              {selectedCat === catId && (
                 <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-gold" />
               )}
             </button>
           ))}
         </div>
 
-        {/* Live Search */}
         <div className="relative w-full md:w-64">
           <input
             type="text"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            placeholder="ค้นหาตามหัวข้อข่าว..."
+            placeholder={t('news.searchPlaceholder')}
             className="w-full text-xs input-underline pr-6"
           />
           {searchTerm && (
             <button
               onClick={() => setSearchTerm('')}
+              aria-label={t('site.close')}
               className="absolute right-1 top-2.5 text-xs text-text-muted hover:text-heading"
             >
               ✕
@@ -156,7 +152,7 @@ export const News: React.FC = () => {
         </div>
       </div>
 
-      {/* News Grid */}
+      {/* รายการข่าวสาร */}
       {loading && allNews.length === 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-8">
           {[1, 2, 3, 4, 5, 6].map((i) => (
@@ -171,7 +167,7 @@ export const News: React.FC = () => {
       ) : visibleNews.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-8">
           {visibleNews.map((item, idx) => (
-            <Link
+            <LocLink
               key={item.id}
               to={`/news/read/${item.id}`}
               className="group block relative border border-gold-border/20 bg-surface p-4 sm:p-5 rounded-sm shadow-editorial transition-all duration-300 hover:border-gold flex flex-col justify-between"
@@ -211,12 +207,12 @@ export const News: React.FC = () => {
                     {item.pinned && (
                       <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-sm bg-brand text-brand-contrast text-[10px] font-medium">
                         <PinIcon className="w-3 h-3 text-gold-light" />
-                        <span>ปักหมุด</span>
+                        <span>{t('home.pinnedTag')}</span>
                       </span>
                     )}
                     <NewsCategoryBadge category={item.category} />
                     <span aria-hidden="true">·</span>
-                    <span>{formatThaiDate(item.createdAt, true)}</span>
+                    <span>{formatDate(item.createdAt, lang, true)}</span>
                   </div>
 
                   <h3 className="font-serif text-lg font-semibold text-heading group-hover:text-accent transition-colors line-clamp-2 leading-snug">
@@ -224,41 +220,41 @@ export const News: React.FC = () => {
                   </h3>
 
                   <p className="text-xs text-text-muted line-clamp-2 leading-relaxed">
-                    {item.excerpt || 'คลิกเพื่ออ่านรายละเอียดเนื้อหาข่าว'}
+                    {item.excerpt || t('news.cardFallbackExcerpt')}
                   </p>
                 </div>
               </div>
 
               <div className="pt-4 mt-4 border-t border-gold-border/15 flex items-center justify-between text-[11px] text-text-muted">
-                <span>อ่าน {formatNumber(item.views)} ครั้ง</span>
+                <span>{t('site.viewsCount', { count: formatNumber(item.views, lang) })}</span>
                 <span className="text-gold-text group-hover:translate-x-1 transition-transform">
-                  อ่านต่อ →
+                  {t('site.readMore')}
                 </span>
               </div>
-            </Link>
+            </LocLink>
           ))}
         </div>
       ) : (
         <div className="p-16 text-center border border-dashed border-gold-border/30 rounded-sm bg-surface/50 space-y-2">
           <p className="font-serif text-lg text-heading">
             {searchTerm
-              ? `ไม่พบข่าวที่ตรงกับคำค้นหา "${searchTerm}"`
-              : 'ยังไม่มีข่าวในหมวดหมู่นี้ในขณะนี้'}
+              ? t('news.emptySearch', { term: searchTerm })
+              : t('news.emptyCategory')}
           </p>
           <p className="text-xs text-text-muted">
-            โปรดลองเลือกหมวดหมู่อื่น หรือกลับมาตรวจสอบอีกครั้งในภายหลัง
+            {t('news.emptyHint')}
           </p>
         </div>
       )}
 
-      {/* Load More Button */}
+      {/* ปุ่มโหลดเพิ่มเติม */}
       {filteredNews.length > displayCount && (
         <div className="text-center pt-8">
           <button
             onClick={() => setDisplayCount((prev) => prev + 9)}
             className="px-8 py-2.5 border border-gold text-xs font-medium text-heading hover:bg-brand hover:text-brand-contrast transition-colors duration-300 rounded-sm"
           >
-            โหลดข่าวสารเพิ่มเติม
+            {t('news.loadMore')}
           </button>
         </div>
       )}

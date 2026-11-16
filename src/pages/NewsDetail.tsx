@@ -4,15 +4,19 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { doc, updateDoc, increment } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { getCachedNewsSync, loadNewsArticle, loadPublishedNews } from '../lib/publicDataService';
 import { NewsItem } from '../types';
-import { formatThaiDate, formatNumber } from '../lib/format';
+import { formatDate, formatNumber } from '../lib/format';
 import { NewsCategoryBadge } from '../components/common/StatusBadge';
 import { SectionEyebrow, SectionDivider } from '../components/common/Ornament';
 import { Emblem } from '../components/common/Emblem';
+import { LocLink } from '../components/common/LocLink';
+import { SeoHead } from '../components/common/SeoHead';
+import { useLanguage } from '../context/LanguageContext';
 import {
   SocialMediaEmbed,
   SocialMediaList,
@@ -26,6 +30,8 @@ import 'yet-another-react-lightbox/styles.css';
 
 export const NewsDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
+  const { t } = useTranslation();
+  const { lang } = useLanguage();
 
   const initialCachedItem = id ? getCachedNewsSync()?.find((n) => n.id === id) || null : null;
   const [news, setNews] = useState<NewsItem | null>(() => initialCachedItem);
@@ -68,7 +74,6 @@ export const NewsDetail: React.FC = () => {
         setLoading(false);
 
         if (resolved) {
-          // Increment view count once per browser session for this article (non-blocking)
           const sessionKey = `desup_view_${id}`;
           if (!sessionStorage.getItem(sessionKey)) {
             sessionStorage.setItem(sessionKey, 'true');
@@ -81,7 +86,6 @@ export const NewsDetail: React.FC = () => {
               .catch(() => {});
           }
 
-          // Compute related articles from shared cache (avoids redundant full Firestore scan)
           loadPublishedNews((allItems) => {
             if (!active) return;
             const relList = allItems
@@ -135,19 +139,19 @@ export const NewsDetail: React.FC = () => {
   if (!news) {
     return (
       <div className="max-w-[760px] mx-auto px-6 py-20 text-center space-y-4">
+        <SeoHead titleKey="news.notFoundTitle" descriptionKey="news.notFoundDesc" />
         <Emblem size={64} className="mx-auto" />
-        <h1 className="font-serif text-2xl text-heading">ไม่พบข่าวสารที่ต้องการ</h1>
-        <p className="text-xs text-text-muted">ข่าวสารนี้อาจถูกลบ ย้าย หรือยังไม่ได้รับการเผยแพร่</p>
-        <Link to="/news" className="inline-block mt-4 px-6 py-2 bg-brand text-brand-contrast hover:bg-brand-hover text-xs rounded-sm transition-colors">
-          กลับสู่หน้ารวมข่าว
-        </Link>
+        <h1 className="font-serif text-2xl text-heading">{t('news.notFoundTitle')}</h1>
+        <p className="text-xs text-text-muted">{t('news.notFoundDesc')}</p>
+        <LocLink to="/news" className="inline-block mt-4 px-6 py-2 bg-brand text-brand-contrast hover:bg-brand-hover text-xs rounded-sm transition-colors">
+          {t('news.backToNews')}
+        </LocLink>
       </div>
     );
   }
 
   const galleryImages = news.gallery || (news.galleryUrls?.map(url => ({ url, alt: news.title })) || []);
 
-  // Extract any direct Facebook/Instagram/TikTok iframe blocks mistakenly embedded in content
   const extractedSocialUrls: string[] = [];
   const sanitizedContent = (news.content || '').replace(
     /<iframe[^>]+src=["']([^"']*(?:facebook\.com|fb\.watch|instagram\.com|tiktok\.com)[^"']*)["'][^>]*>[\s\S]*?<\/iframe>/gi,
@@ -174,17 +178,22 @@ export const NewsDetail: React.FC = () => {
 
   return (
     <article className="py-6 sm:py-12">
+      <SeoHead
+        title={news.title}
+        description={news.excerpt || t('seo.pages.news.desc')}
+      />
+
       <div className="max-w-[760px] mx-auto px-4 sm:px-6 space-y-6 sm:space-y-8">
-        {/* Navigation Breadcrumb */}
+        {/* แถบนำทางเส้นทาง (Breadcrumb) */}
         <div className="flex flex-wrap items-center gap-2 text-xs text-text-muted">
-          <Link to="/" className="hover:text-accent">หน้าหลัก</Link>
+          <LocLink to="/" className="hover:text-accent">{t('nav.home')}</LocLink>
           <span>/</span>
-          <Link to="/news" className="hover:text-accent">ข่าวสาร</Link>
+          <LocLink to="/news" className="hover:text-accent">{t('nav.news')}</LocLink>
           <span>/</span>
           <NewsCategoryBadge category={news.category} />
         </div>
 
-        {/* Article Header */}
+        {/* ส่วนหัวบทความ */}
         <div className="space-y-4 border-b border-gold-border/30 pb-6">
           <h1 className="font-serif text-2xl sm:text-3xl md:text-4xl font-semibold text-heading leading-tight">
             {news.title}
@@ -192,20 +201,19 @@ export const NewsDetail: React.FC = () => {
 
           <div className="flex flex-wrap items-center justify-between text-xs text-text-muted gap-4 pt-2">
             <div className="flex items-center gap-3">
-              <span>{formatThaiDate(news.createdAt)}</span>
+              <span>{formatDate(news.createdAt, lang)}</span>
               <span aria-hidden="true">·</span>
-              <span>อ่าน {formatNumber(news.views)} ครั้ง</span>
+              <span>{t('site.viewsCount', { count: formatNumber(news.views, lang) })}</span>
             </div>
 
-            {/* Social Share Buttons */}
             <div className="flex items-center gap-2">
               <button
                 type="button"
                 onClick={handleCopyLink}
                 className="px-2.5 py-1 border border-gold-border/25 hover:border-gold text-text rounded-sm text-[11px] transition-colors"
-                title="คัดลอกลิงก์"
+                title={t('news.copyLink')}
               >
-                {copyNotice ? 'คัดลอกแล้ว ✓' : 'คัดลอกลิงก์'}
+                {copyNotice ? t('news.copiedLink') : t('news.copyLink')}
               </button>
               <button
                 type="button"
@@ -225,7 +233,7 @@ export const NewsDetail: React.FC = () => {
           </div>
         </div>
 
-        {/* Hero Media: Live YouTube Player (when video post or no custom cover) OR Cover Photo */}
+        {/* สื่อหลัก (วิดีโอ YouTube หรือภาพปก) */}
         {showHeroYouTube && primaryYouTubeUrl ? (
           <SocialMediaEmbed url={primaryYouTubeUrl} title={news.title} eagerYouTube />
         ) : explicitCover ? (
@@ -240,20 +248,17 @@ export const NewsDetail: React.FC = () => {
           </div>
         ) : null}
 
-        {/* Excerpt if present */}
         {news.excerpt && (
           <div className="text-base font-serif italic text-accent bg-brand-soft/45 p-4 border-l-2 border-gold rounded-r-sm">
             {news.excerpt}
           </div>
         )}
 
-        {/* Rich HTML Content from Tiptap */}
         <div
           className="text-[15px] sm:text-[17px] md:text-[18px] text-text leading-[1.8] space-y-4 font-sans prose-custom break-words"
           dangerouslySetInnerHTML={{ __html: sanitizedContent }}
         />
 
-        {/* Video & Social Media Links (YouTube, Facebook, Instagram, TikTok) */}
         {(news.videoUrl || combinedSocialLinks.length > 0) && (
           <div className="pt-4">
             <SocialMediaList
@@ -265,11 +270,11 @@ export const NewsDetail: React.FC = () => {
           </div>
         )}
 
-        {/* Gallery Lightbox */}
+        {/* แกลเลอรีรูปภาพประกอบ */}
         {galleryImages.length > 0 && (
           <div className="pt-8 space-y-4 border-t border-gold-border/20">
             <h3 className="font-serif text-lg font-semibold text-heading">
-              ภาพประกอบกิจกรรม ({galleryImages.length} รูป)
+              {t('news.galleryHeading', { count: galleryImages.length })}
             </h3>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
               {galleryImages.map((img, idx) => (
@@ -283,7 +288,7 @@ export const NewsDetail: React.FC = () => {
                 >
                   <img
                     src={img.url}
-                    alt={img.alt || `ภาพประกอบ ${idx + 1}`}
+                    alt={img.alt || t('news.galleryAltFallback', { index: idx + 1 })}
                     loading="lazy"
                     decoding="async"
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
@@ -301,11 +306,11 @@ export const NewsDetail: React.FC = () => {
           </div>
         )}
 
-        {/* File Attachments */}
+        {/* เอกสารแนบ */}
         {news.attachments && news.attachments.length > 0 && (
           <div className="pt-6 space-y-3 border-t border-gold-border/20">
             <h3 className="font-serif text-lg font-semibold text-heading">
-              เอกสารแนบที่เกี่ยวข้อง
+              {t('news.attachmentsHeading')}
             </h3>
             <div className="space-y-2">
               {news.attachments.map((att, idx) => (
@@ -317,7 +322,7 @@ export const NewsDetail: React.FC = () => {
                   className="flex items-center justify-between p-3 border border-gold-border/20 bg-surface hover:bg-brand-soft rounded-sm text-xs transition-colors"
                 >
                   <span className="font-medium text-heading">📄 {att.name}</span>
-                  <span className="text-gold-text">ดาวน์โหลด ↗</span>
+                  <span className="text-gold-text">{t('news.downloadAttachment')}</span>
                 </a>
               ))}
             </div>
@@ -326,13 +331,13 @@ export const NewsDetail: React.FC = () => {
 
         <SectionDivider className="my-14" />
 
-        {/* Related News (3 items) */}
+        {/* ข่าวสารที่เกี่ยวข้อง */}
         {related.length > 0 && (
           <div className="space-y-6 pt-2">
-            <SectionEyebrow enText="RELATED" thText="ข่าวสารที่เกี่ยวข้อง" />
+            <SectionEyebrow enText={t('news.relatedEn')} thText={t('news.relatedTh')} />
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
               {related.map((item) => (
-                <Link
+                <LocLink
                   key={item.id}
                   to={`/news/read/${item.id}`}
                   className="group block border border-gold-border/20 bg-surface p-3 rounded-sm hover:border-gold transition-colors"
@@ -356,9 +361,9 @@ export const NewsDetail: React.FC = () => {
                     {item.title}
                   </h4>
                   <p className="text-[10px] text-text-muted mt-1">
-                    {formatThaiDate(item.createdAt, true)}
+                    {formatDate(item.createdAt, lang, true)}
                   </p>
-                </Link>
+                </LocLink>
               ))}
             </div>
           </div>

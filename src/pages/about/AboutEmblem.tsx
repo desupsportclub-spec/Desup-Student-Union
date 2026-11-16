@@ -4,48 +4,30 @@
  */
 
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { SectionEyebrow, CornerBracket } from '../../components/common/Ornament';
-import { EMBLEM_DESCRIPTION } from '../../config/site';
-
-const IDENTITY_ITEMS = [
-  {
-    label: 'ชื่อภาษาไทย',
-    value: '“องค์การนักเรียน โรงเรียนสาธิตมหาวิทยาลัยพะเยา”',
-  },
-  {
-    label: 'ชื่อภาษาอังกฤษ',
-    value: '“Demonstration School of University of Phayao Student Union”',
-  },
-  {
-    label: 'อักษรย่อ (ภาษาไทย)',
-    value: '“อน.สธ.มพ.”',
-  },
-  {
-    label: 'อักษรย่อ (ภาษาอังกฤษ)',
-    value: '“DeSUP SU”',
-  },
-  {
-    label: 'ปณิธาน',
-    value: '“ส่งเสริมอัตลักษณ์ พิทักษ์สิทธินักเรียน”',
-  },
-  {
-    label: 'วิสัยทัศน์',
-    value: '“ขับเคลื่อนกิจกรรมส่งเสริมอัตลักษณ์อย่างสร้างสรรค์ พิทักษ์รักษาไว้ซึ่งสิทธิของนักเรียน”',
-  },
-];
+import { SeoHead } from '../../components/common/SeoHead';
 
 export const AboutEmblem: React.FC = () => {
+  const { t } = useTranslation();
+  const identityItems = t('about.emblem.items', { returnObjects: true }) as {
+    label: string;
+    value: string;
+  }[];
+
   return (
     <div className="max-w-[1040px] mx-auto px-4 sm:px-6 py-6 sm:py-10 space-y-8 sm:space-y-12">
-      {/* Header matching editorial & reference layout */}
+      <SeoHead titleKey="seo.pages.emblem.title" descriptionKey="seo.pages.emblem.desc" />
+
+      {/* ส่วนหัวหน้า */}
       <div className="border-b-2 border-gold pb-4 space-y-1.5">
-        <SectionEyebrow enText="SYMBOL & IDENTITY" thText="ตราสัญลักษณ์" />
+        <SectionEyebrow enText={t('about.emblem.eyebrowEn')} thText={t('about.emblem.eyebrowTh')} />
         <h1 className="font-serif text-2xl sm:text-3xl md:text-4xl font-bold text-accent">
-          ตราสัญลักษณ์องค์การนักเรียน
+          {t('about.emblem.title')}
         </h1>
       </div>
 
-      {/* Main 2-column Emblem + Identity Spec Layout (matching reference screenshot) */}
+      {/* โครงสร้าง 2 คอลัมน์: ตราสัญลักษณ์และอัตลักษณ์องค์การ */}
       <div className="bg-surface border border-gold-border/35 p-6 sm:p-10 md:p-12 rounded-sm shadow-editorial relative">
         <CornerBracket position="top-left" />
         <CornerBracket position="top-right" />
@@ -53,19 +35,19 @@ export const AboutEmblem: React.FC = () => {
         <CornerBracket position="bottom-right" />
 
         <div className="grid grid-cols-1 md:grid-cols-12 gap-8 md:gap-12 items-center">
-          {/* Left column: Emblem Image */}
+          {/* คอลัมน์ซ้าย: รูปตราสัญลักษณ์ */}
           <div className="md:col-span-6 flex items-center justify-center py-2">
             <img
               src="/emblem.png"
-              alt="ตราสัญลักษณ์องค์การนักเรียน โรงเรียนสาธิตมหาวิทยาลัยพะเยา"
+              alt={t('about.emblem.imgAlt')}
               data-emblem="true"
               className="w-60 h-60 sm:w-72 sm:h-72 md:w-80 md:h-80 object-contain drop-shadow-md transition-transform duration-500 hover:scale-[1.03]"
             />
           </div>
 
-          {/* Right column: Structured Identity Fields */}
+          {/* คอลัมน์ขวา: รายการข้อมูลอัตลักษณ์ */}
           <dl className="md:col-span-6 space-y-4 sm:space-y-5">
-            {IDENTITY_ITEMS.map((item) => (
+            {Array.isArray(identityItems) && identityItems.map((item) => (
               <div key={item.label} className="space-y-1">
                 <dt className="font-serif text-base sm:text-lg font-bold text-accent leading-snug">
                   {item.label}
@@ -79,15 +61,15 @@ export const AboutEmblem: React.FC = () => {
         </div>
       </div>
 
-      {/* Official Symbolism Description */}
+      {/* คำอธิบายตราสัญลักษณ์อย่างเป็นทางการ */}
       <div className="bg-surface-elevated border border-gold-border/25 p-5 sm:p-8 rounded-sm shadow-editorial space-y-3 sm:space-y-4">
         <div className="border-b border-gold-border/30 pb-3">
           <h2 className="font-serif text-lg sm:text-xl font-bold text-heading">
-            คำอธิบายตราสัญลักษณ์
+            {t('about.emblem.descriptionHeading')}
           </h2>
         </div>
         <p className="text-sm md:text-base text-text leading-relaxed font-sans indent-6 sm:indent-8">
-          {EMBLEM_DESCRIPTION}
+          {t('about.emblem.descriptionText')}
         </p>
       </div>
     </div>

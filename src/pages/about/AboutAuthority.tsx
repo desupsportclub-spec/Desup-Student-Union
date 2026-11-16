@@ -4,73 +4,36 @@
  */
 
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { SectionEyebrow, CornerBracket } from '../../components/common/Ornament';
+import { SeoHead } from '../../components/common/SeoHead';
 
-const DUTIES = [
-  {
-    num: '(๑)',
-    text: 'รักษาผลประโยชน์และสิทธิอันชอบธรรมของนักเรียนในเรื่องเกี่ยวกับกิจการนักเรียน',
-  },
-  {
-    num: '(๒)',
-    text: 'บริหารกิจกรรมที่เกี่ยวกับองค์การนักเรียน ให้เป็นไปตามนโยบายที่ได้แถลงไว้ ซึ่งไม่ขัดข้อบังคับ ระเบียบ ประกาศ นโยบายของโรงเรียน',
-  },
-  {
-    num: '(๓)',
-    text: 'ปฏิบัติงานอื่น ๆ ตามที่โรงเรียนมอบหมาย',
-  },
-];
-
-const GUIDELINES = [
-  {
-    num: '(๑)',
-    text: 'รักษาไว้ซึ่งผลประโยชน์ส่วนรวมของนักเรียน',
-  },
-  {
-    num: '(๒)',
-    text: 'รักษาไว้ซึ่งประสิทธิภาพในการขับเคลื่อนการดำเนินกิจกรรมนักเรียน',
-  },
-  {
-    num: '(๓)',
-    text: 'ยึดมั่นและศรัทธาในการปกครองของระบบประชาธิปไตย',
-  },
-  {
-    num: '(๔)',
-    text: 'ยึดมั่นในข้อบังคับ ระเบียบ ประกาศ คำสั่ง และนโยบายของโรงเรียนอย่างเคร่งครัด',
-  },
-  {
-    num: '(๕)',
-    text: 'เป็นผู้ส่งเสริมกิจกรรมเสริมหลักสูตร ตามอัตลักษณ์นักเรียนของโรงเรียน รักษาไว้ซึ่งศิลปะและวัฒนธรรมของชาติ ทำนุบำรุง อนุรักษ์ ฟื้นฟู สืบสานสร้างสรรค์',
-  },
-  {
-    num: '(๖)',
-    text: 'เป็นผู้มีความซื่อสัตย์ สุจริต บริหารงานอย่างโปร่งใส ใฝ่เรียนรู้และกระตือรือร้น',
-  },
-  {
-    num: '(๗)',
-    text: 'มีความเป็นผู้นำและผู้ตามที่ดี',
-  },
-  {
-    num: '(๘)',
-    text: 'เผยแพร่ชื่อเสียงและเกียรติคุณของโรงเรียน',
-  },
-];
+interface ClauseItem {
+  num: string;
+  text: string;
+}
 
 export const AboutAuthority: React.FC = () => {
+  const { t } = useTranslation();
+  const duties = t('about.authority.duties', { returnObjects: true }) as ClauseItem[];
+  const guidelines = t('about.authority.guidelines', { returnObjects: true }) as ClauseItem[];
+
   return (
     <div className="max-w-[1040px] mx-auto px-4 sm:px-6 py-6 sm:py-10 space-y-8 sm:space-y-12">
-      {/* Header */}
+      <SeoHead titleKey="seo.pages.authority.title" descriptionKey="seo.pages.authority.desc" />
+
+      {/* ส่วนหัวหน้า */}
       <div className="border-b border-gold-border/30 pb-6 sm:pb-8 text-center max-w-2xl mx-auto space-y-2.5">
-        <SectionEyebrow enText="CHARTER & POWERS" thText="อำนาจหน้าที่" />
+        <SectionEyebrow enText={t('about.authority.eyebrowEn')} thText={t('about.authority.eyebrowTh')} />
         <h1 className="font-serif text-3xl md:text-4xl font-semibold text-heading">
-          อำนาจหน้าที่องค์การนักเรียน
+          {t('about.authority.title')}
         </h1>
         <p className="text-xs md:text-sm text-text-muted">
-          ตามประกาศโรงเรียนสาธิตมหาวิทยาลัยพะเยา เรื่อง องค์การนักเรียน พ.ศ. ๒๕๖๙
+          {t('about.authority.subtitle')}
         </p>
       </div>
 
-      {/* Section 1: อำนาจหน้าที่ขององค์การนักเรียน */}
+      {/* ส่วนที่ 1: อำนาจหน้าที่ขององค์การนักเรียน */}
       <section className="bg-surface border border-gold-border/40 p-6 sm:p-8 md:p-10 rounded-sm shadow-editorial relative space-y-6">
         <CornerBracket position="top-left" />
         <CornerBracket position="top-right" />
@@ -82,12 +45,12 @@ export const AboutAuthority: React.FC = () => {
             01
           </span>
           <h2 className="font-serif text-xl sm:text-2xl font-semibold text-accent">
-            อำนาจหน้าที่ขององค์การนักเรียน
+            {t('about.authority.section1Title')}
           </h2>
         </div>
 
         <ol className="divide-y divide-gold-border/15">
-          {DUTIES.map((item) => (
+          {Array.isArray(duties) && duties.map((item) => (
             <li
               key={item.num}
               className="py-4 first:pt-1 last:pb-1 flex items-start gap-4 sm:gap-5"
@@ -103,7 +66,7 @@ export const AboutAuthority: React.FC = () => {
         </ol>
       </section>
 
-      {/* Section 2: แนวทางที่องค์การนักเรียนพึงดำเนิน */}
+      {/* ส่วนที่ 2: แนวทางที่องค์การนักเรียนพึงดำเนิน */}
       <section className="bg-surface border border-gold-border/40 p-6 sm:p-8 md:p-10 rounded-sm shadow-editorial relative space-y-6">
         <CornerBracket position="top-left" />
         <CornerBracket position="top-right" />
@@ -115,12 +78,12 @@ export const AboutAuthority: React.FC = () => {
             02
           </span>
           <h2 className="font-serif text-xl sm:text-2xl font-semibold text-accent">
-            แนวทางที่องค์การนักเรียนพึงดำเนิน
+            {t('about.authority.section2Title')}
           </h2>
         </div>
 
         <ol className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5">
-          {GUIDELINES.map((item) => (
+          {Array.isArray(guidelines) && guidelines.map((item) => (
             <li
               key={item.num}
               className="p-4 sm:p-5 bg-surface-elevated border border-gold-border/30 rounded-sm flex items-start gap-3.5"

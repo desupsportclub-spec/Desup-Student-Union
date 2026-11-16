@@ -8,9 +8,12 @@ import { setDoc, doc } from 'firebase/firestore';
 import { onAuthStateChanged, signInWithPopup, User } from 'firebase/auth';
 import { motion } from 'motion/react';
 import { auth, db, googleProvider } from '../lib/firebase';
+import { useTranslation } from 'react-i18next';
 import { ComplaintType, ImageAsset } from '../types';
-import { generateTrackingCode, formatThaiDateTime } from '../lib/format';
+import { generateTrackingCode, formatDateTime } from '../lib/format';
 import { SectionEyebrow, CornerBracket } from '../components/common/Ornament';
+import { LocLink } from '../components/common/LocLink';
+import { SeoHead } from '../components/common/SeoHead';
 import { compressImageFile, fileToDataUrl, getImageDimensions } from '../lib/imageService';
 import {
   generateTicketReceiptBlob,
@@ -18,20 +21,23 @@ import {
   saveRecoveryLookup,
 } from '../lib/complaintTracking';
 import { incrementPublicComplaintStats } from '../lib/complaintStatsSync';
-import { Link } from 'react-router-dom';
 import { SuccessCheck } from '../components/SuccessCheck';
 import { useSiteSettings } from '../context/SiteSettingsContext';
+import { useLanguage } from '../context/LanguageContext';
+import { localizePath } from '../lib/i18nRouting';
 
-const COMPLAINT_TYPES: { id: ComplaintType; title: string; desc: string }[] = [
-  { id: 'complaint', title: 'เรื่องร้องเรียนทั่วไป', desc: 'ปัญหาด้านสิ่งอำนวยความสะดวก อาคารสถานที่ หรือความไม่สะดวกในโรงเรียน' },
-  { id: 'suggestion', title: 'ข้อเสนอแนะพัฒนาโรงเรียน', desc: 'แนวคิด กิจกรรมใหม่ ๆ หรือข้อเสนอเพื่อสร้างสรรค์โรงเรียนสาธิต มพ. ให้น่าอยู่' },
-  { id: 'corruption', title: 'เบาะแสทุจริต / ความโปร่งใส', desc: 'รายงานความไม่โปร่งใส การประพฤติมิชอบ หรือการใช้อำนาจไม่เหมาะสม' },
-  { id: 'inquiry', title: 'ติดต่อสอบถามข้อมูล', desc: 'สอบถามเกี่ยวกับกิจกรรม ระเบียบ หรือการดำเนินงานขององค์การนักเรียน' },
-  { id: 'compliment', title: 'เรื่องชมเชยการทำงาน', desc: 'ส่งกำลังใจหรือคำชื่นชมการปฏิบัติหน้าที่ของเพื่อนนักเรียนและคณะทำงาน' },
-  { id: 'other', title: 'อื่น ๆ', desc: 'เรื่องอื่น ๆ ที่ประสงค์จะสื่อสารกับองค์การนักเรียน' },
+const COMPLAINT_TYPE_IDS: ComplaintType[] = [
+  'complaint',
+  'suggestion',
+  'corruption',
+  'inquiry',
+  'compliment',
+  'other',
 ];
 
 export const Complaint: React.FC = () => {
+  const { t } = useTranslation();
+  const { lang } = useLanguage();
   const { academicYearTH } = useSiteSettings();
   const [step, setStep] = useState<1 | 2 | 3 | 4>(1);
   const [submitting, setSubmitting] = useState(false);
@@ -86,7 +92,7 @@ export const Complaint: React.FC = () => {
     if (!files || files.length === 0) return;
 
     if (attachedImages.length + files.length > 2) {
-      setErrorMsg("แนบรูปภาพได้สูงสุดไม่เกิน 2 รูป");
+      setErrorMsg(t('complaint.errors.maxImages'));
       return;
     }
 
@@ -111,8 +117,8 @@ export const Complaint: React.FC = () => {
         });
       }
       setAttachedImages(prev => [...prev, ...newImages].slice(0, 2));
-    } catch (err) {
-      setErrorMsg("ไม่สามารถบีบอัดรูปภาพได้ กรุณาลองใหม่อีกครั้ง");
+    } catch {
+      setErrorMsg(t('complaint.errors.compressFailed'));
     } finally {
       setImageCompressing(false);
     }
@@ -122,59 +128,58 @@ export const Complaint: React.FC = () => {
     setAttachedImages(prev => prev.filter((_, i) => i !== index));
   };
 
-  // Step Navigations
+  // ขั้นตอนการเปลี่ยน Step
   const handleNextStep1 = () => {
     setStep(2);
   };
 
   const handleNextStep2 = () => {
     if (title.trim().length < 3) {
-      setErrorMsg("กรุณาระบุหัวข้อเรื่องอย่างน้อย 3 ตัวอักษร");
+      setErrorMsg(t('complaint.errors.titleTooShort'));
       return;
     }
     if (body.trim().length < 10) {
-      setErrorMsg("กรุณาระบุรายละเอียดอย่างน้อย 10 ตัวอักษร");
+      setErrorMsg(t('complaint.errors.bodyTooShort'));
       return;
     }
     setErrorMsg(null);
     setStep(3);
   };
 
-  // Final Submit
+  // ส่งข้อมูลขั้นสุดท้าย
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (submitting) return;
 
-    // 1. Check honeypot
+    // 1. ตรวจสอบช่องดักสแปม
     if (honeypot) {
-      // Quietly ignore spam bot submission
       return;
     }
 
-    // 2. Client-side rate limiting (1 submission per minute)
+    // 2. จำกัดความถี่การส่งฝั่งไคลเอนต์ (1 ครั้งต่อนาที)
     const lastSubmitTime = localStorage.getItem('desup_last_complaint_time');
     const now = Date.now();
     if (lastSubmitTime && now - parseInt(lastSubmitTime, 10) < 60000) {
-      setErrorMsg("กรุณารอประมาณ 1 นาทีก่อนส่งเรื่องใหม่อีกครั้ง เพื่อป้องกันการส่งข้อมูลซ้ำ");
+      setErrorMsg(t('complaint.errors.rateLimited'));
       return;
     }
 
-    // 3. Validate PDPA consent if specified
+    // 3. ตรวจสอบความยินยอม PDPA กรณีระบุตัวตน
     if (!anonymous && !pdpaConsent) {
-      setErrorMsg("กรุณายินยอมให้ใช้ข้อมูลติดต่อสำหรับการประสานงาน");
+      setErrorMsg(t('complaint.errors.pdpaRequired'));
       return;
     }
 
-    // 4. Validate optional recovery key + PIN pair if user started filling either
+    // 4. ตรวจสอบคำจำส่วนตัวและรหัส PIN กรณีกู้คืน
     const hasKeyword = recoveryKeyword.trim().length > 0;
     const hasPin = recoveryPin.trim().length > 0;
     if (hasKeyword || hasPin) {
       if (recoveryKeyword.trim().length < 2) {
-        setErrorMsg("กรุณากรอกคำจำส่วนตัวสำหรับกู้คืนอย่างน้อย 2 ตัวอักษร (หรือเว้นว่างทั้ง 2 ช่องหากไม่ใช้)");
+        setErrorMsg(t('complaint.errors.keywordTooShort'));
         return;
       }
       if (recoveryPin.trim().length < 4) {
-        setErrorMsg("กรุณาตั้งรหัส PIN สำหรับกู้คืนอย่างน้อย 4 หลัก");
+        setErrorMsg(t('complaint.errors.pinTooShort'));
         return;
       }
     }
@@ -262,7 +267,7 @@ export const Complaint: React.FC = () => {
       setStep(4);
     } catch (err: unknown) {
       console.error("Complaint submission error:", err);
-      setErrorMsg("เกิดข้อผิดพลาดในการบันทึกข้อมูล กรุณาลองใหม่อีกครั้ง");
+      setErrorMsg(t('complaint.errors.submitFailed'));
     } finally {
       setSubmitting(false);
     }
@@ -276,16 +281,17 @@ export const Complaint: React.FC = () => {
       setCurrentUser(res.user);
       setLinkGoogleAccount(true);
     } catch {
-      setErrorMsg("ไม่สามารถเชื่อมต่อบัญชี Google ได้ในขณะนี้ (สามารถส่งเรื่องได้ตามปกติโดยไม่ต้องล็อกอิน)");
+      setErrorMsg(t('complaint.errors.googleFailed'));
     } finally {
       setAuthLoading(false);
     }
   };
 
+  const localizedTrackPath = localizePath(`/track?code=${generatedCode}`, lang);
   const directTrackUrl =
     typeof window !== 'undefined' && generatedCode
-      ? `${window.location.origin}/track?code=${generatedCode}`
-      : `/track?code=${generatedCode}`;
+      ? `${window.location.origin}${localizedTrackPath}`
+      : localizedTrackPath;
 
   const handleCopyCode = () => {
     navigator.clipboard.writeText(generatedCode);
@@ -305,8 +311,8 @@ export const Complaint: React.FC = () => {
     try {
       const blob = await generateTicketReceiptBlob({
         trackingCode: generatedCode,
-        title: submittedTitle || 'เรื่องร้องเรียน / ข้อเสนอแนะ',
-        dateText: formatThaiDateTime(submittedAtISO || new Date().toISOString()),
+        title: submittedTitle || t('complaint.defaultTicketTitle'),
+        dateText: formatDateTime(submittedAtISO || new Date().toISOString(), lang),
         trackUrl: directTrackUrl,
       });
       if (!blob) return;
@@ -314,7 +320,7 @@ export const Complaint: React.FC = () => {
       const fileName = `ticket-${generatedCode}.png`;
       const file = new File([blob], fileName, { type: 'image/png' });
 
-      // Prefer native share sheet on iOS/iPadOS if file sharing is supported so user can tap "Save Image"
+      // ใช้เมนูแชร์ของระบบบน iOS/iPadOS หากรองรับเพื่อให้ผู้ใช้บันทึกรูปภาพได้สะดวก
       if (
         typeof navigator !== 'undefined' &&
         navigator.share &&
@@ -324,12 +330,12 @@ export const Complaint: React.FC = () => {
         try {
           await navigator.share({
             files: [file],
-            title: `บัตรติดตามเรื่อง ${generatedCode}`,
-            text: `ลิงก์ติดตามสถานะ: ${directTrackUrl}`,
+            title: t('complaint.ticketShareTitle', { code: generatedCode }),
+            text: t('complaint.ticketShareText', { url: directTrackUrl }),
           });
           return;
         } catch {
-          // User cancelled share or fallback to direct download
+          // ผู้ใช้ยกเลิกการแชร์ ให้ดาวน์โหลดไฟล์โดยตรงแทน
         }
       }
 
@@ -348,44 +354,46 @@ export const Complaint: React.FC = () => {
 
   return (
     <div className="max-w-[800px] mx-auto px-4 sm:px-6 py-6 sm:py-10 space-y-6 sm:space-y-10">
-      {/* Header */}
+      <SeoHead titleKey="seo.pages.complaint.title" descriptionKey="seo.pages.complaint.desc" />
+
+      {/* ส่วนหัวหน้า */}
       <div className="border-b border-gold-border/30 pb-5 sm:pb-6 text-center max-w-xl mx-auto space-y-2">
-        <SectionEyebrow enText="STUDENT VOICE" thText="รับเรื่องร้องเรียนและข้อเสนอแนะ" />
+        <SectionEyebrow enText={t('complaint.eyebrowEn')} thText={t('complaint.eyebrowTh')} />
         <h1 className="font-serif text-3xl md:text-4xl font-semibold text-heading">
-          DeSUP CARE
+          {t('complaint.title')}
         </h1>
         <p className="text-xs md:text-sm text-text-muted">
-          ช่องทางสื่อสารโดยตรง ปลอดภัย สามารถส่งแบบไม่ระบุตัวตนได้
+          {t('complaint.subtitle')}
         </p>
       </div>
 
-      {/* Stepper (Only show on steps 1-3) */}
+      {/* ตัวบ่งชี้ขั้นตอน (แสดงเฉพาะขั้นตอน 1-3) */}
       {step < 4 && (
         <div className="flex items-center justify-between max-w-md mx-auto text-[11px] sm:text-xs pb-4 border-b border-gold-border/15 gap-1 sm:gap-2">
           <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
             <span className={`w-6 h-6 rounded-full flex items-center justify-center font-bold ${step >= 1 ? 'bg-brand text-brand-contrast' : 'bg-bg-alt text-text-muted'}`}>
               1
             </span>
-            <span className={step === 1 ? 'font-semibold text-heading' : 'text-text-muted'}>ประเภทเรื่อง</span>
+            <span className={step === 1 ? 'font-semibold text-heading' : 'text-text-muted'}>{t('complaint.steps.step1')}</span>
           </div>
           <div className="h-[1px] flex-1 mx-1 sm:mx-2 bg-gold-border/25" />
           <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
             <span className={`w-6 h-6 rounded-full flex items-center justify-center font-bold ${step >= 2 ? 'bg-brand text-brand-contrast' : 'bg-bg-alt text-text-muted'}`}>
               2
             </span>
-            <span className={step === 2 ? 'font-semibold text-heading' : 'text-text-muted'}>รายละเอียด</span>
+            <span className={step === 2 ? 'font-semibold text-heading' : 'text-text-muted'}>{t('complaint.steps.step2')}</span>
           </div>
           <div className="h-[1px] flex-1 mx-1 sm:mx-2 bg-gold-border/25" />
           <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
             <span className={`w-6 h-6 rounded-full flex items-center justify-center font-bold ${step >= 3 ? 'bg-brand text-brand-contrast' : 'bg-bg-alt text-text-muted'}`}>
               3
             </span>
-            <span className={step === 3 ? 'font-semibold text-heading' : 'text-text-muted'}>ข้อมูลผู้ส่ง</span>
+            <span className={step === 3 ? 'font-semibold text-heading' : 'text-text-muted'}>{t('complaint.steps.step3')}</span>
           </div>
         </div>
       )}
 
-      {/* Honeypot field (hidden from view) */}
+      {/* ช่องดักสแปมบอท (ซ่อนจากผู้ใช้งาน) */}
       <input
         type="text"
         name="website_url_check"
@@ -402,38 +410,38 @@ export const Complaint: React.FC = () => {
         </div>
       )}
 
-      {/* STEP 1: Select Complaint Type */}
+      {/* ขั้นตอนที่ 1: เลือกประเภทเรื่อง */}
       {step === 1 && (
         <div className="space-y-6">
           <h2 className="font-serif text-xl font-semibold text-heading">
-            ขั้นตอนที่ ๑: เลือกประเภทเรื่องที่ต้องการส่ง
+            {t('complaint.step1Heading')}
           </h2>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {COMPLAINT_TYPES.map((t) => (
+            {COMPLAINT_TYPE_IDS.map((typeId) => (
               <label
-                key={t.id}
-                onClick={() => setType(t.id)}
+                key={typeId}
+                onClick={() => setType(typeId)}
                 className={`p-4 border rounded-sm cursor-pointer transition-all flex flex-col justify-between ${
-                  type === t.id
+                  type === typeId
                     ? 'border-gold bg-brand-soft/60 ring-1 ring-gold'
                     : 'border-gold-border/20 bg-surface-elevated hover:border-gold/60'
                 }`}
               >
                 <div className="flex items-start justify-between">
                   <h3 className="font-serif text-base font-semibold text-heading">
-                    {t.title}
+                    {t(`complaint.types.${typeId}.title`)}
                   </h3>
                   <input
                     type="radio"
                     name="complaintType"
-                    checked={type === t.id}
-                    onChange={() => setType(t.id)}
+                    checked={type === typeId}
+                    onChange={() => setType(typeId)}
                     className="accent-brand"
                   />
                 </div>
                 <p className="text-xs text-text-muted mt-2 leading-relaxed">
-                  {t.desc}
+                  {t(`complaint.types.${typeId}.desc`)}
                 </p>
               </label>
             ))}
@@ -445,34 +453,34 @@ export const Complaint: React.FC = () => {
               onClick={handleNextStep1}
               className="px-8 py-2.5 bg-brand text-brand-contrast text-xs font-medium rounded-full border border-gold-light/40 hover:bg-brand-hover transition-colors"
             >
-              ถัดไป: กรอกรายละเอียด →
+              {t('complaint.nextToStep2')}
             </button>
           </div>
         </div>
       )}
 
-      {/* STEP 2: Details & Attachments */}
+      {/* ขั้นตอนที่ 2: กรอกรายละเอียดและแนบรูปภาพ */}
       {step === 2 && (
         <div className="space-y-6">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 border-b border-gold-border/15 pb-2">
             <h2 className="font-serif text-xl font-semibold text-heading">
-              ขั้นตอนที่ ๒: กรอกรายละเอียดเรื่อง
+              {t('complaint.step2Heading')}
             </h2>
             <span className="text-xs text-gold-text">
-              ประเภท: {COMPLAINT_TYPES.find(t => t.id === type)?.title}
+              {t('complaint.selectedTypeLabel', { type: t(`complaint.types.${type}.title`) })}
             </span>
           </div>
 
           <div className="space-y-4">
             <div>
               <label className="block text-xs font-semibold text-heading mb-1">
-                หัวข้อเรื่อง (โปรดระบุให้ชัดเจนและกระชับ) *
+                {t('complaint.subjectLabel')}
               </label>
               <input
                 type="text"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
-                placeholder="เช่น เครื่องปรับอากาศห้องเรียน ม.4/1 ไม่ทำงาน, ข้อเสนอแนะการจัดงานสัปดาห์วิทยาศาสตร์"
+                placeholder={t('complaint.subjectPlaceholder')}
                 className="w-full text-xs input-underline"
                 required
               />
@@ -480,46 +488,45 @@ export const Complaint: React.FC = () => {
 
             <div>
               <label className="block text-xs font-semibold text-heading mb-1">
-                สถานที่หรือฝ่ายที่เกี่ยวข้อง (ถ้ามี)
+                {t('complaint.locationLabel')}
               </label>
               <input
                 type="text"
                 value={location}
                 onChange={(e) => setLocation(e.target.value)}
-                placeholder="เช่น อาคารเรียน 2 ชั้น 3, โรงอาหาร, ฝ่ายกิจกรรมนักเรียน"
+                placeholder={t('complaint.locationPlaceholder')}
                 className="w-full text-xs input-underline"
               />
             </div>
 
             <div>
               <label className="block text-xs font-semibold text-heading mb-1">
-                รายละเอียดเนื้อหา (อย่างน้อย 10 ตัวอักษร) *
+                {t('complaint.bodyLabel')}
               </label>
               <textarea
                 value={body}
                 onChange={(e) => setBody(e.target.value)}
                 rows={6}
-                placeholder="อธิบายเหตุการณ์ ปัญหา วันเวลา หรือข้อเสนอแนะที่ต้องการแจ้ง..."
+                placeholder={t('complaint.bodyPlaceholder')}
                 className="w-full text-xs input-underline"
                 required
               />
             </div>
 
-            {/* Photo Attachments (Max 2, private subcollection) */}
+            {/* แนบภาพถ่าย (สูงสุด 2 รูป เก็บใน subcollection ส่วนตัว) */}
             <div className="pt-2">
               <label className="block text-xs font-semibold text-heading mb-1">
-                แนบภาพถ่ายประกอบ (ไม่บังคับ สูงสุด 2 รูป)
+                {t('complaint.attachLabel')}
               </label>
 
               <div className="bg-warning-bg border border-warning/30 p-2.5 rounded-sm text-[11px] text-warning mb-2">
-                ⚠️ คำเตือน: หลีกเลี่ยงการแนบรูปที่เห็นใบหน้าหรือข้อมูลส่วนตัวของผู้อื่นโดยไม่จำเป็น
-                รูปถ่ายจะถูกบีบอัดและเปิดดูได้เฉพาะคณะกรรมการแอดมินเท่านั้น
+                {t('complaint.attachWarning')}
               </div>
 
               {attachedImages.length < 2 && (
                 <div className="flex items-center gap-2">
                   <label className="cursor-pointer px-4 py-2 bg-surface-elevated border border-gold-border/25 hover:border-gold rounded-sm text-xs text-heading inline-flex items-center gap-2 transition-colors">
-                    <span>📷 เพิ่มรูปภาพ / ถ่ายภาพ</span>
+                    <span>{t('complaint.addImageBtn')}</span>
                     <input
                       type="file"
                       accept="image/*"
@@ -529,17 +536,17 @@ export const Complaint: React.FC = () => {
                     />
                   </label>
                   {imageCompressing && (
-                    <span className="text-xs text-text-muted">กำลังบีบอัดรูปภาพ...</span>
+                    <span className="text-xs text-text-muted">{t('complaint.compressing')}</span>
                   )}
                 </div>
               )}
 
-              {/* Attached Photos Preview */}
+              {/* ตัวอย่างรูปภาพที่แนบ */}
               {attachedImages.length > 0 && (
                 <div className="flex gap-4 mt-3">
                   {attachedImages.map((img, idx) => (
                     <div key={idx} className="relative w-24 h-24 border border-gold-border/30 rounded-sm overflow-hidden bg-bg-alt">
-                      <img src={img.url} alt="รูปแนบ" className="w-full h-full object-cover" />
+                      <img src={img.url} alt={t('complaint.attachedAlt')} className="w-full h-full object-cover" />
                       <button
                         type="button"
                         onClick={() => handleRemoveImage(idx)}
@@ -560,33 +567,33 @@ export const Complaint: React.FC = () => {
               onClick={() => setStep(1)}
               className="text-xs text-text-muted hover:text-accent"
             >
-              ← ย้อนกลับ
+              {t('complaint.backBtn')}
             </button>
             <button
               type="button"
               onClick={handleNextStep2}
               className="px-8 py-2.5 bg-brand text-brand-contrast text-xs font-medium rounded-full border border-gold-light/40 hover:bg-brand-hover transition-colors"
             >
-              ถัดไป: ข้อมูลผู้ส่ง →
+              {t('complaint.nextToStep3')}
             </button>
           </div>
         </div>
       )}
 
-      {/* STEP 3: Submitter Identity & PDPA */}
+      {/* ขั้นตอนที่ 3: ข้อมูลผู้ส่งและการยินยอม PDPA */}
       {step === 3 && (
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="border-b border-gold-border/15 pb-2">
             <h2 className="font-serif text-xl font-semibold text-heading">
-              ขั้นตอนที่ ๓: ข้อมูลผู้ส่งเรื่อง
+              {t('complaint.step3Heading')}
             </h2>
             <p className="text-xs text-text-muted">
-              ท่านสามารถเลือกที่จะไม่เปิดเผยตัวตนได้ โดยระบบจะไม่บันทึกชื่อของท่าน
+              {t('complaint.step3Sub')}
             </p>
           </div>
 
           <div className="space-y-4">
-            {/* Anonymous Toggle */}
+            {/* ตัวเลือกการเปิดเผยตัวตน */}
             <div className="space-y-3 bg-surface-elevated p-4 border border-gold-border/20 rounded-sm">
               <label className="flex items-center gap-3 cursor-pointer">
                 <input
@@ -598,10 +605,10 @@ export const Complaint: React.FC = () => {
                 />
                 <div>
                   <span className="font-serif text-sm font-semibold text-heading">
-                    ส่งแบบไม่ระบุตัวตน (ค่าเริ่มต้น - ปลอดภัยสูงสุด)
+                    {t('complaint.anonTitle')}
                   </span>
                   <p className="text-xs text-text-muted">
-                    ข้อมูลผู้ส่งจะไม่ถูกบันทึกในระบบ สามารถติดตามความคืบหน้าด้วยรหัสติดตามเท่านั้น
+                    {t('complaint.anonDesc')}
                   </p>
                 </div>
               </label>
@@ -616,27 +623,27 @@ export const Complaint: React.FC = () => {
                 />
                 <div>
                   <span className="font-serif text-sm font-semibold text-heading">
-                    ระบุตัวตน (เพื่อความสะดวกรวดเร็วในการประสานงานกลับ)
+                    {t('complaint.identifiedTitle')}
                   </span>
                   <p className="text-xs text-text-muted">
-                    ข้อมูลจะถูกเก็บเป็นความลับและเห็นได้เฉพาะคณะกรรมการแอดมินขององค์การนักเรียนเท่านั้น
+                    {t('complaint.identifiedDesc')}
                   </p>
                 </div>
               </label>
             </div>
 
-            {/* Submitter details if not anonymous */}
+            {/* ข้อมูลติดต่อกรณีเลือกระบุตัวตน */}
             {!anonymous && (
               <div className="space-y-4 p-4 bg-brand-soft/35 border border-gold-border/20 rounded-sm">
                 <div>
                   <label className="block text-xs font-semibold text-heading mb-1">
-                    ชื่อ-นามสกุล (ผู้ส่ง) *
+                    {t('complaint.contactNameLabel')}
                   </label>
                   <input
                     type="text"
                     value={contactName}
                     onChange={(e) => setContactName(e.target.value)}
-                    placeholder="เช่น นายธนภัทร สุขสมบูรณ์"
+                    placeholder={t('complaint.contactNamePlaceholder')}
                     className="w-full text-xs input-underline"
                     required={!anonymous}
                   />
@@ -644,26 +651,26 @@ export const Complaint: React.FC = () => {
 
                 <div>
                   <label className="block text-xs font-semibold text-heading mb-1">
-                    ระดับชั้น / ห้องเรียน
+                    {t('complaint.gradeClassLabel')}
                   </label>
                   <input
                     type="text"
                     value={gradeClass}
                     onChange={(e) => setGradeClass(e.target.value)}
-                    placeholder="เช่น ม.5/2"
+                    placeholder={t('complaint.gradeClassPlaceholder')}
                     className="w-full text-xs input-underline"
                   />
                 </div>
 
                 <div>
                   <label className="block text-xs font-semibold text-heading mb-1">
-                    ช่องทางติดต่อกลับ (LINE ID หรือ อีเมล) *
+                    {t('complaint.contactMethodLabel')}
                   </label>
                   <input
                     type="text"
                     value={contactMethod}
                     onChange={(e) => setContactMethod(e.target.value)}
-                    placeholder="LINE ID หรือ อีเมลสำหรับรับผลการประสานงาน"
+                    placeholder={t('complaint.contactMethodPlaceholder')}
                     className="w-full text-xs input-underline"
                     required={!anonymous}
                   />
@@ -679,35 +686,35 @@ export const Complaint: React.FC = () => {
                       required={!anonymous}
                     />
                     <span>
-                      ข้าพเจ้ายินยอมให้องค์การนักเรียนใช้ข้อมูลติดต่อนี้เพื่อวัตถุประสงค์ในการตรวจสอบและแจ้งผลการดำเนินงานเท่านั้น (ตามนโยบายคุ้มครองข้อมูลส่วนบุคคล PDPA)
+                      {t('complaint.pdpaAgree')}
                     </span>
                   </label>
                 </div>
               </div>
             )}
-            {/* Anti-Loss Tracking Options (Local Auto-Save + Optional Recovery PIN + Google Sync) */}
+
+            {/* ตัวเลือกช่วยจำและกู้คืนข้ามเครื่อง */}
             <div className="p-4 sm:p-5 bg-surface border border-gold-border/40 rounded-sm space-y-4">
               <div className="space-y-1">
                 <h3 className="font-serif text-sm font-semibold text-heading">
-                  ระบบช่วยจำและติดตามผล (ป้องกันรหัสหาย)
+                  {t('complaint.recoveryBoxTitle')}
                 </h3>
                 <p className="text-xs text-text-muted leading-relaxed">
-                  ✓ ระบบจะบันทึกรายการเรื่องนี้ไว้บนเครื่องนี้ให้อัตโนมัติเมื่อเปิดหน้าติดตามสถานะ
-                  และท่านสามารถตั้งรหัสกันลืมหรือเชื่อมบัญชี Google เพื่อเปิดดูจากเครื่องอื่นได้
+                  {t('complaint.recoveryBoxDesc')}
                 </p>
               </div>
 
-              {/* Option A: Personal Recovery Keyword + PIN */}
+              {/* ตัวเลือก ก: คำจำส่วนตัว + รหัส PIN */}
               <div className="pt-2 border-t border-gold-border/15 space-y-2">
                 <label className="block text-xs font-semibold text-heading">
-                  ตั้งคำจำส่วนตัว + รหัส PIN (ไม่บังคับ — เผื่อใช้ค้นหาคืนเมื่อเปลี่ยนเครื่องหรือล้างประวัติ)
+                  {t('complaint.recoveryPinLabel')}
                 </label>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <input
                     type="text"
                     value={recoveryKeyword}
                     onChange={(e) => setRecoveryKeyword(e.target.value)}
-                    placeholder="คำจำส่วนตัว เช่น รหัสนักเรียน หรือชื่อเล่น"
+                    placeholder={t('complaint.recoveryKeywordPlaceholder')}
                     className="w-full text-xs input-underline bg-surface-elevated px-2.5"
                     maxLength={50}
                   />
@@ -716,17 +723,17 @@ export const Complaint: React.FC = () => {
                     inputMode="numeric"
                     value={recoveryPin}
                     onChange={(e) => setRecoveryPin(e.target.value)}
-                    placeholder="รหัส PIN 4-6 หลัก (เช่น 1234)"
+                    placeholder={t('complaint.recoveryPinPlaceholder')}
                     className="w-full text-xs input-underline bg-surface-elevated px-2.5"
                     maxLength={12}
                   />
                 </div>
                 <p className="text-[11px] text-text-muted">
-                  ข้อมูลนี้จะถูกเข้ารหัสแบบทางเดียว (SHA-256) ก่อนจัดเก็บ จึงไม่เปิดเผยตัวตนของผู้ส่ง
+                  {t('complaint.recoveryHashNote')}
                 </p>
               </div>
 
-              {/* Option B: Optional Google Account Cross-Device Sync */}
+              {/* ตัวเลือก ข: เชื่อมต่อบัญชี Google เพื่อซิงค์ข้ามเครื่อง */}
               <div className="pt-2 border-t border-gold-border/15 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                 {currentUser ? (
                   <label className="flex items-center gap-2 text-xs text-heading cursor-pointer">
@@ -737,13 +744,13 @@ export const Complaint: React.FC = () => {
                       className="accent-brand"
                     />
                     <span>
-                      ผูกกับบัญชี Google (<strong>{currentUser.email}</strong>) เพื่อดูสถานะข้ามเครื่อง
+                      {t('complaint.googleLinkChecked')}<strong>{currentUser.email}</strong>{t('complaint.googleLinkCheckedEnd')}
                     </span>
                   </label>
                 ) : (
                   <>
                     <span className="text-xs text-text-muted">
-                      หรือเชื่อมบัญชี Google เพื่อซิงค์ประวัติข้ามมือถือ / ไอแพด / คอม (ไม่เปิดเผยชื่อต่อผู้ดูแลหากเลือกไม่ระบุตัวตน)
+                      {t('complaint.googleSyncDesc')}
                     </span>
                     <button
                       type="button"
@@ -751,7 +758,7 @@ export const Complaint: React.FC = () => {
                       disabled={authLoading}
                       className="px-3.5 py-1.5 bg-surface-elevated border border-gold-border/25 hover:border-gold text-xs font-medium text-heading rounded-sm shrink-0 transition-colors"
                     >
-                      {authLoading ? 'กำลังเชื่อมต่อ...' : 'เชื่อมบัญชี Google'}
+                      {authLoading ? t('complaint.connectingGoogle') : t('complaint.connectGoogle')}
                     </button>
                   </>
                 )}
@@ -765,20 +772,20 @@ export const Complaint: React.FC = () => {
               onClick={() => setStep(2)}
               className="text-xs text-text-muted hover:text-accent"
             >
-              ← ย้อนกลับ
+              {t('complaint.backBtn')}
             </button>
             <button
               type="submit"
               disabled={submitting}
               className="px-8 py-3 bg-brand text-brand-contrast text-xs font-medium rounded-full border border-gold-light/40 hover:bg-brand-hover transition-colors shadow-editorial"
             >
-              {submitting ? 'กำลังส่งเรื่อง...' : 'ยืนยันและส่งเรื่องร้องเรียน ✓'}
+              {submitting ? t('complaint.submitting') : t('complaint.submitBtn')}
             </button>
           </div>
         </form>
       )}
 
-      {/* STEP 4: Success View & Tracking Code */}
+      {/* ขั้นตอนที่ 4: ส่งสำเร็จและแสดงรหัสติดตามเรื่อง */}
       {step === 4 && (
         <div className="bg-surface border border-gold-border/50 p-5 sm:p-8 md:p-12 rounded-sm shadow-editorial text-center space-y-6 relative">
           <CornerBracket position="top-left" />
@@ -798,18 +805,17 @@ export const Complaint: React.FC = () => {
           >
             <div className="space-y-2">
               <h2 className="font-serif text-2xl md:text-3xl font-semibold text-heading">
-                องค์การนักเรียนได้รับเรื่องของท่านแล้ว
+                {t('complaint.successTitle')}
               </h2>
               <p className="text-xs md:text-sm text-text-muted max-w-md mx-auto">
-                ระบบได้บันทึกเรื่องนี้ไว้ในหน้า "ติดตามสถานะ" บนอุปกรณ์นี้ให้อัตโนมัติแล้ว
-                หรือบันทึกรูปบัตร/ลิงก์ด้านล่างเพื่อเก็บไว้เปิดดูจากเครื่องอื่น
+                {t('complaint.successDesc')}
               </p>
             </div>
 
-            {/* Large Tracking Code Display */}
+            {/* กล่องแสดงรหัสติดตามเรื่องขนาดใหญ่ */}
             <div className="p-5 sm:p-6 bg-surface-elevated border border-gold rounded-sm max-w-md mx-auto space-y-4">
               <span className="text-[11px] uppercase tracking-widest text-gold-text font-semibold block">
-                รหัสติดตามเรื่องร้องเรียน (TRACKING CODE)
+                {t('complaint.trackingCodeHeading')}
               </span>
               <div className="font-serif text-2xl sm:text-3xl md:text-4xl font-bold text-accent tracking-wider font-mono">
                 {generatedCode}
@@ -822,38 +828,38 @@ export const Complaint: React.FC = () => {
                   disabled={downloadingTicket}
                   className="px-4 py-2 bg-brand text-brand-contrast text-xs font-medium rounded-sm hover:bg-brand-hover transition-colors"
                 >
-                  {downloadingTicket ? 'กำลังสร้างรูปบัตร...' : '🖼️ บันทึกรูปบัตรติดตามเรื่อง'}
+                  {downloadingTicket ? t('complaint.creatingTicket') : t('complaint.downloadTicket')}
                 </button>
                 <button
                   type="button"
                   onClick={handleCopyTrackLink}
                   className="px-3.5 py-2 bg-surface border border-gold/60 text-xs text-heading rounded-sm hover:bg-brand-soft transition-colors"
                 >
-                  {copiedLink ? 'คัดลอกลิงก์แล้ว ✓' : '🔗 คัดลอกลิงก์ติดตาม'}
+                  {copiedLink ? t('complaint.copiedLink') : t('complaint.copyLink')}
                 </button>
                 <button
                   type="button"
                   onClick={handleCopyCode}
                   className="px-3.5 py-2 bg-surface border border-gold-border/30 text-xs text-heading rounded-sm hover:bg-bg-alt transition-colors"
                 >
-                  {copied ? 'คัดลอกรหัสแล้ว ✓' : '📋 คัดลอกรหัส'}
+                  {copied ? t('complaint.copiedCode') : t('complaint.copyCode')}
                 </button>
               </div>
             </div>
 
             <div className="pt-2 flex flex-wrap justify-center gap-3 sm:gap-4">
-              <Link
+              <LocLink
                 to={`/track?code=${generatedCode}`}
                 className="px-6 py-2.5 bg-brand text-brand-contrast text-xs font-medium rounded-full border border-gold-light/40 hover:bg-brand-hover transition-colors"
               >
-                ติดตามสถานะเรื่องนี้ →
-              </Link>
-              <Link
+                {t('complaint.trackThisCase')}
+              </LocLink>
+              <LocLink
                 to="/"
                 className="px-6 py-2.5 border border-gold-border/30 text-heading text-xs font-medium rounded-full hover:bg-surface-elevated transition-colors"
               >
-                กลับสู่หน้าหลัก
-              </Link>
+                {t('complaint.backHome')}
+              </LocLink>
             </div>
           </motion.div>
         </div>

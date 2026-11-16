@@ -4,8 +4,9 @@
  */
 
 import React, { lazy, Suspense } from 'react';
-import { createBrowserRouter, RouterProvider } from 'react-router-dom';
+import { createBrowserRouter, RouteObject, RouterProvider } from 'react-router-dom';
 import { HelmetProvider } from 'react-helmet-async';
+import { useTranslation } from 'react-i18next';
 import { MainLayout } from './components/layout/MainLayout';
 import { AdminAuthProvider } from './admin/AdminAuthContext';
 import { SiteSettingsProvider } from './context/SiteSettingsContext';
@@ -40,141 +41,154 @@ const AdminComplaints = lazy(() => import('./admin/AdminComplaints').then(m => (
 const AdminUsers = lazy(() => import('./admin/AdminUsers').then(m => ({ default: m.AdminUsers })));
 const AdminSettings = lazy(() => import('./admin/AdminSettings').then(m => ({ default: m.AdminSettings })));
 
-// Loading Fallback Spinner
-const PageFallback: React.FC = () => (
-  <div className="min-h-[60vh] flex flex-col items-center justify-center p-12">
-    <Emblem size={44} animate />
-    <span className="text-xs text-gold-text mt-4 font-serif tracking-wider">กำลังโหลด...</span>
-  </div>
-);
+// ตัวแสดงสถานะระหว่างโหลดหน้าแบบ Lazy Load
+const PageFallback: React.FC = () => {
+  const { t } = useTranslation();
+  return (
+    <div className="min-h-[60vh] flex flex-col items-center justify-center p-12">
+      <Emblem size={44} animate />
+      <span className="text-xs text-gold-text mt-4 font-serif tracking-wider">{t('site.loading')}</span>
+    </div>
+  );
+};
+
+// เส้นทางหน้าเว็บไซต์สาธารณะที่ใช้ร่วมกันทั้งภาษาไทย (/) และภาษาอังกฤษ (/en)
+const publicChildrenRoutes: RouteObject[] = [
+  {
+    index: true,
+    element: (
+      <Suspense fallback={<PageFallback />}>
+        <Home />
+      </Suspense>
+    ),
+  },
+  {
+    path: 'news',
+    element: (
+      <Suspense fallback={<PageFallback />}>
+        <News />
+      </Suspense>
+    ),
+  },
+  {
+    path: 'news/:category',
+    element: (
+      <Suspense fallback={<PageFallback />}>
+        <News />
+      </Suspense>
+    ),
+  },
+  {
+    path: 'news/read/:id',
+    element: (
+      <Suspense fallback={<PageFallback />}>
+        <NewsDetail />
+      </Suspense>
+    ),
+  },
+  {
+    path: 'calendar',
+    element: (
+      <Suspense fallback={<PageFallback />}>
+        <CalendarPage />
+      </Suspense>
+    ),
+  },
+  {
+    path: 'downloads',
+    element: (
+      <Suspense fallback={<PageFallback />}>
+        <Downloads />
+      </Suspense>
+    ),
+  },
+  {
+    path: 'about/emblem',
+    element: (
+      <Suspense fallback={<PageFallback />}>
+        <AboutEmblem />
+      </Suspense>
+    ),
+  },
+  {
+    path: 'about/authority',
+    element: (
+      <Suspense fallback={<PageFallback />}>
+        <AboutAuthority />
+      </Suspense>
+    ),
+  },
+  {
+    path: 'about/board',
+    element: (
+      <Suspense fallback={<PageFallback />}>
+        <AboutBoard />
+      </Suspense>
+    ),
+  },
+  {
+    path: 'about/advisors',
+    element: (
+      <Suspense fallback={<PageFallback />}>
+        <AboutAdvisors />
+      </Suspense>
+    ),
+  },
+  {
+    path: 'about/hall',
+    element: (
+      <Suspense fallback={<PageFallback />}>
+        <AboutHall />
+      </Suspense>
+    ),
+  },
+  {
+    path: 'complaint',
+    element: (
+      <Suspense fallback={<PageFallback />}>
+        <Complaint />
+      </Suspense>
+    ),
+  },
+  {
+    path: 'track',
+    element: (
+      <Suspense fallback={<PageFallback />}>
+        <TrackComplaint />
+      </Suspense>
+    ),
+  },
+  {
+    path: 'contact',
+    element: (
+      <Suspense fallback={<PageFallback />}>
+        <Contact />
+      </Suspense>
+    ),
+  },
+  {
+    path: '*',
+    element: (
+      <Suspense fallback={<PageFallback />}>
+        <NotFound />
+      </Suspense>
+    ),
+  },
+];
 
 const router = createBrowserRouter([
-  // Public Portal with MainLayout
+  // เส้นทางเว็บไซต์สาธารณะภาษาไทย (ค่าเริ่มต้น)
   {
     path: '/',
     element: <MainLayout />,
-    children: [
-      {
-        index: true,
-        element: (
-          <Suspense fallback={<PageFallback />}>
-            <Home />
-          </Suspense>
-        ),
-      },
-      {
-        path: 'news',
-        element: (
-          <Suspense fallback={<PageFallback />}>
-            <News />
-          </Suspense>
-        ),
-      },
-      {
-        path: 'news/:category',
-        element: (
-          <Suspense fallback={<PageFallback />}>
-            <News />
-          </Suspense>
-        ),
-      },
-      {
-        path: 'news/read/:id',
-        element: (
-          <Suspense fallback={<PageFallback />}>
-            <NewsDetail />
-          </Suspense>
-        ),
-      },
-      {
-        path: 'calendar',
-        element: (
-          <Suspense fallback={<PageFallback />}>
-            <CalendarPage />
-          </Suspense>
-        ),
-      },
-      {
-        path: 'downloads',
-        element: (
-          <Suspense fallback={<PageFallback />}>
-            <Downloads />
-          </Suspense>
-        ),
-      },
-      {
-        path: 'about/emblem',
-        element: (
-          <Suspense fallback={<PageFallback />}>
-            <AboutEmblem />
-          </Suspense>
-        ),
-      },
-      {
-        path: 'about/authority',
-        element: (
-          <Suspense fallback={<PageFallback />}>
-            <AboutAuthority />
-          </Suspense>
-        ),
-      },
-      {
-        path: 'about/board',
-        element: (
-          <Suspense fallback={<PageFallback />}>
-            <AboutBoard />
-          </Suspense>
-        ),
-      },
-      {
-        path: 'about/advisors',
-        element: (
-          <Suspense fallback={<PageFallback />}>
-            <AboutAdvisors />
-          </Suspense>
-        ),
-      },
-      {
-        path: 'about/hall',
-        element: (
-          <Suspense fallback={<PageFallback />}>
-            <AboutHall />
-          </Suspense>
-        ),
-      },
-      {
-        path: 'complaint',
-        element: (
-          <Suspense fallback={<PageFallback />}>
-            <Complaint />
-          </Suspense>
-        ),
-      },
-      {
-        path: 'track',
-        element: (
-          <Suspense fallback={<PageFallback />}>
-            <TrackComplaint />
-          </Suspense>
-        ),
-      },
-      {
-        path: 'contact',
-        element: (
-          <Suspense fallback={<PageFallback />}>
-            <Contact />
-          </Suspense>
-        ),
-      },
-      {
-        path: '*',
-        element: (
-          <Suspense fallback={<PageFallback />}>
-            <NotFound />
-          </Suspense>
-        ),
-      },
-    ],
+    children: publicChildrenRoutes,
+  },
+
+  // เส้นทางเว็บไซต์สาธารณะภาษาอังกฤษ
+  {
+    path: '/en',
+    element: <MainLayout />,
+    children: publicChildrenRoutes,
   },
 
   // Admin Portal with AdminLayout

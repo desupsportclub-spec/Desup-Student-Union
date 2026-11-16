@@ -4,47 +4,52 @@
  */
 
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { SectionEyebrow, CornerBracket } from '../components/common/Ornament';
+import { SeoHead } from '../components/common/SeoHead';
 import { useSiteSettings } from '../context/SiteSettingsContext';
 import { SITE_CONFIG } from '../config/site';
 
 export const Contact: React.FC = () => {
+  const { t } = useTranslation();
   const { contactInfo } = useSiteSettings();
 
   return (
     <div className="max-w-[1240px] mx-auto px-4 sm:px-6 md:px-12 py-6 sm:py-10 space-y-8 sm:space-y-12">
-      {/* Header */}
+      <SeoHead titleKey="seo.pages.contact.title" descriptionKey="seo.pages.contact.desc" />
+
+      {/* ส่วนหัวหน้า */}
       <div className="border-b border-gold-border/30 pb-5 sm:pb-6 text-center max-w-xl mx-auto space-y-2">
-        <SectionEyebrow enText="Contact" thText="ติดต่อเรา" />
+        <SectionEyebrow enText={t('contact.eyebrowEn')} thText={t('contact.eyebrowTh')} />
         <h1 className="font-serif text-3xl md:text-4xl font-semibold text-heading">
-          ติดต่อเรา
+          {t('contact.title')}
         </h1>
         <p className="text-xs md:text-sm text-text-muted">
-          โรงเรียนสาธิตมหาวิทยาลัยพะเยา
+          {t('contact.subtitle')}
         </p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start">
-        {/* Left 5 Cols: Contact Information */}
+        {/* คอลัมน์ซ้าย: ข้อมูลการติดต่อ */}
         <div className="lg:col-span-5">
           <div className="bg-surface border border-gold-border/30 p-5 sm:p-6 rounded-sm shadow-editorial space-y-4">
             <h2 className="font-serif text-xl font-semibold text-heading">
-              ข้อมูลการติดต่อ
+              {t('contact.infoHeading')}
             </h2>
 
             <div className="space-y-3.5 text-xs md:text-sm text-text/85 leading-relaxed">
               <div>
-                <span className="font-semibold text-accent block">สถานที่ตั้ง:</span>
+                <span className="font-semibold text-accent block">{t('contact.addressLabel')}</span>
                 <span>{contactInfo.address}</span>
               </div>
 
               <div>
-                <span className="font-semibold text-accent block">อีเมล:</span>
+                <span className="font-semibold text-accent block">{t('contact.emailLabel')}</span>
                 <span>{contactInfo.email}</span>
               </div>
 
               <div>
-                <span className="font-semibold text-accent block">Facebook Page:</span>
+                <span className="font-semibold text-accent block">{t('contact.facebookLabel')}</span>
                 <a
                   href={contactInfo.facebookUrl}
                   target="_blank"
@@ -58,7 +63,7 @@ export const Contact: React.FC = () => {
           </div>
         </div>
 
-        {/* Right 7 Cols: Embedded Google Maps */}
+        {/* คอลัมน์ขวา: แผนที่ Google Maps */}
         <div className="lg:col-span-7 flex">
           <div className="bg-surface border border-gold-border/20 p-5 sm:p-6 rounded-sm shadow-editorial relative w-full flex flex-col space-y-4">
             <CornerBracket position="top-left" />
@@ -67,7 +72,7 @@ export const Contact: React.FC = () => {
             <CornerBracket position="bottom-right" />
 
             <h2 className="font-serif text-xl font-semibold text-heading">
-              แผนที่โรงเรียนสาธิตมหาวิทยาลัยพะเยา
+              {t('contact.mapHeading')}
             </h2>
 
             <div className="w-full flex-1 min-h-[280px] sm:min-h-[340px] rounded-sm overflow-hidden border border-gold-border/30">
@@ -79,7 +84,7 @@ export const Contact: React.FC = () => {
                 allowFullScreen
                 loading="lazy"
                 referrerPolicy="no-referrer-when-downgrade"
-                title="แผนที่โรงเรียนสาธิตมหาวิทยาลัยพะเยา"
+                title={t('contact.mapTitle')}
                 className="w-full h-full min-h-[280px] sm:min-h-[340px]"
               />
             </div>

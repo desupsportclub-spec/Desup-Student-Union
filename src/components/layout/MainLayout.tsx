@@ -12,6 +12,8 @@ import { Footer } from '../common/Footer';
 import { ScrollProgress } from '../common/ScrollProgress';
 import { Preloader } from '../common/Preloader';
 import { CookieConsent } from '../common/CookieConsent';
+import { SeoHead } from '../common/SeoHead';
+import { LanguageProvider } from '../../context/LanguageContext';
 import { doc, updateDoc, increment } from 'firebase/firestore';
 import { db } from '../../lib/firebase';
 import { prefetchNews } from '../../lib/publicDataService';
@@ -98,33 +100,36 @@ export const MainLayout: React.FC = () => {
   }, [location.pathname]);
 
   return (
-    <div className="min-h-screen flex flex-col bg-bg text-text relative selection:bg-brand-soft selection:text-heading">
-      {/* Top scroll progress */}
-      <ScrollProgress />
+    <LanguageProvider>
+      <SeoHead />
+      <div className="min-h-screen flex flex-col bg-bg text-text relative selection:bg-brand-soft selection:text-heading">
+        {/* แถบความคืบหน้าการเลื่อนหน้าจอ */}
+        <ScrollProgress />
 
-      {/* Session-based initial preloader */}
-      <Preloader />
+        {/* หน้าจอต้อนรับขณะเข้าชมครั้งแรก */}
+        <Preloader />
 
-      {/* Main sticky navigation */}
-      <Navbar tickerItems={tickerItems} />
+        {/* แถบนำทางหลักและประกาศ */}
+        <Navbar tickerItems={tickerItems} />
 
-      {/* Crisp route view without blocking exit delay */}
-      <main className="flex-1">
-        <motion.div
-          key={location.pathname}
-          initial={{ opacity: 0, y: 8 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.16, ease: [0.22, 1, 0.36, 1] }}
-        >
-          <Outlet />
-        </motion.div>
-      </main>
+        {/* เนื้อหาหลักของแต่ละหน้า */}
+        <main className="flex-1">
+          <motion.div
+            key={location.pathname}
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.16, ease: [0.22, 1, 0.36, 1] }}
+          >
+            <Outlet />
+          </motion.div>
+        </main>
 
-      {/* Main Footer */}
-      <Footer />
+        {/* ส่วนท้ายเว็บไซต์ */}
+        <Footer />
 
-      {/* Cookie Consent Banner */}
-      <CookieConsent />
-    </div>
+        {/* แบนเนอร์ขอความยินยอมคุกกี้ */}
+        <CookieConsent />
+      </div>
+    </LanguageProvider>
   );
 };

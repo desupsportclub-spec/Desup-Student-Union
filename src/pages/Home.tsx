@@ -4,7 +4,7 @@
  */
 
 import React, { useEffect, useState, useCallback } from 'react';
-import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import useEmblaCarousel from 'embla-carousel-react';
 import Lightbox from 'yet-another-react-lightbox';
 import 'yet-another-react-lightbox/styles.css';
@@ -23,8 +23,9 @@ import {
 } from '../lib/publicDataService';
 import { NewsItem, EventItem, PersonItem, BannerItem, ComplaintItem } from '../types';
 import {
-  formatThaiDate,
-  getThaiDateParts,
+  formatAcademicYear,
+  formatDate,
+  getDateParts,
   formatNumber,
   isEventActiveOrUpcoming,
   getEventScheduleStatus,
@@ -34,6 +35,9 @@ import { SectionEyebrow, CornerBracket, PinIcon } from '../components/common/Orn
 import { NewsCategoryBadge } from '../components/common/StatusBadge';
 import { Emblem } from '../components/common/Emblem';
 import { HeroBannerSlider } from '../components/home/HeroBannerSlider';
+import { LocLink } from '../components/common/LocLink';
+import { SeoHead } from '../components/common/SeoHead';
+import { useLanguage } from '../context/LanguageContext';
 import { useSiteSettings } from '../context/SiteSettingsContext';
 import { computeComplaintStats, syncComplaintStatsToSettings } from '../lib/complaintStatsSync';
 import {
@@ -42,6 +46,8 @@ import {
   YouTubeLitePlayer,
 } from '../components/news/SocialMediaEmbed';
 
+const THAI_DEFAULT_HEADLINE = '"พวกเราพร้อมเป็นตัวแทนและรับฟังทุกเสียงของเพื่อนนักเรียนสาธิต มพ."';
+
 function splitHomeNews(newsList: NewsItem[]) {
   if (newsList.length === 0) {
     return { featured: null, recent: [], pinnedList: [], photos: [] };
@@ -49,7 +55,6 @@ function splitHomeNews(newsList: NewsItem[]) {
 
   const pinnedList = newsList.filter((n) => n.pinned);
   const unpinned = newsList.filter((n) => !n.pinned);
-  // Keep latest non-pinned post(s) in top area when available; otherwise fall back to full list
   const topPool = unpinned.length > 0 ? unpinned : newsList;
   const featured = topPool[0] || null;
   const recent = featured ? topPool.filter((n) => n.id !== featured.id).slice(0, 4) : [];
@@ -87,6 +92,8 @@ function resolvePresident(peopleList: PersonItem[]): PersonItem | null {
 }
 
 export const Home: React.FC = () => {
+  const { t } = useTranslation();
+  const { lang } = useLanguage();
   const { academicYearTH, presidentHeadline, presidentMessage, complaintStats } = useSiteSettings();
 
   const initialNews = getCachedNewsSync();
@@ -105,7 +112,6 @@ export const Home: React.FC = () => {
   const [president, setPresident] = useState<PersonItem | null>(() => (initialPeople ? resolvePresident(initialPeople) : null));
   const [galleryPhotos, setGalleryPhotos] = useState<{ src: string; title: string }[]>(() => initialNewsSplit?.photos || []);
 
-  // Optional direct admin override when admin visits homepage
   const [adminComplaintStats, setAdminComplaintStats] = useState<{
     total: number;
     inProgress: number;
@@ -115,7 +121,6 @@ export const Home: React.FC = () => {
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(0);
 
-  // Embla Carousel for upcoming events
   const [emblaRef] = useEmblaCarousel({ align: 'start', loop: false, dragFree: true });
 
   const applyNewsList = useCallback((newsList: NewsItem[]) => {
@@ -127,7 +132,6 @@ export const Home: React.FC = () => {
     setNewsLoading(false);
   }, []);
 
-  // Load live data from Firestore in parallel with cache-first hydration
   useEffect(() => {
     let active = true;
 
@@ -151,7 +155,6 @@ export const Home: React.FC = () => {
       setPresident(resolvePresident(list));
     });
 
-    // If an admin is signed in, reconcile exact complaint counts and sync back to public settings/site
     const loadComplaintsTask = auth.currentUser
       ? getDocs(collection(db, 'complaints'))
           .then((complaintsSnap) => {
@@ -181,25 +184,34 @@ export const Home: React.FC = () => {
     };
   }, [applyNewsList]);
 
+  const displayHeadline =
+    lang === 'en' && presidentHeadline === THAI_DEFAULT_HEADLINE
+      ? '"We are ready to represent and listen to every voice of DeSUP students."'
+      : presidentHeadline;
+
+  const displayPresidentYear = formatAcademicYear(president?.yearTH || academicYearTH, lang);
+
   return (
     <div className={`space-y-12 sm:space-y-16 md:space-y-24 ${banners.length === 0 ? 'pt-8 sm:pt-10' : ''}`}>
-      {/* ========================================================
-          00. HERO BANNER SLIDER (Full Width Prominent Carousel)
-         ======================================================== */}
+      <SeoHead
+        titleKey="seo.pages.home.title"
+        descriptionKey="seo.pages.home.desc"
+        appendSiteName={false}
+      />
+
+      {/* 00. แถบสไลด์แบนเนอร์ประชาสัมพันธ์ */}
       <HeroBannerSlider banners={banners} />
 
-      {/* ========================================================
-          00.5 ปักหมุดหน้าแรก (แสดงด้านบนข่าวสารและความเคลื่อนไหว)
-         ======================================================== */}
+      {/* 00.5 ข่าวปักหมุดหน้าแรก */}
       {pinnedNews.length > 0 && (
         <section className="max-w-[1240px] mx-auto px-4 sm:px-6 md:px-12">
           <div className="flex flex-wrap items-center justify-between gap-2 mb-5 sm:mb-6 pb-3 border-b border-gold-border/30">
             <div className="inline-flex items-center gap-2 text-[11px] tracking-[0.18em] uppercase font-semibold text-gold-text">
               <PinIcon className="w-3.5 h-3.5 text-gold-text" />
-              <span>PINNED HIGHLIGHTS</span>
+              <span>{t('home.pinnedEyebrow')}</span>
             </div>
             <span className="text-xs text-text-muted">
-              ปักหมุดทั้งหมด {pinnedNews.length} รายการ
+              {t('home.pinnedTotal', { count: pinnedNews.length })}
             </span>
           </div>
 
@@ -220,7 +232,7 @@ export const Home: React.FC = () => {
                       {ytUrl ? (
                         <YouTubeLitePlayer url={ytUrl} title={item.title} />
                       ) : coverUrl ? (
-                        <Link to={`/news/read/${item.id}`} className="block aspect-[16/9] bg-bg-alt rounded-sm overflow-hidden">
+                        <LocLink to={`/news/read/${item.id}`} className="block aspect-[16/9] bg-bg-alt rounded-sm overflow-hidden">
                           <img
                             src={coverUrl}
                             alt={item.title}
@@ -228,11 +240,11 @@ export const Home: React.FC = () => {
                             decoding="async"
                             className="w-full h-full object-cover hover:scale-[1.03] transition-transform duration-500"
                           />
-                        </Link>
+                        </LocLink>
                       ) : (
-                        <Link to={`/news/read/${item.id}`} className="aspect-[16/9] bg-brand-soft rounded-sm flex items-center justify-center text-accent">
+                        <LocLink to={`/news/read/${item.id}`} className="aspect-[16/9] bg-brand-soft rounded-sm flex items-center justify-center text-accent">
                           <Emblem size={56} />
-                        </Link>
+                        </LocLink>
                       )}
                     </div>
 
@@ -240,18 +252,18 @@ export const Home: React.FC = () => {
                       <div className="flex flex-wrap items-center gap-2 text-xs text-text-muted">
                         <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-sm bg-brand text-brand-contrast text-[10px] font-medium">
                           <PinIcon className="w-3 h-3 text-gold-light" />
-                          <span>ปักหมุด</span>
+                          <span>{t('home.pinnedTag')}</span>
                         </span>
                         <NewsCategoryBadge category={item.category} />
                         <span aria-hidden="true">·</span>
-                        <span>{formatThaiDate(item.createdAt, true)}</span>
+                        <span>{formatDate(item.createdAt, lang, true)}</span>
                       </div>
 
-                      <Link to={`/news/read/${item.id}`} className="block group">
+                      <LocLink to={`/news/read/${item.id}`} className="block group">
                         <h3 className="font-serif text-xl sm:text-2xl font-semibold text-heading group-hover:text-accent transition-colors leading-snug">
                           {item.title}
                         </h3>
-                      </Link>
+                      </LocLink>
 
                       {item.excerpt && (
                         <p className="text-xs sm:text-sm text-text-muted line-clamp-3 leading-relaxed">
@@ -261,15 +273,15 @@ export const Home: React.FC = () => {
 
                       <div className="pt-2 flex flex-wrap items-center justify-between gap-3 border-t border-gold-border/15">
                         <span className="text-xs text-text-muted">
-                          อ่าน {formatNumber(item.views)} ครั้ง
+                          {t('site.viewsCount', { count: formatNumber(item.views, lang) })}
                         </span>
-                        <Link
+                        <LocLink
                           to={`/news/read/${item.id}`}
                           className="inline-flex items-center gap-1.5 px-4 py-2 bg-brand text-brand-contrast hover:bg-brand-hover text-xs font-medium rounded-sm transition-colors"
                         >
-                          <span>เปิดอ่านรายละเอียด</span>
+                          <span>{t('site.openDetails')}</span>
                           <span className="text-gold-light">→</span>
-                        </Link>
+                        </LocLink>
                       </div>
                     </div>
                   </div>
@@ -299,7 +311,7 @@ export const Home: React.FC = () => {
                       {ytUrl ? (
                         <YouTubeLitePlayer url={ytUrl} title={item.title} />
                       ) : coverUrl ? (
-                        <Link to={`/news/read/${item.id}`} className="block aspect-[16/9] bg-bg-alt rounded-sm overflow-hidden">
+                        <LocLink to={`/news/read/${item.id}`} className="block aspect-[16/9] bg-bg-alt rounded-sm overflow-hidden">
                           <img
                             src={coverUrl}
                             alt={item.title}
@@ -307,28 +319,28 @@ export const Home: React.FC = () => {
                             decoding="async"
                             className="w-full h-full object-cover hover:scale-[1.03] transition-transform duration-500"
                           />
-                        </Link>
+                        </LocLink>
                       ) : (
-                        <Link to={`/news/read/${item.id}`} className="aspect-[16/9] bg-brand-soft rounded-sm flex items-center justify-center text-accent">
+                        <LocLink to={`/news/read/${item.id}`} className="aspect-[16/9] bg-brand-soft rounded-sm flex items-center justify-center text-accent">
                           <Emblem size={44} />
-                        </Link>
+                        </LocLink>
                       )}
 
                       <div className="flex flex-wrap items-center gap-2 text-[11px] text-text-muted">
                         <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-sm bg-brand text-brand-contrast text-[10px] font-medium">
                           <PinIcon className="w-3 h-3 text-gold-light" />
-                          <span>ปักหมุด</span>
+                          <span>{t('home.pinnedTag')}</span>
                         </span>
                         <NewsCategoryBadge category={item.category} />
                         <span aria-hidden="true">·</span>
-                        <span>{formatThaiDate(item.createdAt, true)}</span>
+                        <span>{formatDate(item.createdAt, lang, true)}</span>
                       </div>
 
-                      <Link to={`/news/read/${item.id}`} className="block group">
+                      <LocLink to={`/news/read/${item.id}`} className="block group">
                         <h3 className="font-serif text-base sm:text-lg font-semibold text-heading group-hover:text-accent transition-colors line-clamp-2 leading-snug">
                           {item.title}
                         </h3>
-                      </Link>
+                      </LocLink>
 
                       {item.excerpt && (
                         <p className="text-xs text-text-muted line-clamp-2 leading-relaxed">
@@ -338,13 +350,15 @@ export const Home: React.FC = () => {
                     </div>
 
                     <div className="pt-3 border-t border-gold-border/15 flex items-center justify-between text-xs">
-                      <span className="text-text-muted">อ่าน {formatNumber(item.views)} ครั้ง</span>
-                      <Link
+                      <span className="text-text-muted">
+                        {t('site.viewsCount', { count: formatNumber(item.views, lang) })}
+                      </span>
+                      <LocLink
                         to={`/news/read/${item.id}`}
                         className="text-accent font-medium hover:text-gold-text transition-colors"
                       >
-                        เปิดอ่านรายละเอียด →
-                      </Link>
+                        {t('site.openDetails')} →
+                      </LocLink>
                     </div>
                   </div>
                 );
@@ -354,21 +368,19 @@ export const Home: React.FC = () => {
         </section>
       )}
 
-      {/* ========================================================
-          01. ข่าวเด่น & ข่าวรอง (Lead story left + 4 vertical items right)
-         ======================================================== */}
+      {/* 01. ข่าวสารและประชาสัมพันธ์ */}
       <section className="max-w-[1240px] mx-auto px-4 sm:px-6 md:px-12">
         <div className="flex flex-col md:flex-row md:items-end justify-between mb-6 sm:mb-10 pb-4 border-b border-gold-border/30">
           <div>
-            <SectionEyebrow number="01" enText="NEWS" thText="ข่าวสาร" />
+            <SectionEyebrow number="01" enText={t('home.newsEyebrowEn')} thText={t('home.newsEyebrowTh')} />
             <h2 className="font-serif text-2xl md:text-3xl text-heading font-semibold mt-2">
-              ข่าวประชาสัมพันธ์
+              {t('home.newsHeading')}
             </h2>
           </div>
-          <Link to="/news" className="btn-secondary-link text-xs font-medium text-accent mt-3 md:mt-0 self-start md:self-auto">
-            <span>อ่านทั้งหมด</span>
+          <LocLink to="/news" className="btn-secondary-link text-xs font-medium text-accent mt-3 md:mt-0 self-start md:self-auto">
+            <span>{t('home.viewAllNews')}</span>
             <span className="text-gold-text">→</span>
-          </Link>
+          </LocLink>
         </div>
 
         {newsLoading && !featuredNews ? (
@@ -393,9 +405,8 @@ export const Home: React.FC = () => {
           </div>
         ) : featuredNews ? (
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8">
-            {/* Left 7 cols: Large Featured Card */}
             <div className="lg:col-span-7">
-              <Link
+              <LocLink
                 to={`/news/read/${featuredNews.id}`}
                 className="group block relative border border-gold-border/20 bg-surface p-4 sm:p-6 rounded-sm shadow-editorial transition-all duration-300 hover:border-gold"
               >
@@ -432,9 +443,9 @@ export const Home: React.FC = () => {
                   <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-text-muted">
                     <NewsCategoryBadge category={featuredNews.category} />
                     <span aria-hidden="true">·</span>
-                    <span>{formatThaiDate(featuredNews.createdAt)}</span>
+                    <span>{formatDate(featuredNews.createdAt, lang)}</span>
                     <span aria-hidden="true">·</span>
-                    <span>อ่าน {formatNumber(featuredNews.views)} ครั้ง</span>
+                    <span>{t('site.viewsCount', { count: formatNumber(featuredNews.views, lang) })}</span>
                   </div>
 
                   <h3 className="font-serif text-lg sm:text-xl md:text-2xl font-semibold text-heading group-hover:text-accent transition-colors line-clamp-2">
@@ -442,20 +453,19 @@ export const Home: React.FC = () => {
                   </h3>
 
                   <p className="text-xs md:text-sm text-text-muted line-clamp-2 leading-relaxed">
-                    {featuredNews.excerpt || 'คลิกเพื่ออ่านรายละเอียดเนื้อหาข่าวสารฉบับเต็ม'}
+                    {featuredNews.excerpt || t('home.defaultExcerpt')}
                   </p>
                 </div>
-              </Link>
+              </LocLink>
             </div>
 
-            {/* Right 5 cols: 4 Vertical Secondary List Items */}
             <div className="lg:col-span-5 flex flex-col justify-between space-y-3 sm:space-y-4">
               {recentNews.length > 0 ? (
                 recentNews.map((item) => {
                   const thumb = getNewsCoverUrl(item);
                   const hasVideo = item.category === 'video' || Boolean(getNewsYouTubeUrl(item));
                   return (
-                    <Link
+                    <LocLink
                       key={item.id}
                       to={`/news/read/${item.id}`}
                       className="group flex gap-3 sm:gap-4 p-3 sm:p-3.5 border border-gold-border/15 hover:border-gold bg-surface rounded-sm transition-all duration-300"
@@ -486,73 +496,68 @@ export const Home: React.FC = () => {
                         <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[11px] text-text-muted">
                           <NewsCategoryBadge category={item.category} />
                           <span aria-hidden="true">·</span>
-                          <span>{formatThaiDate(item.createdAt, true)}</span>
+                          <span>{formatDate(item.createdAt, lang, true)}</span>
                         </div>
                         <h4 className="font-serif text-sm font-semibold text-heading group-hover:text-accent transition-colors line-clamp-2">
                           {item.title}
                         </h4>
                       </div>
-                    </Link>
+                    </LocLink>
                   );
                 })
               ) : (
                 <div className="p-8 text-center border border-dashed border-gold-border/25 rounded-sm text-xs text-text-muted">
-                  กำลังรอการเผยแพร่ข่าวสารเพิ่มเติม
+                  {t('home.waitingMoreNews')}
                 </div>
               )}
             </div>
           </div>
         ) : (
           <div className="p-12 text-center border border-dashed border-gold-border/30 rounded-sm bg-surface/50">
-            <p className="font-serif text-lg text-heading mb-2">ยังไม่มีข่าวประชาสัมพันธ์ในขณะนี้</p>
-            <p className="text-xs text-text-muted">สามารถติดตามข่าวสารและการประกาศกิจกรรมที่จะอัปเดตผ่านหน้านี้เร็ว ๆ นี้</p>
+            <p className="font-serif text-lg text-heading mb-2">{t('home.noNewsTitle')}</p>
+            <p className="text-xs text-text-muted">{t('home.noNewsDesc')}</p>
           </div>
         )}
       </section>
 
-      {/* ========================================================
-          02. รายงานผลการดำเนินงาน (Anchor dark royal violet section)
-         ======================================================== */}
+      {/* 02. รายงานผลการดำเนินงาน */}
       {(() => {
         const displayStats = adminComplaintStats || complaintStats;
         return (
           <section className="bg-anchor-bg text-anchor-text py-14 sm:py-20 relative overflow-hidden border-y border-gold/30">
             <div className="max-w-[1240px] mx-auto px-4 sm:px-6 md:px-12 relative z-10">
               <div className="mb-8 sm:mb-12 text-center max-w-xl mx-auto space-y-2">
-                <SectionEyebrow number="02" enText="PERFORMANCE REPORT" thText="รายงานผลการดำเนินงาน" light />
+                <SectionEyebrow number="02" enText={t('home.reportEyebrowEn')} thText={t('home.reportEyebrowTh')} light />
                 <h2 className="font-serif text-2xl md:text-3xl font-semibold text-anchor-text">
-                  ส่งเสริมอัตลักษณ์ พิทักษ์สิทธินักเรียน
+                  {t('site.motto')}
                 </h2>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 sm:gap-8 md:gap-12 text-center max-w-4xl mx-auto">
-                {/* Stat 1: Total Complaints */}
                 <div className="space-y-1.5 sm:space-y-2 border-b sm:border-b-0 sm:border-r border-gold/20 pb-5 sm:pb-0 sm:pr-4">
                   <div className="font-serif text-3xl sm:text-4xl md:text-5xl lg:text-6xl text-anchor-gold tabular-numbers font-medium">
-                    {formatNumber(displayStats.total)}
+                    {formatNumber(displayStats.total, lang)}
                   </div>
                   <div className="text-[11px] sm:text-xs tracking-wider text-anchor-text/80 uppercase">
-                    เรื่องร้องเรียนทั้งหมด
+                    {t('home.statTotal')}
                   </div>
                 </div>
 
-                {/* Stat 2: In Progress Complaints */}
                 <div className="space-y-1.5 sm:space-y-2 border-b sm:border-b-0 sm:border-r border-gold/20 pb-5 sm:pb-0 sm:px-4">
                   <div className="font-serif text-3xl sm:text-4xl md:text-5xl lg:text-6xl text-anchor-text tabular-numbers font-medium">
-                    {formatNumber(displayStats.inProgress)}
+                    {formatNumber(displayStats.inProgress, lang)}
                   </div>
                   <div className="text-[11px] sm:text-xs tracking-wider text-anchor-text/80 uppercase">
-                    กำลังดำเนินการ
+                    {t('home.statInProgress')}
                   </div>
                 </div>
 
-                {/* Stat 3: Resolved Complaints (Case count, no %) */}
                 <div className="space-y-1.5 sm:space-y-2 pt-1 sm:pt-0 sm:pl-4">
                   <div className="font-serif text-3xl sm:text-4xl md:text-5xl lg:text-6xl text-anchor-gold tabular-numbers font-medium">
-                    {formatNumber(displayStats.resolved)}
+                    {formatNumber(displayStats.resolved, lang)}
                   </div>
                   <div className="text-[11px] sm:text-xs tracking-wider text-anchor-text/80 uppercase">
-                    ดำเนินการเสร็จสิ้น
+                    {t('home.statResolved')}
                   </div>
                 </div>
               </div>
@@ -561,28 +566,26 @@ export const Home: React.FC = () => {
         );
       })()}
 
-      {/* ========================================================
-          03. กิจกรรมที่กำลังจะมาถึง (Upcoming Events carousel)
-         ======================================================== */}
+      {/* 03. กิจกรรมที่กำลังจะมาถึง */}
       <section className="max-w-[1240px] mx-auto px-4 sm:px-6 md:px-12">
         <div className="flex flex-col md:flex-row md:items-end justify-between mb-6 sm:mb-10 pb-4 border-b border-gold-border/30">
           <div>
-            <SectionEyebrow number="03" enText="SCHEDULE" thText="ปฏิทินกิจกรรม" />
+            <SectionEyebrow number="03" enText={t('home.scheduleEyebrowEn')} thText={t('home.scheduleEyebrowTh')} />
             <h2 className="font-serif text-2xl md:text-3xl text-heading font-semibold mt-2">
-              กิจกรรมที่กำลังจะมาถึง
+              {t('home.scheduleHeading')}
             </h2>
           </div>
-          <Link to="/calendar" className="btn-secondary-link text-xs font-medium text-accent mt-3 md:mt-0 self-start md:self-auto">
-            <span>ดูปฏิทินทั้งหมด</span>
+          <LocLink to="/calendar" className="btn-secondary-link text-xs font-medium text-accent mt-3 md:mt-0 self-start md:self-auto">
+            <span>{t('home.viewAllCalendar')}</span>
             <span className="text-gold-text">→</span>
-          </Link>
+          </LocLink>
         </div>
 
         {upcomingEvents.length > 0 ? (
           <div className="overflow-hidden" ref={emblaRef}>
             <div className="flex gap-4 sm:gap-6">
               {upcomingEvents.map((evt) => {
-                const dateParts = getThaiDateParts(evt.startAt);
+                const dateParts = getDateParts(evt.startAt, lang);
                 const scheduleStatus = getEventScheduleStatus(evt.startAt, evt.endAt);
                 const startKey = getEventDateKey(evt.startAt);
                 const endKey = getEventDateKey(evt.endAt);
@@ -606,7 +609,7 @@ export const Home: React.FC = () => {
                           {scheduleStatus === 'ongoing' && (
                             <div className="mb-1">
                               <span className="px-1.5 py-0.5 rounded-sm bg-success-bg border border-success/30 text-success text-[10px] font-medium">
-                                อยู่ในช่วงจัดกิจกรรม
+                                {t('home.ongoingBadge')}
                               </span>
                             </div>
                           )}
@@ -616,16 +619,16 @@ export const Home: React.FC = () => {
                         </div>
                       </div>
                       <p className="text-xs text-text-muted line-clamp-2 mb-4 leading-relaxed">
-                        {evt.description || 'ไม่มีคำอธิบายเพิ่มเติม'}
+                        {evt.description || t('home.noEventDesc')}
                       </p>
                     </div>
 
                     <div className="pt-3 border-t border-gold-border/15 text-xs text-text-muted flex items-center justify-between gap-2">
-                      <span className="truncate">📍 {evt.location || 'โรงเรียนสาธิต มพ.'}</span>
+                      <span className="truncate">📍 {evt.location || t('home.defaultLocation')}</span>
                       <span className="text-gold-text shrink-0">
                         {hasDateRange && evt.endAt
-                          ? `ถึง ${formatThaiDate(evt.endAt, true)}`
-                          : `พ.ศ. ${dateParts.yearBE}`}
+                          ? t('home.untilDate', { date: formatDate(evt.endAt, lang, true) })
+                          : t('home.yearBadge', { year: dateParts.yearDisplay })}
                       </span>
                     </div>
                   </div>
@@ -635,28 +638,26 @@ export const Home: React.FC = () => {
           </div>
         ) : (
           <div className="p-12 text-center border border-dashed border-gold-border/30 rounded-sm bg-surface/50">
-            <p className="font-serif text-lg text-heading mb-2">ยังไม่มีกิจกรรมที่กำหนดไว้ในเร็ว ๆ นี้</p>
-            <p className="text-xs text-text-muted">สามารถตรวจสอบกำหนดการในหน้าปฏิทินกิจกรรมฉบับเต็มได้</p>
+            <p className="font-serif text-lg text-heading mb-2">{t('home.noEventsTitle')}</p>
+            <p className="text-xs text-text-muted">{t('home.noEventsDesc')}</p>
           </div>
         )}
       </section>
 
-      {/* ========================================================
-          04. แกลเลอรีภาพกิจกรรม (Masonry preview with lightbox)
-         ======================================================== */}
+      {/* 04. แกลเลอรีภาพกิจกรรม */}
       {galleryPhotos.length > 0 && (
         <section className="max-w-[1240px] mx-auto px-4 sm:px-6 md:px-12">
           <div className="flex flex-col md:flex-row md:items-end justify-between mb-6 sm:mb-10 pb-4 border-b border-gold-border/30">
             <div>
-              <SectionEyebrow number="04" enText="GALLERY" thText="ภาพข่าวกิจกรรม" />
+              <SectionEyebrow number="04" enText={t('home.galleryEyebrowEn')} thText={t('home.galleryEyebrowTh')} />
               <h2 className="font-serif text-2xl md:text-3xl text-heading font-semibold mt-2">
-                ประมวลภาพบรรยากาศ
+                {t('home.galleryHeading')}
               </h2>
             </div>
-            <Link to="/news/activity" className="btn-secondary-link text-xs font-medium text-accent mt-3 md:mt-0 self-start md:self-auto">
-              <span>ภาพกิจกรรมทั้งหมด</span>
+            <LocLink to="/news/activity" className="btn-secondary-link text-xs font-medium text-accent mt-3 md:mt-0 self-start md:self-auto">
+              <span>{t('home.viewAllGallery')}</span>
               <span className="text-gold-text">→</span>
-            </Link>
+            </LocLink>
           </div>
 
           <div className="grid grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4">
@@ -692,9 +693,7 @@ export const Home: React.FC = () => {
         </section>
       )}
 
-      {/* ========================================================
-          05. สารจากนายกองค์การนักเรียน (Editorial portrait overlap)
-         ======================================================== */}
+      {/* 05. สารจากนายกองค์การนักเรียน */}
       <section className="max-w-[1240px] mx-auto px-4 sm:px-6 md:px-12 pb-8 sm:pb-12">
         <div className="bg-surface border border-gold-border/40 p-5 sm:p-8 md:p-14 rounded-sm shadow-editorial relative overflow-hidden">
           <CornerBracket position="top-left" />
@@ -703,7 +702,6 @@ export const Home: React.FC = () => {
           <CornerBracket position="bottom-right" />
 
           <div className="grid grid-cols-1 md:grid-cols-12 gap-6 sm:gap-8 md:gap-12 items-center">
-            {/* Left 4 cols: President photo with greyscale-to-color transition */}
             <div className="md:col-span-4 flex justify-center">
               <div className="relative w-36 h-44 sm:w-48 sm:h-60 md:w-56 md:h-72 border border-gold rounded-sm overflow-hidden shadow-editorial bg-bg-alt">
                 {president?.photo?.url || president?.photoUrl ? (
@@ -717,29 +715,28 @@ export const Home: React.FC = () => {
                 ) : (
                   <div className="w-full h-full bg-brand-soft flex flex-col items-center justify-center p-4 text-center">
                     <Emblem size={56} />
-                    <span className="text-xs text-accent mt-3 font-medium">นายกองค์การนักเรียน</span>
+                    <span className="text-xs text-accent mt-3 font-medium">{t('home.presidentRoleFallback')}</span>
                   </div>
                 )}
               </div>
             </div>
 
-            {/* Right 8 cols: Editorial Message */}
             <div className="md:col-span-8 space-y-3 sm:space-y-4">
-              <SectionEyebrow number="05" enText="MESSAGE FROM THE PRESIDENT" thText="สารจากนายกองค์การนักเรียน" />
+              <SectionEyebrow number="05" enText={t('home.presidentEyebrowEn')} thText={t('home.presidentEyebrowTh')} />
               <h2 className="font-serif text-xl sm:text-2xl md:text-3xl text-heading font-semibold leading-snug">
-                {presidentHeadline}
+                {displayHeadline}
               </h2>
               <p className="text-sm md:text-base text-text/85 leading-relaxed font-sans whitespace-pre-line">
                 {presidentMessage?.trim() ||
                   president?.quote ||
-                  "องค์การนักเรียนยินดีต้อนรับนักเรียน ครู อาจารย์ และผู้ปกครองทุกท่าน เว็บไซต์นี้จัดทำขึ้นเพื่อเป็นช่องทางหลักในการสื่อสารความเคลื่อนไหว ประกาศระเบียบ กิจกรรม และที่สำคัญที่สุดคือเป็นช่องทางรับฟังความคิดเห็นและข้อเสนอแนะเพื่อร่วมสร้างสรรค์สังคมโรงเรียนของเราให้น่าอยู่และเปี่ยมด้วยคุณภาพ"}
+                  t('home.defaultPresidentMessage')}
               </p>
               <div className="pt-2 border-t border-gold-border/15">
                 <div className="font-serif text-base font-semibold text-accent">
-                  {president?.name || 'นายกองค์การนักเรียน'}
+                  {president?.name || t('home.presidentRoleFallback')}
                 </div>
                 <div className="text-xs text-gold-text">
-                  นายกองค์การนักเรียน ประจำปีการศึกษา {president?.yearTH || academicYearTH}
+                  {t('home.presidentRoleWithYear', { year: displayPresidentYear })}
                 </div>
               </div>
             </div>

@@ -4,21 +4,25 @@
  */
 
 import React, { useState, useEffect, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import { doc, updateDoc, increment } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { DownloadItem } from '../types';
-import { formatThaiDate, formatNumber } from '../lib/format';
+import { formatDate, formatNumber } from '../lib/format';
 import { SectionEyebrow, CornerBracket } from '../components/common/Ornament';
+import { SeoHead } from '../components/common/SeoHead';
+import { useLanguage } from '../context/LanguageContext';
 import { resolveDownloadUrl } from '../lib/downloadStorage';
 import { getCachedDownloadsSync, loadDownloads } from '../lib/publicDataService';
 
 export const Downloads: React.FC = () => {
+  const { t } = useTranslation();
+  const { lang } = useLanguage();
   const initialDownloads = getCachedDownloadsSync();
   const [downloads, setDownloads] = useState<DownloadItem[]>(initialDownloads || []);
   const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(!initialDownloads);
 
-  // PDF Viewer Modal State
   const [previewItem, setPreviewItem] = useState<DownloadItem | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string>('');
   const [previewIsBlob, setPreviewIsBlob] = useState(false);
@@ -46,7 +50,6 @@ export const Downloads: React.FC = () => {
     };
   }, []);
 
-  // Cleanup active Blob URL on unmount
   useEffect(() => {
     return () => {
       if (previewIsBlob && previewUrl) {
@@ -65,7 +68,7 @@ export const Downloads: React.FC = () => {
         prev.map(d => d.id === item.id ? { ...d, downloads: (d.downloads || 0) + 1 } : d)
       );
     } catch {
-      // Ignore increment error
+      // ข้ามหากอัปเดตตัวนับไม่ได้
     }
   };
 
@@ -95,7 +98,7 @@ export const Downloads: React.FC = () => {
       setPreviewIsBlob(resolved.isBlob);
     } catch (err) {
       console.error('Could not resolve preview file:', err);
-      setPreviewError('ไม่สามารถโหลดไฟล์เอกสารได้ กรุณาลองใหม่อีกครั้ง');
+      setPreviewError(t('downloads.previewError'));
     } finally {
       setPreviewLoading(false);
     }
@@ -162,31 +165,32 @@ export const Downloads: React.FC = () => {
 
   return (
     <div className="max-w-[1240px] mx-auto px-4 sm:px-6 md:px-12 py-6 sm:py-10 space-y-6 sm:space-y-10">
-      {/* Header */}
+      <SeoHead titleKey="seo.pages.downloads.title" descriptionKey="seo.pages.downloads.desc" />
+
+      {/* ส่วนหัวหน้าดาวน์โหลด */}
       <div className="border-b border-gold-border/30 pb-5 sm:pb-6 flex flex-col md:flex-row md:items-end justify-between gap-4">
         <div>
-          <SectionEyebrow enText="Document" thText="ดาวน์โหลดเอกสาร" />
+          <SectionEyebrow enText={t('downloads.eyebrowEn')} thText={t('downloads.eyebrowTh')} />
           <h1 className="font-serif text-3xl md:text-4xl font-semibold text-heading mt-2">
-            ศูนย์รวมเอกสารและแบบฟอร์ม
+            {t('downloads.title')}
           </h1>
           <p className="text-xs md:text-sm text-text-muted mt-1">
-            เปิดดูเอกสาร PDF แบบออนไลน์ พร้อมระบบดาวน์โหลดและสั่งพิมพ์เอกสารได้ทันที
+            {t('downloads.subtitle')}
           </p>
         </div>
 
-        {/* Search */}
         <div className="w-full md:w-64">
           <input
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="ค้นหาชื่อเอกสาร..."
+            placeholder={t('downloads.searchPlaceholder')}
             className="w-full text-xs input-underline"
           />
         </div>
       </div>
 
-      {/* Editorial Table */}
+      {/* รายการเอกสาร */}
       {loading ? (
         <div className="animate-pulse space-y-4">
           {[1, 2, 3, 4, 5].map((i) => (
@@ -195,7 +199,6 @@ export const Downloads: React.FC = () => {
         </div>
       ) : filtered.length > 0 ? (
         <div className="border border-gold-border/20 bg-surface rounded-sm shadow-editorial overflow-hidden">
-          {/* Mobile Card List (no horizontal table scrolling) */}
           <div className="md:hidden divide-y divide-gold-border/15">
             {filtered.map((item) => (
               <div key={item.id} className="p-4 space-y-3">
@@ -208,7 +211,7 @@ export const Downloads: React.FC = () => {
                   </span>
                 </div>
                 <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-text-muted">
-                  <span>{formatThaiDate(item.createdAt, true)}</span>
+                  <span>{formatDate(item.createdAt, lang, true)}</span>
                 </div>
                 <div className="grid grid-cols-2 gap-2 pt-1">
                   <button
@@ -216,7 +219,7 @@ export const Downloads: React.FC = () => {
                     onClick={() => openPreview(item)}
                     className="w-full inline-flex items-center justify-center gap-1 px-3 py-2 border border-gold text-gold-text hover:bg-brand-soft rounded-sm text-xs font-medium transition-colors"
                   >
-                    <span>เปิดดู</span>
+                    <span>{t('downloads.view')}</span>
                   </button>
                   <button
                     type="button"
@@ -224,23 +227,22 @@ export const Downloads: React.FC = () => {
                     disabled={downloadingId === item.id}
                     className="w-full inline-flex items-center justify-center gap-1.5 px-3 py-2 bg-brand text-brand-contrast hover:bg-brand-hover transition-colors rounded-sm text-xs font-medium shadow-editorial-sm disabled:opacity-60"
                   >
-                    <span>{downloadingId === item.id ? 'กำลังเตรียม...' : 'ดาวน์โหลด'}</span>
-                    <span className="text-[10px] opacity-75">({formatNumber(item.downloads)})</span>
+                    <span>{downloadingId === item.id ? t('downloads.preparing') : t('downloads.download')}</span>
+                    <span className="text-[10px] opacity-75">({formatNumber(item.downloads, lang)})</span>
                   </button>
                 </div>
               </div>
             ))}
           </div>
 
-          {/* Desktop Table */}
           <div className="hidden md:block overflow-x-auto">
             <table className="w-full text-left text-xs">
               <thead className="bg-brand-soft/60 border-b border-gold-border/20 text-gold-text uppercase tracking-wider font-medium">
                 <tr>
-                  <th className="py-3 px-4">ชื่อเอกสาร</th>
-                  <th className="py-3 px-4">ชนิดไฟล์</th>
-                  <th className="py-3 px-4">วันที่เผยแพร่</th>
-                  <th className="py-3 px-4 text-center">เปิดดู / พิมพ์ / ดาวน์โหลด</th>
+                  <th className="py-3 px-4">{t('downloads.table.name')}</th>
+                  <th className="py-3 px-4">{t('downloads.table.type')}</th>
+                  <th className="py-3 px-4">{t('downloads.table.date')}</th>
+                  <th className="py-3 px-4 text-center">{t('downloads.table.actions')}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gold-border/15">
@@ -255,28 +257,26 @@ export const Downloads: React.FC = () => {
                       </span>
                     </td>
                     <td className="py-4 px-4 text-text-muted">
-                      {formatThaiDate(item.createdAt, true)}
+                      {formatDate(item.createdAt, lang, true)}
                     </td>
                     <td className="py-4 px-4">
                       <div className="flex items-center justify-center gap-2">
-                        {/* Open Viewer Button */}
                         <button
                           type="button"
                           onClick={() => openPreview(item)}
                           className="inline-flex items-center gap-1 px-3 py-1.5 border border-gold text-gold-text hover:bg-brand-soft rounded-sm text-xs font-medium transition-colors"
                         >
-                          <span>👁️ เปิดดู</span>
+                          <span>{t('downloads.viewWithIcon')}</span>
                         </button>
 
-                        {/* Direct Download Button */}
                         <button
                           type="button"
                           onClick={() => triggerDownload(item)}
                           disabled={downloadingId === item.id}
                           className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-brand text-brand-contrast hover:bg-brand-hover transition-colors rounded-sm text-xs font-medium shadow-editorial-sm disabled:opacity-60"
                         >
-                          <span>{downloadingId === item.id ? 'กำลังเตรียมไฟล์...' : 'ดาวน์โหลด'}</span>
-                          <span className="text-[10px] opacity-70">({formatNumber(item.downloads)})</span>
+                          <span>{downloadingId === item.id ? t('downloads.preparingFile') : t('downloads.download')}</span>
+                          <span className="text-[10px] opacity-70">({formatNumber(item.downloads, lang)})</span>
                         </button>
                       </div>
                     </td>
@@ -289,15 +289,15 @@ export const Downloads: React.FC = () => {
       ) : (
         <div className="p-16 text-center border border-dashed border-gold-border/30 rounded-sm bg-surface/50 space-y-2">
           <p className="font-serif text-lg text-heading">
-            {search ? `ไม่พบเอกสารที่ตรงกับ "${search}"` : 'ยังไม่มีเอกสารให้ดาวน์โหลดในขณะนี้'}
+            {search ? t('downloads.emptySearch', { term: search }) : t('downloads.emptyAll')}
           </p>
           <p className="text-xs text-text-muted">
-            เอกสารจะถูกจัดเก็บและเปิดให้ดาวน์โหลดผ่านหน้านี้เมื่อมีประกาศเพิ่มเติม
+            {t('downloads.emptyHint')}
           </p>
         </div>
       )}
 
-      {/* Inline PDF Viewer Modal with Download & Print */}
+      {/* หน้าต่างแสดงตัวอย่างเอกสาร PDF */}
       {previewItem && (
         <div className="fixed inset-0 z-50 bg-anchor-bg-deep/70 backdrop-blur-sm flex items-center justify-center p-3 sm:p-6 overflow-hidden">
           <div className="bg-surface border-2 border-gold rounded-sm w-full max-w-4xl max-h-[95vh] flex flex-col shadow-2xl relative overflow-hidden">
@@ -306,7 +306,6 @@ export const Downloads: React.FC = () => {
             <CornerBracket position="bottom-left" />
             <CornerBracket position="bottom-right" />
 
-            {/* Modal Header */}
             <div className="p-4 sm:p-5 border-b border-gold-border/25 flex items-center justify-between bg-surface-elevated">
               <div className="pr-4">
                 <span className="text-[10px] uppercase font-bold tracking-wider text-gold-text">
@@ -319,19 +318,18 @@ export const Downloads: React.FC = () => {
               <button
                 type="button"
                 onClick={closePreview}
-                aria-label="Close Preview"
+                aria-label={t('downloads.closePreviewAria')}
                 className="w-8 h-8 rounded-full border border-gold-border/30 flex items-center justify-center text-text-muted hover:text-heading hover:bg-bg-alt transition-colors"
               >
                 ✕
               </button>
             </div>
 
-            {/* Modal Body: Embedded Viewer */}
             <div className="flex-1 bg-bg-alt/60 p-2 overflow-hidden flex items-center justify-center min-h-[50vh]">
               {previewLoading ? (
                 <div className="p-12 text-center space-y-3">
                   <div className="w-8 h-8 border-2 border-accent border-t-transparent rounded-full animate-spin mx-auto" />
-                  <p className="text-xs text-heading font-medium">กำลังโหลดไฟล์เอกสารจากฐานข้อมูล...</p>
+                  <p className="text-xs text-heading font-medium">{t('downloads.previewLoading')}</p>
                 </div>
               ) : previewError ? (
                 <div className="p-12 text-center space-y-3 text-xs text-error">
@@ -348,27 +346,28 @@ export const Downloads: React.FC = () => {
                 <div className="p-12 text-center space-y-4">
                   <div className="text-4xl">📄</div>
                   <p className="font-serif text-base text-heading">
-                    ไฟล์ประเภท {previewItem.fileType.toUpperCase()} จำเป็นต้องดาวน์โหลดเพื่อเปิดในโปรแกรมเฉพาะทาง
+                    {t('downloads.nonPdfNotice', { type: previewItem.fileType.toUpperCase() })}
                   </p>
                   <button
                     type="button"
                     onClick={() => triggerDownload(previewItem, previewUrl)}
                     className="inline-block px-6 py-2.5 bg-brand text-brand-contrast hover:bg-brand-hover rounded text-xs font-medium transition-colors"
                   >
-                    คลิกเพื่อดาวน์โหลดไฟล์
+                    {t('downloads.clickToDownload')}
                   </button>
                 </div>
               )}
             </div>
 
-            {/* Modal Action Footer Toolbar */}
             <div className="p-3 sm:p-4 bg-surface-elevated border-t border-gold-border/20 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
               <div className="text-[11px] text-text-muted">
-                เผยแพร่เมื่อ {formatThaiDate(previewItem.createdAt, true)} · ดาวน์โหลดแล้ว {previewItem.downloads} ครั้ง
+                {t('downloads.modalMeta', {
+                  date: formatDate(previewItem.createdAt, lang, true),
+                  count: formatNumber(previewItem.downloads, lang),
+                })}
               </div>
 
               <div className="flex flex-wrap items-center gap-2 sm:gap-3">
-                {/* Print Button */}
                 <button
                   type="button"
                   onClick={handlePrint}
@@ -376,10 +375,9 @@ export const Downloads: React.FC = () => {
                   className="inline-flex items-center justify-center gap-1.5 px-3 sm:px-4 py-2 border border-gold text-heading hover:bg-brand-soft rounded-sm font-medium transition-colors disabled:opacity-50"
                 >
                   <span>🖨️</span>
-                  <span>พิมพ์เอกสาร</span>
+                  <span>{t('downloads.printDoc')}</span>
                 </button>
 
-                {/* Open in Full Window */}
                 {previewUrl && (
                   <a
                     href={previewUrl}
@@ -387,18 +385,17 @@ export const Downloads: React.FC = () => {
                     rel="noreferrer"
                     className="inline-flex items-center justify-center gap-1 px-3 py-2 border border-gold-border/30 hover:bg-bg-alt rounded-sm text-text transition-colors"
                   >
-                    <span>↗ เปิดหน้าต่างใหม่</span>
+                    <span>{t('downloads.openNewWindow')}</span>
                   </a>
                 )}
 
-                {/* Download Button */}
                 <button
                   type="button"
                   onClick={() => triggerDownload(previewItem, previewUrl)}
                   disabled={!previewUrl}
                   className="flex-1 sm:flex-none inline-flex items-center justify-center gap-1.5 px-4 sm:px-5 py-2 bg-brand text-brand-contrast hover:bg-brand-hover rounded-sm font-medium shadow-editorial transition-colors disabled:opacity-50"
                 >
-                  <span>⬇ ดาวน์โหลดไฟล์</span>
+                  <span>{t('downloads.downloadFile')}</span>
                 </button>
               </div>
             </div>

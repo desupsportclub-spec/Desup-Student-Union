@@ -4,15 +4,17 @@
  */
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import useEmblaCarousel from 'embla-carousel-react';
 import { BannerItem } from '../../types';
+import { LocLink } from '../common/LocLink';
 
 interface HeroBannerSliderProps {
   banners: BannerItem[];
 }
 
 export const HeroBannerSlider: React.FC<HeroBannerSliderProps> = ({ banners }) => {
+  const { t } = useTranslation();
   const [emblaRef, emblaApi] = useEmblaCarousel({ loop: true, duration: 25 });
   const [selectedIndex, setSelectedIndex] = useState(0);
 
@@ -71,7 +73,7 @@ export const HeroBannerSlider: React.FC<HeroBannerSliderProps> = ({ banners }) =
                 <div className="relative w-full aspect-[16/9] sm:aspect-[16/8] lg:aspect-[21/9] sm:min-h-[380px] lg:min-h-[540px] max-h-[680px] overflow-hidden bg-anchor-bg flex items-center justify-center">
                   <img
                     src={banner.imageUrl}
-                    alt={banner.title || 'แบนเนอร์องค์การนักเรียน'}
+                    alt={banner.title || t('banner.defaultAlt')}
                     loading={index === 0 ? 'eager' : 'lazy'}
                     decoding="async"
                     fetchPriority={index === 0 ? 'high' : 'auto'}
@@ -109,9 +111,9 @@ export const HeroBannerSlider: React.FC<HeroBannerSliderProps> = ({ banners }) =
                         {BannerContent}
                       </a>
                     ) : (
-                      <Link to={banner.linkUrl} className="block cursor-pointer">
+                      <LocLink to={banner.linkUrl} className="block cursor-pointer">
                         {BannerContent}
-                      </Link>
+                      </LocLink>
                     )
                   ) : (
                     BannerContent
@@ -128,7 +130,7 @@ export const HeroBannerSlider: React.FC<HeroBannerSliderProps> = ({ banners }) =
               <button
                 type="button"
                 onClick={scrollPrev}
-                aria-label="Previous Slide"
+                aria-label={t('banner.prevSlide')}
                 className="absolute left-2 sm:left-3 top-1/2 -translate-y-1/2 w-8 h-8 sm:w-11 sm:h-11 rounded-full bg-anchor-bg/75 hover:bg-anchor-bg text-anchor-text border border-gold/50 flex items-center justify-center backdrop-blur-sm transition-all opacity-80 hover:opacity-100 z-10"
               >
                 <svg className="w-4 h-4 sm:w-5 sm:h-5 text-anchor-text" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -138,7 +140,7 @@ export const HeroBannerSlider: React.FC<HeroBannerSliderProps> = ({ banners }) =
               <button
                 type="button"
                 onClick={scrollNext}
-                aria-label="Next Slide"
+                aria-label={t('banner.nextSlide')}
                 className="absolute right-2 sm:right-3 top-1/2 -translate-y-1/2 w-8 h-8 sm:w-11 sm:h-11 rounded-full bg-anchor-bg/75 hover:bg-anchor-bg text-anchor-text border border-gold/50 flex items-center justify-center backdrop-blur-sm transition-all opacity-80 hover:opacity-100 z-10"
               >
                 <svg className="w-4 h-4 sm:w-5 sm:h-5 text-anchor-text" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -153,7 +155,7 @@ export const HeroBannerSlider: React.FC<HeroBannerSliderProps> = ({ banners }) =
                     key={idx}
                     type="button"
                     onClick={() => scrollTo(idx)}
-                    aria-label={`Go to slide ${idx + 1}`}
+                    aria-label={t('banner.goToSlide', { index: idx + 1 })}
                     className={`h-1.5 sm:h-2 rounded-full transition-all ${
                       idx === selectedIndex ? 'w-5 sm:w-6 bg-anchor-gold' : 'w-1.5 sm:w-2 bg-anchor-text/60 hover:bg-anchor-text'
                     }`}

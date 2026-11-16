@@ -4,19 +4,24 @@
  */
 
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { EventItem } from '../types';
 import {
-  formatThaiDate,
+  formatDate,
   getEventDateKey,
   getLocalTodayDateKey,
-  getThaiDateParts,
+  getDateParts,
   isEventActiveOrUpcoming,
   isEventOnDateKey,
 } from '../lib/format';
 import { SectionEyebrow } from '../components/common/Ornament';
+import { SeoHead } from '../components/common/SeoHead';
+import { useLanguage } from '../context/LanguageContext';
 import { getCachedEventsSync, loadPublishedEvents } from '../lib/publicDataService';
 
 export const CalendarPage: React.FC = () => {
+  const { t } = useTranslation();
+  const { lang } = useLanguage();
   const initialEvents = getCachedEventsSync() || [];
   const todayStr = getLocalTodayDateKey();
 
@@ -43,10 +48,9 @@ export const CalendarPage: React.FC = () => {
     };
   }, [todayStr]);
 
-  // Calendar Math
   const year = currentDate.getFullYear();
   const month = currentDate.getMonth();
-  const firstDayIndex = new Date(year, month, 1).getDay(); // 0 is Sunday
+  const firstDayIndex = new Date(year, month, 1).getDay();
   const daysInMonth = new Date(year, month + 1, 0).getDate();
 
   const handlePrevMonth = () => {
@@ -57,11 +61,10 @@ export const CalendarPage: React.FC = () => {
     setCurrentDate(new Date(year, month + 1, 1));
   };
 
-  const thaiDateParts = getThaiDateParts(currentDate);
-
+  const dateParts = getDateParts(currentDate, lang);
+  const weekdays = t('calendar.weekdays', { returnObjects: true }) as string[];
   const activeOrUpcomingEvents = events.filter((e) => isEventActiveOrUpcoming(e));
 
-  // Check events for a given day
   const getEventsForDay = (dayNum: number): EventItem[] => {
     const dayStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(dayNum).padStart(2, '0')}`;
     return events.filter((e) => isEventOnDateKey(e, dayStr));
@@ -74,7 +77,6 @@ export const CalendarPage: React.FC = () => {
     setSelectedDayEvents(dayEvents);
   };
 
-  // Client-side .ics export helper
   const handleExportICS = (event: EventItem) => {
     const start = new Date(event.startAt).toISOString().replace(/-|:|\.\d\d\d/g, "");
     const end = event.endAt
@@ -115,69 +117,61 @@ export const CalendarPage: React.FC = () => {
 
   return (
     <div className="max-w-[1240px] mx-auto px-4 sm:px-6 md:px-12 py-6 sm:py-10 space-y-6 sm:space-y-10">
-      {/* Page Header */}
+      <SeoHead titleKey="seo.pages.calendar.title" descriptionKey="seo.pages.calendar.desc" />
+
+      {/* ส่วนหัวปฏิทิน */}
       <div className="border-b border-gold-border/30 pb-6">
-        <SectionEyebrow enText="CALENDAR" thText="ปฏิทินกิจกรรม" />
+        <SectionEyebrow enText={t('calendar.eyebrowEn')} thText={t('calendar.eyebrowTh')} />
         <h1 className="font-serif text-3xl md:text-4xl font-semibold text-heading mt-2">
-          กำหนดการและกิจกรรมนักเรียน
+          {t('calendar.title')}
         </h1>
         <p className="text-xs md:text-sm text-text-muted mt-1">
-          ติดตามตารางกิจกรรม โครงการ และวันสำคัญขององค์การนักเรียน
+          {t('calendar.subtitle')}
         </p>
       </div>
 
-      {/* Desktop Split View: Month Grid (Left 8 cols) + Selected Day Panel (Right 4 cols) */}
+      {/* มุมมองเดสก์ท็อป: ตารางปฏิทิน 8 คอลัมน์ + รายละเอียดวันที่เลือก 4 คอลัมน์ */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8">
-        {/* Month Calendar Grid (8 cols) */}
         <div className="lg:col-span-8 bg-surface border border-gold-border/30 p-3.5 sm:p-6 rounded-sm shadow-editorial">
-          {/* Month Header Controller */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 sm:pb-6 mb-4 sm:mb-6 border-b border-gold-border/20">
             <h2 className="font-serif text-xl sm:text-2xl font-semibold text-heading">
-              {thaiDateParts.monthFull} พ.ศ. {thaiDateParts.yearBE}
+              {t('calendar.monthYear', { month: dateParts.monthFull, year: dateParts.yearDisplay })}
             </h2>
             <div className="flex items-center gap-1.5 sm:gap-2">
               <button
                 onClick={handlePrevMonth}
                 className="flex-1 sm:flex-none px-2.5 sm:px-3 py-1.5 sm:py-2 border border-gold-border/25 hover:border-gold text-text rounded-sm text-xs whitespace-nowrap transition-colors"
-                title="เดือนก่อนหน้า"
+                title={t('calendar.prevMonthTitle')}
               >
-                ← เดือนก่อน
+                {t('calendar.prevMonth')}
               </button>
               <button
                 onClick={() => setCurrentDate(new Date())}
                 className="px-3 py-1.5 sm:py-2 border border-gold-border/25 hover:border-gold rounded-sm text-xs text-accent font-medium whitespace-nowrap transition-colors"
               >
-                วันนี้
+                {t('calendar.today')}
               </button>
               <button
                 onClick={handleNextMonth}
                 className="flex-1 sm:flex-none px-2.5 sm:px-3 py-1.5 sm:py-2 border border-gold-border/25 hover:border-gold text-text rounded-sm text-xs whitespace-nowrap transition-colors"
-                title="เดือนถัดไป"
+                title={t('calendar.nextMonthTitle')}
               >
-                เดือนถัดไป →
+                {t('calendar.nextMonth')}
               </button>
             </div>
           </div>
 
-          {/* Days of Week Header (Starts Sunday) */}
           <div className="grid grid-cols-7 text-center font-medium text-[11px] sm:text-xs text-gold-text pb-2 sm:pb-3 border-b border-gold-border/15">
-            <div>อา.</div>
-            <div>จ.</div>
-            <div>อ.</div>
-            <div>พ.</div>
-            <div>พฤ.</div>
-            <div>ศ.</div>
-            <div>ส.</div>
+            {weekdays.map((dayName) => (
+              <div key={dayName}>{dayName}</div>
+            ))}
           </div>
 
-          {/* Calendar Day Grid */}
           <div className="grid grid-cols-7 gap-1 pt-2">
-            {/* Empty slots for days before 1st of month */}
             {Array.from({ length: firstDayIndex }).map((_, i) => (
               <div key={`empty-${i}`} className="h-12 sm:h-20 md:h-24 p-1 bg-bg-alt/40 rounded-sm" />
             ))}
 
-            {/* Days in Month */}
             {Array.from({ length: daysInMonth }).map((_, i) => {
               const dayNum = i + 1;
               const dayEvents = getEventsForDay(dayNum);
@@ -222,7 +216,9 @@ export const CalendarPage: React.FC = () => {
                         </div>
                       ))}
                       {dayEvents.length > 2 && (
-                        <div className="text-[9px] text-gold-text">+{dayEvents.length - 2} อื่น ๆ</div>
+                        <div className="text-[9px] text-gold-text">
+                          {t('calendar.moreEvents', { count: dayEvents.length - 2 })}
+                        </div>
                       )}
                     </div>
                   )}
@@ -232,15 +228,14 @@ export const CalendarPage: React.FC = () => {
           </div>
         </div>
 
-        {/* Selected Day Agenda Panel (Right 4 cols) */}
         <div className="lg:col-span-4 bg-surface border border-gold-border/30 p-6 rounded-sm shadow-editorial flex flex-col justify-between">
           <div>
             <div className="border-b border-gold-border/20 pb-4 mb-4">
               <span className="text-[11px] uppercase tracking-wider text-gold-text font-semibold">
-                กิจกรรมของวันที่เลือก
+                {t('calendar.selectedDayLabel')}
               </span>
               <h3 className="font-serif text-lg font-semibold text-heading mt-1">
-                {selectedDayStr ? formatThaiDate(selectedDayStr) : 'กรุณาเลือกวันที่'}
+                {selectedDayStr ? formatDate(selectedDayStr, lang) : t('calendar.pleaseSelectDay')}
               </h3>
             </div>
 
@@ -257,12 +252,12 @@ export const CalendarPage: React.FC = () => {
                       </p>
                     )}
                     <div className="text-[11px] text-text-muted pt-2 border-t border-gold-border/15 flex items-center justify-between">
-                      <span>📍 {evt.location || 'โรงเรียนสาธิต มพ.'}</span>
+                      <span>📍 {evt.location || t('home.defaultLocation')}</span>
                       <button
                         onClick={() => handleExportICS(evt)}
                         className="text-accent hover:text-gold-text underline"
                       >
-                        + ปฏิทิน (.ics)
+                        {t('calendar.addToIcsShort')}
                       </button>
                     </div>
                   </div>
@@ -270,24 +265,24 @@ export const CalendarPage: React.FC = () => {
               </div>
             ) : (
               <div className="py-12 text-center text-xs text-text-muted space-y-1">
-                <p>ไม่มีกิจกรรมในวันนี้</p>
-                <p className="text-[11px] opacity-75">คลิกวันที่ที่มีจุดสีทองบนปฏิทินเพื่อดูรายละเอียด</p>
+                <p>{t('calendar.noEventsDayTitle')}</p>
+                <p className="text-[11px] opacity-75">{t('calendar.noEventsDayHint')}</p>
               </div>
             )}
           </div>
         </div>
       </div>
 
-      {/* Mobile Agenda List View (Ongoing & upcoming chronologically) */}
+      {/* รายการกิจกรรมสำหรับมือถือ */}
       <div className="lg:hidden space-y-6 pt-4 border-t border-gold-border/20">
         <h3 className="font-serif text-xl font-semibold text-heading">
-          กิจกรรมที่กำลังจัดและกำลังจะมาถึง
+          {t('calendar.upcomingSectionTitle')}
         </h3>
 
         {activeOrUpcomingEvents.length > 0 ? (
           <div className="space-y-4">
             {activeOrUpcomingEvents.map((evt) => {
-              const p = getThaiDateParts(evt.startAt);
+              const p = getDateParts(evt.startAt, lang);
               const hasEnd = Boolean(evt.endAt && getEventDateKey(evt.endAt) > getEventDateKey(evt.startAt));
               return (
                 <div key={evt.id} className="p-4 bg-surface-elevated border border-gold-border/20 rounded-sm flex gap-4">
@@ -299,17 +294,20 @@ export const CalendarPage: React.FC = () => {
                     <h4 className="font-serif text-sm font-semibold text-heading">{evt.title}</h4>
                     {hasEnd && evt.endAt && (
                       <p className="text-[11px] text-gold-text font-medium">
-                        ช่วงวันที่จัด: {formatThaiDate(evt.startAt, true)} – {formatThaiDate(evt.endAt, true)}
+                        {t('calendar.dateRange', {
+                          start: formatDate(evt.startAt, lang, true),
+                          end: formatDate(evt.endAt, lang, true),
+                        })}
                       </p>
                     )}
                     <p className="text-xs text-text-muted line-clamp-2">{evt.description}</p>
                     <div className="text-[11px] text-text-muted pt-1 flex items-center justify-between">
-                      <span>📍 {evt.location || 'โรงเรียนสาธิต มพ.'}</span>
+                      <span>📍 {evt.location || t('home.defaultLocation')}</span>
                       <button
                         onClick={() => handleExportICS(evt)}
                         className="text-accent underline text-[11px]"
                       >
-                        + บันทึกลงปฏิทิน
+                        {t('calendar.addToIcsFull')}
                       </button>
                     </div>
                   </div>
@@ -318,7 +316,7 @@ export const CalendarPage: React.FC = () => {
             })}
           </div>
         ) : (
-          <p className="text-xs text-text-muted py-6 text-center">ยังไม่มีกิจกรรมที่กำลังจัดหรือกำลังจะมาถึง</p>
+          <p className="text-xs text-text-muted py-6 text-center">{t('calendar.noUpcomingEvents')}</p>
         )}
       </div>
     </div>

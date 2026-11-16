@@ -4,9 +4,13 @@
  */
 
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { PersonItem } from '../../types';
 import { SectionEyebrow, CornerBracket } from '../../components/common/Ornament';
 import { Emblem } from '../../components/common/Emblem';
+import { SeoHead } from '../../components/common/SeoHead';
+import { useLanguage } from '../../context/LanguageContext';
+import { formatAcademicYear } from '../../lib/format';
 import { getCachedPeopleSync, loadPeopleList } from '../../lib/publicDataService';
 
 function filterPresidents(all: PersonItem[]): PersonItem[] {
@@ -25,6 +29,8 @@ function filterPresidents(all: PersonItem[]): PersonItem[] {
 }
 
 export const AboutHall: React.FC = () => {
+  const { t } = useTranslation();
+  const { lang } = useLanguage();
   const initialPeople = getCachedPeopleSync();
   const [presidents, setPresidents] = useState<PersonItem[]>(
     initialPeople ? filterPresidents(initialPeople) : []
@@ -51,18 +57,20 @@ export const AboutHall: React.FC = () => {
 
   return (
     <div className="max-w-[1000px] mx-auto px-4 sm:px-6 py-6 sm:py-10 space-y-8 sm:space-y-12">
-      {/* Header */}
+      <SeoHead titleKey="seo.pages.hall.title" descriptionKey="seo.pages.hall.desc" />
+
+      {/* ส่วนหัวหน้า */}
       <div className="border-b border-gold-border/30 pb-5 sm:pb-6 text-center max-w-xl mx-auto space-y-2">
-        <SectionEyebrow enText="HALL OF PRESIDENTS" thText="ทำเนียบนายกองค์การนักเรียน" />
+        <SectionEyebrow enText={t('about.hall.eyebrowEn')} thText={t('about.hall.eyebrowTh')} />
         <h1 className="font-serif text-3xl md:text-4xl font-semibold text-heading">
-          ทำเนียบนายกองค์การนักเรียน
+          {t('about.hall.title')}
         </h1>
         <p className="text-xs md:text-sm text-text-muted">
-          ผู้แทนนักเรียนผู้ขับเคลื่อนและสร้างสรรค์คุณประโยชน์ให้แก่โรงเรียนสาธิตมหาวิทยาลัยพะเยา
+          {t('about.hall.subtitle')}
         </p>
       </div>
 
-      {/* Alternating Vertical Timeline */}
+      {/* ไทม์ไลน์สลับซ้ายขวาแนวตั้ง */}
       {loading ? (
         <div className="animate-pulse space-y-8">
           {[1, 2, 3].map((i) => (
@@ -71,12 +79,13 @@ export const AboutHall: React.FC = () => {
         </div>
       ) : presidents.length > 0 ? (
         <div className="relative">
-          {/* Central Gold Timeline Line */}
+          {/* เส้นกลางสีทองของไทม์ไลน์ */}
           <div className="hidden md:block absolute left-1/2 top-0 bottom-0 w-[1.5px] bg-gold-border/40 -translate-x-1/2" />
 
           <div className="space-y-6 md:space-y-12">
             {presidents.map((pres, index) => {
               const isEven = index % 2 === 0;
+              const formattedYear = pres.yearTH ? formatAcademicYear(pres.yearTH, lang) : '';
 
               return (
                 <div
@@ -85,12 +94,12 @@ export const AboutHall: React.FC = () => {
                     isEven ? 'md:flex-row' : 'md:flex-row-reverse'
                   }`}
                 >
-                  {/* Central Year Node on Timeline */}
+                  {/* จุดแสดงปีกลางเส้นไทม์ไลน์ */}
                   <div className="hidden md:flex absolute left-1/2 -translate-x-1/2 w-10 h-10 rounded-full bg-anchor-bg border-2 border-gold items-center justify-center text-[10px] text-anchor-gold font-serif font-bold z-10 shadow-editorial">
-                    {pres.yearTH ? pres.yearTH.slice(-2) : '•'}
+                    {formattedYear ? formattedYear.slice(-2) : '•'}
                   </div>
 
-                  {/* Card Content (half width) */}
+                  {/* การ์ดข้อมูลนายกองค์การ (ครึ่งหน้าจอ) */}
                   <div className="w-full md:w-[45%]">
                     <div className="bg-surface border border-gold-border/20 p-4 sm:p-6 rounded-sm shadow-editorial relative space-y-3 hover:border-gold transition-colors">
                       <CornerBracket position="top-left" />
@@ -114,14 +123,16 @@ export const AboutHall: React.FC = () => {
                         </div>
 
                         <div>
-                          <span className="text-[10px] uppercase tracking-wider text-gold-text font-semibold">
-                            ปีการศึกษา {pres.yearTH}
-                          </span>
+                          {formattedYear && (
+                            <span className="text-[10px] uppercase tracking-wider text-gold-text font-semibold">
+                              {t('site.academicYearLabel', { year: formattedYear })}
+                            </span>
+                          )}
                           <h3 className="font-serif text-lg font-semibold text-heading">
                             {pres.name}
                           </h3>
                           <p className="text-xs text-accent font-medium">
-                            {pres.position || 'นายกองค์การนักเรียน'}
+                            {pres.position || t('about.hall.roleFallback')}
                           </p>
                         </div>
                       </div>
@@ -134,7 +145,7 @@ export const AboutHall: React.FC = () => {
                     </div>
                   </div>
 
-                  {/* Empty counterpart for balance on desktop */}
+                  {/* พื้นที่ว่างฝั่งตรงข้ามเพื่อความสมดุลบนเดสก์ท็อป */}
                   <div className="hidden md:block w-[45%]" />
                 </div>
               );
@@ -144,10 +155,10 @@ export const AboutHall: React.FC = () => {
       ) : (
         <div className="p-16 text-center border border-dashed border-gold-border/30 rounded-sm bg-surface/60 space-y-2">
           <p className="font-serif text-lg text-heading">
-            ยังไม่มีข้อมูลทำเนียบนายกองค์การนักเรียน
+            {t('about.hall.emptyTitle')}
           </p>
           <p className="text-xs text-text-muted">
-            สามารถบันทึกข้อมูลทำเนียบนายกองค์การนักเรียนในแต่ละปีการศึกษาได้ผ่านระบบจัดการหลังบ้าน
+            {t('about.hall.emptyHint')}
           </p>
         </div>
       )}

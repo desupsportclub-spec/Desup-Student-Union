@@ -1,0 +1,569 @@
+{
+  "site": {
+    "name": "Demonstration School of University of Phayao Student Union",
+    "shortName": "DeSUP SU",
+    "shortNameNav": "Student Union",
+    "schoolName": "Demonstration School, University of Phayao",
+    "englishFullName": "Demonstration School of University of Phayao Student Union",
+    "motto": "Promoting Identity, Protecting Student Rights",
+    "vision": "Creatively driving identity-enriching activities while upholding and protecting student rights.",
+    "description": "Official portal of Demonstration School of University of Phayao Student Union (DeSUP SU) — News, Events, Documents & DeSUP CARE.",
+    "loading": "Loading...",
+    "close": "Close",
+    "ok": "OK",
+    "back": "Back",
+    "readMore": "Read more →",
+    "openDetails": "Read Article",
+    "viewsCount": "{{count}} views",
+    "academicYearLabel": "Academic Year {{year}}",
+    "copyright": "© {{year}} {{name}} · {{school}}"
+  },
+  "nav": {
+    "home": "Home",
+    "homeAria": "Home — Demonstration School of University of Phayao Student Union",
+    "about": "About Us",
+    "aboutSub": {
+      "emblem": "Official Emblem",
+      "authority": "Powers & Duties",
+      "board": "Executive Committee",
+      "advisors": "Advisory Board",
+      "hall": "Hall of Presidents"
+    },
+    "news": "News",
+    "newsAndAnnouncements": "News & Announcements",
+    "newsSub": {
+      "pr": "Public Relations",
+      "activity": "Activities Gallery",
+      "regulation": "Regulations, Orders & Announcements",
+      "knowledge": "Knowledge Hub",
+      "video": "Video Clips"
+    },
+    "calendar": "Calendar",
+    "downloads": "Downloads",
+    "downloadsFull": "Document Downloads",
+    "trackComplaint": "Track Submission",
+    "contact": "Contact",
+    "contactUs": "Contact Us",
+    "reportButton": "DeSUP CARE",
+    "reportFull": "Submit Feedback / Complaint",
+    "openMenu": "Open navigation menu",
+    "closeMenu": "Close menu",
+    "mainMenuAria": "Main navigation menu",
+    "toggleAboutSub": "Toggle About Us submenu",
+    "toggleNewsSub": "Toggle News categories",
+    "tickerBadge": "NOTICE",
+    "tickerTrackLink": "Track Submission",
+    "defaultTicker": [
+      "Welcome to the official website of Demonstration School of University of Phayao Student Union (DeSUP SU)",
+      "Share your voice and suggestions to improve our school via DeSUP CARE online feedback system",
+      "Explore upcoming student activities, schedules, and official documents here"
+    ],
+    "themeLabel": "Theme",
+    "languageLabel": "Language"
+  },
+  "theme": {
+    "light": "Light",
+    "dark": "Dark",
+    "system": "System",
+    "heading": "Appearance",
+    "groupAria": "Select display theme",
+    "menuAria": "Select screen theme mode",
+    "triggerTitle": "Switch Light / Dark Mode",
+    "triggerAria": "Display mode: {{label}}",
+    "modePrefix": "{{label}} Mode"
+  },
+  "language": {
+    "th": "TH",
+    "en": "EN",
+    "thName": "ภาษาไทย",
+    "enName": "English",
+    "ariaLabel": "Switch website language",
+    "switchToTh": "เปลี่ยนเป็นภาษาไทย",
+    "switchToEn": "Switch to English"
+  },
+  "footer": {
+    "addressLabel": "Address:",
+    "emailLabel": "Email:",
+    "newsCol": "News",
+    "aboutCol": "About Us",
+    "boardShort": "Executive Board",
+    "relatedCol": "Related Systems",
+    "academicSystem": "Academic Affairs System",
+    "studentAffairsSystem": "Student Affairs System",
+    "facebookPage": "Student Union Facebook Page",
+    "schoolWebsite": "DeSUP Official Website",
+    "universityWebsite": "University of Phayao",
+    "servicesCol": "Student Services",
+    "cookieSettings": "Cookie Settings",
+    "adminPortal": "Admin Portal"
+  },
+  "cookie": {
+    "ariaLabel": "Cookie and privacy preferences",
+    "title": "Cookies & Privacy Notice (PDPA)",
+    "closeAria": "Close cookie banner",
+    "description": "The Demonstration School of University of Phayao Student Union website uses cookies to remember preferences, ensure essential security and system functionality, and measure anonymized readership statistics in accordance with Thailand's Personal Data Protection Act (PDPA).",
+    "necessaryTitle": "Strictly Necessary Cookies",
+    "necessaryDesc": "Remembers privacy consent, session status, and system security",
+    "alwaysActive": "Always Active",
+    "analyticsTitle": "Analytics & Statistics Cookies",
+    "analyticsDesc": "Counts article views and usage statistics anonymously",
+    "hideDetails": "Hide Details",
+    "showDetails": "Customize / View Details",
+    "saveSettings": "Save Preferences",
+    "necessaryOnly": "Necessary Only",
+    "acceptAll": "Accept All"
+  },
+  "status": {
+    "complaint": {
+      "received": "Received",
+      "considering": "Under Review",
+      "in_progress": "In Progress",
+      "resolved": "Resolved"
+    },
+    "newsCategory": {
+      "pr": "Public Relations",
+      "activity": "Activities",
+      "regulation": "Regulations & Announcements",
+      "order": "Regulations & Announcements",
+      "knowledge": "Knowledge",
+      "video": "Videos",
+      "fallback": "News"
+    }
+  },
+  "social": {
+    "youtubeTitle": "YouTube Video",
+    "playVideoAria": "Play video: {{title}}",
+    "defaultTitle": "Media Post",
+    "externalLink": "External Link",
+    "tiktokDefaultLabel": "TikTok Video",
+    "instagramDefaultLabel": "Instagram Post / Reel",
+    "followDetailsOn": "View more details on {{platform}}",
+    "cta": {
+      "youtube": "Watch on YouTube ↗",
+      "facebook": "View post on Facebook ↗",
+      "instagram": "View on Instagram ↗",
+      "tiktok": "Watch on TikTok ↗",
+      "other": "Open source link ↗"
+    }
+  },
+  "banner": {
+    "defaultAlt": "Student Union Highlight Banner",
+    "prevSlide": "Previous Slide",
+    "nextSlide": "Next Slide",
+    "goToSlide": "Go to slide {{index}}"
+  },
+  "home": {
+    "pinnedEyebrow": "PINNED HIGHLIGHTS",
+    "pinnedTotal": "{{count}} pinned items",
+    "pinnedTag": "Pinned",
+    "newsEyebrowEn": "NEWS",
+    "newsEyebrowTh": "PRESS & UPDATES",
+    "newsHeading": "Public Relations",
+    "viewAllNews": "View All",
+    "defaultExcerpt": "Click to read the full news article and details",
+    "waitingMoreNews": "More updates coming soon",
+    "noNewsTitle": "No announcements available at this time",
+    "noNewsDesc": "Stay tuned for upcoming student union news and updates here soon.",
+    "reportEyebrowEn": "PERFORMANCE REPORT",
+    "reportEyebrowTh": "SERVICE OVERVIEW",
+    "statTotal": "Total Submissions",
+    "statInProgress": "In Progress",
+    "statResolved": "Resolved Cases",
+    "scheduleEyebrowEn": "SCHEDULE",
+    "scheduleEyebrowTh": "ACTIVITY CALENDAR",
+    "scheduleHeading": "Upcoming Activities",
+    "viewAllCalendar": "Full Calendar",
+    "ongoingBadge": "Happening Now",
+    "noEventDesc": "No additional description",
+    "defaultLocation": "DeSUP Campus",
+    "untilDate": "Until {{date}}",
+    "yearBadge": "{{year}}",
+    "noEventsTitle": "No upcoming activities scheduled soon",
+    "noEventsDesc": "Check the full activity calendar for past and future schedules.",
+    "galleryEyebrowEn": "GALLERY",
+    "galleryEyebrowTh": "ACTIVITIES GALLERY",
+    "galleryHeading": "Event Highlights",
+    "viewAllGallery": "All Activity Photos",
+    "presidentEyebrowEn": "MESSAGE FROM THE PRESIDENT",
+    "presidentEyebrowTh": "EXECUTIVE ADDRESS",
+    "presidentRoleFallback": "Student Union President",
+    "presidentRoleWithYear": "Student Union President, Academic Year {{year}}",
+    "defaultPresidentMessage": "Welcome students, faculty, and parents to the official Student Union portal. This platform serves as our primary channel for news, regulations, activities, and most importantly, listening to your feedback and ideas to build a better school community together."
+  },
+  "news": {
+    "eyebrowEn": "PRESS & UPDATES",
+    "eyebrowTh": "NEWS ARCHIVE",
+    "title": "Student Union News",
+    "subtitle": "Public relations, event recaps, regulations, announcements, and educational articles",
+    "searchPlaceholder": "Search by headline...",
+    "categories": {
+      "all": "All",
+      "pr": "Public Relations",
+      "activity": "Activities",
+      "regulation": "Regulations & Announcements",
+      "knowledge": "Knowledge",
+      "video": "Videos"
+    },
+    "cardFallbackExcerpt": "Click to read the full article",
+    "emptySearch": "No articles matched \"{{term}}\"",
+    "emptyCategory": "No articles in this category yet",
+    "emptyHint": "Try selecting another category or check back later.",
+    "loadMore": "Load More Articles",
+    "notFoundTitle": "Article Not Found",
+    "notFoundDesc": "This article may have been removed, moved, or not yet published.",
+    "backToNews": "Back to News",
+    "copyLink": "Copy Link",
+    "copiedLink": "Copied ✓",
+    "galleryHeading": "Event Gallery ({{count}} photos)",
+    "galleryAltFallback": "Photo {{index}}",
+    "attachmentsHeading": "Related Attachments",
+    "downloadAttachment": "Download ↗",
+    "relatedEn": "RELATED",
+    "relatedTh": "MORE IN THIS TOPIC"
+  },
+  "calendar": {
+    "eyebrowEn": "CALENDAR",
+    "eyebrowTh": "STUDENT SCHEDULE",
+    "title": "Schedules & Student Activities",
+    "subtitle": "Follow activity schedules, student projects, and important campus dates",
+    "monthYear": "{{month}} {{year}}",
+    "prevMonth": "← Prev",
+    "prevMonthTitle": "Previous month",
+    "today": "Today",
+    "nextMonth": "Next →",
+    "nextMonthTitle": "Next month",
+    "weekdays": ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"],
+    "moreEvents": "+{{count}} more",
+    "selectedDayLabel": "Schedule for Selected Date",
+    "pleaseSelectDay": "Select a date",
+    "addToIcsShort": "+ Calendar (.ics)",
+    "addToIcsFull": "+ Add to Calendar",
+    "noEventsDayTitle": "No activities on this day",
+    "noEventsDayHint": "Click a date marked with a gold dot to view details",
+    "upcomingSectionTitle": "Ongoing & Upcoming Activities",
+    "dateRange": "Dates: {{start}} – {{end}}",
+    "noUpcomingEvents": "No ongoing or upcoming activities scheduled"
+  },
+  "downloads": {
+    "eyebrowEn": "DOCUMENTS",
+    "eyebrowTh": "DOCUMENT CENTER",
+    "title": "Documents & Official Forms",
+    "subtitle": "Preview PDF documents online, download forms, or print directly",
+    "searchPlaceholder": "Search document name...",
+    "view": "Preview",
+    "viewWithIcon": "👁️ Preview",
+    "download": "Download",
+    "preparing": "Preparing...",
+    "preparingFile": "Preparing file...",
+    "table": {
+      "name": "Document Name",
+      "type": "Format",
+      "date": "Published",
+      "actions": "Preview / Print / Download"
+    },
+    "emptySearch": "No documents matched \"{{term}}\"",
+    "emptyAll": "No documents available for download yet",
+    "emptyHint": "Official documents and forms will be published here once announced.",
+    "previewError": "Could not load document preview. Please try again.",
+    "previewLoading": "Loading document from storage...",
+    "nonPdfNotice": "{{type}} files require downloading to open in a compatible application",
+    "clickToDownload": "Click to Download File",
+    "modalMeta": "Published {{date}} · {{count}} downloads",
+    "printDoc": "Print",
+    "openNewWindow": "↗ Open in New Tab",
+    "downloadFile": "⬇ Download File",
+    "closePreviewAria": "Close document preview"
+  },
+  "about": {
+    "emblem": {
+      "eyebrowEn": "SYMBOL & IDENTITY",
+      "eyebrowTh": "OFFICIAL EMBLEM",
+      "title": "Student Union Emblem",
+      "imgAlt": "Emblem of Demonstration School of University of Phayao Student Union",
+      "descriptionHeading": "Emblem Description",
+      "descriptionText": "The official emblem features a black seven-tiered candlestick (Sattaphan) standing prominently against a golden-yellow circular background symbolizing the sun. At the base of the candlestick sit the purple Thai initials \"มพ\" beneath the white English lettering \"STUDENT UNION\". Surrounding the centerpiece is a black circular border inscribed with \"Demonstration School . University of Phayao\" in white, anchored at the bottom by a curved white ribbon bearing the Thai title \"องค์การนักเรียน\" in black.",
+      "items": [
+        { "label": "Thai Name", "value": "\"องค์การนักเรียน โรงเรียนสาธิตมหาวิทยาลัยพะเยา\"" },
+        { "label": "English Name", "value": "\"Demonstration School of University of Phayao Student Union\"" },
+        { "label": "Thai Abbreviation", "value": "\"อน.สธ.มพ.\"" },
+        { "label": "English Abbreviation", "value": "\"DeSUP SU\"" },
+        { "label": "Motto", "value": "\"Promoting Identity, Protecting Student Rights\" (ส่งเสริมอัตลักษณ์ พิทักษ์สิทธินักเรียน)" },
+        { "label": "Vision", "value": "\"Creatively driving identity-enriching activities while upholding and protecting student rights.\"" }
+      ]
+    },
+    "authority": {
+      "eyebrowEn": "CHARTER & POWERS",
+      "eyebrowTh": "POWERS & DUTIES",
+      "title": "Powers & Duties of the Student Union",
+      "subtitle": "Pursuant to the Demonstration School, University of Phayao Announcement on the Student Union, B.E. 2569 (2026)",
+      "section1Title": "Powers and Duties",
+      "duties": [
+        { "num": "(1)", "text": "Safeguard the collective interests and legitimate rights of students concerning student affairs." },
+        { "num": "(2)", "text": "Administer Student Union activities in accordance with declared policies, provided they do not conflict with school regulations, rules, announcements, or policies." },
+        { "num": "(3)", "text": "Perform other duties as assigned by the school." }
+      ],
+      "section2Title": "Guiding Principles of Conduct",
+      "guidelines": [
+        { "num": "(1)", "text": "Uphold the collective interests and welfare of the student body." },
+        { "num": "(2)", "text": "Maintain effectiveness in organizing and advancing student activities." },
+        { "num": "(3)", "text": "Adhere faithfully to the principles of democratic governance." },
+        { "num": "(4)", "text": "Strictly observe all school regulations, rules, announcements, orders, and policies." },
+        { "num": "(5)", "text": "Promote co-curricular activities reflecting school student identity while preserving, nurturing, reviving, and creatively advancing national arts and culture." },
+        { "num": "(6)", "text": "Act with integrity, honesty, and transparency in administration while remaining eager to learn and proactive." },
+        { "num": "(7)", "text": "Demonstrate responsible leadership as well as good followership." },
+        { "num": "(8)", "text": "Enhance and uphold the reputation and honor of the school." }
+      ]
+    },
+    "board": {
+      "eyebrowEn": "BOARD & LEADERSHIP",
+      "eyebrowTh": "EXECUTIVE COMMITTEE",
+      "title": "Student Union Executive Committee",
+      "subtitle": "Executive Committee under the supervision of Student Affairs (1-year term) — Academic Year {{year}}",
+      "yearFilterLabel": "Academic Year:",
+      "emptyTitle": "No executive committee records for Academic Year {{year}}",
+      "emptyHint": "Committee member profiles can be managed through the Admin Portal."
+    },
+    "advisors": {
+      "eyebrowEn": "ADVISORY BOARD",
+      "eyebrowTh": "ADVISORS",
+      "title": "Student Union Advisory Board",
+      "subtitle": "School administrators, faculty advisors, and experienced students appointed by the school to advise, guide, oversee, and support Student Union activities",
+      "groups": {
+        "executive": {
+          "label": "Executive Advisory Committee",
+          "shortLabel": "Executive Advisors"
+        },
+        "teacher": {
+          "label": "Faculty Advisors Committee",
+          "shortLabel": "Faculty Advisors"
+        },
+        "experienced_student": {
+          "label": "Experienced Student Advisors Committee",
+          "shortLabel": "Student Advisors"
+        }
+      },
+      "emptyGroup": "No members listed in {{group}} yet"
+    },
+    "hall": {
+      "eyebrowEn": "HALL OF PRESIDENTS",
+      "eyebrowTh": "PAST & PRESENT PRESIDENTS",
+      "title": "Hall of Student Union Presidents",
+      "subtitle": "Student representatives who have led and created lasting impact for Demonstration School, University of Phayao",
+      "roleFallback": "Student Union President",
+      "emptyTitle": "No president records available yet",
+      "emptyHint": "Records of Student Union presidents for each academic year can be added via the Admin Portal."
+    }
+  },
+  "complaint": {
+    "eyebrowEn": "STUDENT VOICE",
+    "eyebrowTh": "FEEDBACK & COMPLAINTS",
+    "title": "DeSUP CARE",
+    "subtitle": "Direct and secure communication channel — anonymous submission supported",
+    "steps": {
+      "step1": "Category",
+      "step2": "Details",
+      "step3": "Identity"
+    },
+    "types": {
+      "complaint": { "title": "General Complaint", "desc": "Issues regarding campus facilities, buildings, or daily student conveniences" },
+      "suggestion": { "title": "School Improvement Idea", "desc": "Proposals, new activities, or constructive ideas to enrich school life" },
+      "corruption": { "title": "Integrity & Transparency Report", "desc": "Reports of misconduct, unfair practices, or transparency concerns" },
+      "inquiry": { "title": "General Inquiry", "desc": "Questions regarding activities, regulations, or Student Union operations" },
+      "compliment": { "title": "Appreciation & Praise", "desc": "Encouragement or recognition for student leaders and organizing teams" },
+      "other": { "title": "Other", "desc": "Any other matter you wish to communicate to the Student Union" }
+    },
+    "step1Heading": "Step 1: Select Submission Category",
+    "nextToStep2": "Next: Enter Details →",
+    "step2Heading": "Step 2: Describe Your Submission",
+    "selectedTypeLabel": "Category: {{type}}",
+    "subjectLabel": "Subject (Please state clearly and concisely) *",
+    "subjectPlaceholder": "e.g., Classroom M.4/1 A/C not cooling, Science Week activity suggestion",
+    "locationLabel": "Location or Relevant Department (Optional)",
+    "locationPlaceholder": "e.g., Building 2 Floor 3, Cafeteria, Student Activities Club",
+    "bodyLabel": "Detailed Description (At least 10 characters) *",
+    "bodyPlaceholder": "Describe the issue, date/time, situation, or suggestion...",
+    "attachLabel": "Attach Supporting Photos (Optional, up to 2 photos)",
+    "attachWarning": "⚠️ Reminder: Avoid uploading photos showing recognizable faces or private personal info unless necessary. Photos are compressed and visible only to authorized administrators.",
+    "addImageBtn": "📷 Add / Take Photo",
+    "compressing": "Compressing image...",
+    "attachedAlt": "Attachment preview",
+    "backBtn": "← Back",
+    "nextToStep3": "Next: Sender Options →",
+    "step3Heading": "Step 3: Identity & Tracking Preferences",
+    "step3Sub": "You may choose to stay completely anonymous; no personal name will be recorded.",
+    "anonTitle": "Submit Anonymously (Default — Maximum Privacy)",
+    "anonDesc": "No sender details will be stored. Follow progress solely via your tracking code.",
+    "identifiedTitle": "Provide Contact Info (For Direct Follow-up)",
+    "identifiedDesc": "Kept strictly confidential and visible only to authorized Student Union committee admins.",
+    "contactNameLabel": "Full Name *",
+    "contactNamePlaceholder": "e.g., Thanaphat Suksamboon",
+    "gradeClassLabel": "Grade / Room",
+    "gradeClassPlaceholder": "e.g., M.5/2",
+    "contactMethodLabel": "Contact Channel (LINE ID or Email) *",
+    "contactMethodPlaceholder": "LINE ID or Email for status updates",
+    "pdpaAgree": "I consent to the Student Union using these contact details solely to investigate and communicate updates regarding this submission in accordance with PDPA.",
+    "recoveryBoxTitle": "Anti-Loss Tracking & Cross-Device Recovery",
+    "recoveryBoxDesc": "✓ Your submission will be saved automatically on this device in the Track page. You can also set a recovery PIN or link a Google account to access it from other devices.",
+    "recoveryPinLabel": "Personal Passphrase + PIN (Optional — Recover code if switching devices)",
+    "recoveryKeywordPlaceholder": "Passphrase (e.g., Student ID or nickname)",
+    "recoveryPinPlaceholder": "4–6 digit PIN (e.g., 1234)",
+    "recoveryHashNote": "Hashed one-way (SHA-256) before storage so your identity remains protected.",
+    "googleLinkChecked": "Link with Google Account (",
+    "googleLinkCheckedEnd": ") for cross-device tracking",
+    "googleSyncDesc": "Or connect your Google account to sync history across phone / tablet / desktop (your name remains hidden if Anonymous is selected)",
+    "connectingGoogle": "Connecting...",
+    "connectGoogle": "Connect Google Account",
+    "submitting": "Submitting...",
+    "submitBtn": "Confirm & Submit ✓",
+    "successTitle": "Your Submission Has Been Received",
+    "successDesc": "This submission has been saved automatically on this device. Save the receipt card or tracking link below to access it on another device.",
+    "trackingCodeHeading": "TRACKING CODE",
+    "creatingTicket": "Generating Receipt...",
+    "downloadTicket": "🖼️ Save Tracking Receipt Image",
+    "copiedLink": "Link Copied ✓",
+    "copyLink": "🔗 Copy Tracking Link",
+    "copiedCode": "Code Copied ✓",
+    "copyCode": "📋 Copy Code",
+    "trackThisCase": "Track This Submission →",
+    "backHome": "Back to Home",
+    "unspecifiedLocation": "Unspecified",
+    "defaultTicketTitle": "Feedback / Complaint",
+    "ticketShareTitle": "Tracking Ticket {{code}}",
+    "ticketShareText": "Track status here: {{url}}",
+    "errors": {
+      "maxImages": "You can attach up to 2 photos maximum.",
+      "compressFailed": "Could not process the image. Please try another file.",
+      "titleTooShort": "Please enter a subject of at least 3 characters.",
+      "bodyTooShort": "Please enter details of at least 10 characters.",
+      "rateLimited": "Please wait 1 minute before sending another submission to prevent duplicates.",
+      "pdpaRequired": "Please agree to the PDPA consent checkbox to submit identified contact info.",
+      "keywordTooShort": "Please enter at least 2 characters for your recovery passphrase (or leave both blank).",
+      "pinTooShort": "Please set a recovery PIN of at least 4 characters/digits.",
+      "submitFailed": "Could not save your submission. Please try again.",
+      "googleFailed": "Unable to connect Google right now (you can still submit without signing in)."
+    }
+  },
+  "track": {
+    "eyebrowEn": "STATUS TRACKING",
+    "eyebrowTh": "TRACK SUBMISSION",
+    "title": "Check Submission Progress",
+    "subtitle": "View cases sent from this device or look up via Tracking Code, Recovery PIN, or Google Account",
+    "myComplaintsTitle": "Your Submissions (Auto-Saved)",
+    "syncedWithGoogle": "Synced from this device and {{email}}",
+    "localOnlyHint": "Showing submissions created or opened from this device without re-entering codes",
+    "connecting": "Connecting...",
+    "syncWithGoogleBtn": "Sync Across Devices with Google",
+    "removeFromDeviceTitle": "Remove from this device's history",
+    "repliedCount": "Replied ({{count}})",
+    "viewDetails": "View Details →",
+    "noHistoryTitle": "No submission history saved on this device yet",
+    "submitNewLink": "Submit Feedback / Complaint →",
+    "tabCode": "Search by Tracking Code",
+    "tabRecovery": "Forgot Code? Use Passphrase + PIN",
+    "codePlaceholder": "Enter tracking code e.g. SC-{{year}}-ABCDEF",
+    "searching": "Searching...",
+    "checkStatusBtn": "Check Status →",
+    "recoveryKeywordPlaceholder": "Your passphrase (e.g. Student ID / nickname)",
+    "recoveryPinPlaceholder": "4–6 digit PIN",
+    "recovering": "Recovering...",
+    "recoverBtn": "Recover History →",
+    "recoveryHint": "Enter the passphrase and PIN set during submission to retrieve your matching records.",
+    "notFoundHint": "Please verify your tracking code or try recovering with your Passphrase + PIN or Google Account.",
+    "codePrefix": "Code: {{code}}",
+    "copiedCaseLink": "Link Copied ✓",
+    "copyCaseLink": "🔗 Copy Direct Link",
+    "locationMeta": "Location: {{location}}",
+    "submittedAtMeta": "Submitted: {{date}}",
+    "senderAnon": "Sender: Anonymous",
+    "senderIdentified": "Sender: Identified",
+    "unspecified": "Unspecified",
+    "timelineHeading": "Processing Progress",
+    "currentStageBadge": "Current Stage",
+    "repliesHeading": "Official Replies from Student Union",
+    "defaultReplyAuthor": "Student Union",
+    "noReplies": "Under review — official updates and replies from the committee will appear here once available.",
+    "stages": {
+      "received": { "label": "Received", "desc": "Your submission has been recorded in our system." },
+      "considering": { "label": "Under Review", "desc": "Committee members and advisors are reviewing the details." },
+      "in_progress": { "label": "In Progress", "desc": "Coordinating with relevant school departments to resolve the matter." },
+      "resolved": { "label": "Resolved", "desc": "Action has been completed or a formal resolution has been reached." }
+    },
+    "errors": {
+      "notFound": "No submission found with tracking code \"{{code}}\"",
+      "recoveryValidation": "Please enter your passphrase (min 2 chars) and PIN (min 4 chars).",
+      "recoveryNotFound": "No submissions matched that passphrase and PIN.",
+      "recoveryFailed": "Could not search right now. Please try again later."
+    }
+  },
+  "contact": {
+    "eyebrowEn": "CONTACT",
+    "eyebrowTh": "GET IN TOUCH",
+    "title": "Contact Us",
+    "subtitle": "Demonstration School, University of Phayao",
+    "infoHeading": "Contact Information",
+    "addressLabel": "Location:",
+    "emailLabel": "Email:",
+    "facebookLabel": "Facebook Page:",
+    "mapHeading": "School Location Map",
+    "mapTitle": "Map of Demonstration School, University of Phayao"
+  },
+  "notFound": {
+    "title": "Page Not Found",
+    "desc": "The page you are looking for may have been moved, renamed, or no longer exists. Please check the URL or return to the homepage.",
+    "backHome": "← Back to Home"
+  },
+  "seo": {
+    "siteTitle": "Demonstration School of University of Phayao Student Union",
+    "defaultDesc": "Official portal of Demonstration School of University of Phayao Student Union (DeSUP SU) — News, Events, Documents & DeSUP CARE.",
+    "pages": {
+      "home": {
+        "title": "Demonstration School of University of Phayao Student Union",
+        "desc": "Official portal of Demonstration School of University of Phayao Student Union (DeSUP SU) — News, Events, Documents & DeSUP CARE."
+      },
+      "news": {
+        "title": "Student Union News",
+        "desc": "Public relations, student activities, official regulations, announcements, and educational articles."
+      },
+      "calendar": {
+        "title": "Activity Calendar",
+        "desc": "Follow campus activity schedules, projects, and important Student Union dates."
+      },
+      "downloads": {
+        "title": "Documents & Official Forms",
+        "desc": "Preview, download, and print official Student Union PDF documents and forms."
+      },
+      "emblem": {
+        "title": "Official Emblem & Identity",
+        "desc": "Emblem symbolism, motto, vision, and identity of Demonstration School of University of Phayao Student Union."
+      },
+      "authority": {
+        "title": "Powers & Duties",
+        "desc": "Charter powers, duties, and guiding principles of the Student Union."
+      },
+      "board": {
+        "title": "Executive Committee",
+        "desc": "Members of the Student Union Executive Committee by academic year."
+      },
+      "advisors": {
+        "title": "Advisory Board",
+        "desc": "Executive advisors, faculty advisors, and experienced student advisors."
+      },
+      "hall": {
+        "title": "Hall of Presidents",
+        "desc": "Past and present Presidents of Demonstration School of University of Phayao Student Union."
+      },
+      "complaint": {
+        "title": "DeSUP CARE — Feedback & Complaints",
+        "desc": "Direct and secure communication channel supporting anonymous student feedback and complaints."
+      },
+      "track": {
+        "title": "Track Submission",
+        "desc": "Check the progress of your submitted complaint or suggestion using your tracking code."
+      },
+      "contact": {
+        "title": "Contact Us",
+        "desc": "Contact information and location map of Demonstration School of University of Phayao Student Union."
+      }
+    }
+  }
+}

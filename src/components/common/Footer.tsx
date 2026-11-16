@@ -5,14 +5,31 @@
 
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { Emblem } from './Emblem';
-import { RELATED_SYSTEM_LINKS, SITE_CONFIG } from '../../config/site';
+import { RELATED_SYSTEM_LINKS } from '../../config/site';
 import { useSiteSettings } from '../../context/SiteSettingsContext';
+import { useLanguage } from '../../context/LanguageContext';
+import { LocLink } from './LocLink';
+import { formatAcademicYear } from '../../lib/format';
 
 export const Footer: React.FC = () => {
   const { contactInfo, links, academicYearTH } = useSiteSettings();
+  const { lang } = useLanguage();
+  const { t } = useTranslation();
 
   const relatedLinks = links && links.length > 0 ? links : RELATED_SYSTEM_LINKS;
+  const displayAcademicYear = formatAcademicYear(academicYearTH, lang);
+  const currentYear = lang === 'en' ? new Date().getFullYear() : new Date().getFullYear() + 543;
+
+  // แปลงชื่อลิงก์ระบบที่เกี่ยวข้องเริ่มต้นให้สอดคล้องกับภาษาที่เลือก
+  const resolveRelatedLinkTitle = (title: string) => {
+    if (lang !== 'en') return title;
+    if (title === 'ระบบบริหารงานวิชาการ') return t('footer.academicSystem');
+    if (title === 'ระบบบริหารงานกิจการนักเรียน') return t('footer.studentAffairsSystem');
+    if (title === 'เพจ Facebook องค์การนักเรียน') return t('footer.facebookPage');
+    return title;
+  };
 
   const handleOpenCookieSettings = () => {
     window.dispatchEvent(new CustomEvent('desup:open-cookie-settings'));
@@ -20,69 +37,69 @@ export const Footer: React.FC = () => {
 
   return (
     <footer className="bg-anchor-bg text-anchor-text border-t border-gold/30 relative overflow-hidden">
-      {/* Background Subtle Watermark */}
+      {/* ลายน้ำตราสัญลักษณ์พื้นหลัง */}
       <div className="absolute right-0 bottom-0 pointer-events-none opacity-[0.04] translate-x-12 translate-y-12">
         <Emblem size={380} />
       </div>
 
       <div className="max-w-[1240px] mx-auto px-4 sm:px-6 md:px-12 py-10 sm:py-16 relative z-10">
         <div className="grid grid-cols-1 md:grid-cols-12 gap-8 md:gap-12 pb-10 md:pb-14 border-b border-gold/20">
-          {/* Identity & School Info (4 columns) */}
+          {/* ข้อมูลองค์กร (4 คอลัมน์) */}
           <div className="md:col-span-4 space-y-4">
             <div className="flex items-center gap-3.5">
               <Emblem size={48} />
               <div>
                 <h3 className="font-serif text-lg font-semibold tracking-wide text-anchor-text">
-                  {SITE_CONFIG.name}
+                  {t('site.name')}
                 </h3>
                 <p className="text-xs text-anchor-gold tracking-wider">
-                  {SITE_CONFIG.schoolName} · ปีการศึกษา {academicYearTH}
+                  {t('site.schoolName')} · {t('site.academicYearLabel', { year: displayAcademicYear })}
                 </p>
               </div>
             </div>
 
             <p className="text-xs text-anchor-text/70 leading-relaxed max-w-sm">
-              ขับเคลื่อนกิจกรรมส่งเสริมอัตลักษณ์อย่างสร้างสรรค์ พิทักษ์รักษาไว้ซึ่งสิทธิของนักเรียน
+              {t('site.vision')}
             </p>
 
             <div className="pt-2 text-xs text-anchor-text/80 space-y-1.5">
-              <p><span className="text-anchor-gold">ที่อยู่:</span> {contactInfo.address}</p>
-              <p><span className="text-anchor-gold">อีเมล:</span> {contactInfo.email}</p>
+              <p><span className="text-anchor-gold">{t('footer.addressLabel')}</span> {contactInfo.address}</p>
+              <p><span className="text-anchor-gold">{t('footer.emailLabel')}</span> {contactInfo.email}</p>
             </div>
           </div>
 
-          {/* Quick Links Column 1: ข่าวสาร (2 columns) */}
+          {/* คอลัมน์ลิงก์ 1: ข่าวสาร (2 คอลัมน์) */}
           <div className="md:col-span-2 space-y-3">
             <h4 className="text-xs uppercase tracking-[0.2em] font-semibold text-anchor-gold">
-              ข่าวสาร
+              {t('footer.newsCol')}
             </h4>
             <ul className="text-xs space-y-2 text-anchor-text/75">
-              <li><Link to="/news/pr" className="hover:text-anchor-text transition-colors">ข่าวประชาสัมพันธ์</Link></li>
-              <li><Link to="/news/activity" className="hover:text-anchor-text transition-colors">ภาพข่าวกิจกรรม</Link></li>
-              <li><Link to="/calendar" className="hover:text-anchor-text transition-colors">ปฏิทินกิจกรรม</Link></li>
-              <li><Link to="/news/video" className="hover:text-anchor-text transition-colors">คลิปวิดีโอ</Link></li>
+              <li><LocLink to="/news/pr" className="hover:text-anchor-text transition-colors">{t('nav.newsSub.pr')}</LocLink></li>
+              <li><LocLink to="/news/activity" className="hover:text-anchor-text transition-colors">{t('nav.newsSub.activity')}</LocLink></li>
+              <li><LocLink to="/calendar" className="hover:text-anchor-text transition-colors">{t('nav.calendar')}</LocLink></li>
+              <li><LocLink to="/news/video" className="hover:text-anchor-text transition-colors">{t('nav.newsSub.video')}</LocLink></li>
             </ul>
           </div>
 
-          {/* Quick Links Column 2: เกี่ยวกับเรา (2 columns) */}
+          {/* คอลัมน์ลิงก์ 2: เกี่ยวกับเรา (2 คอลัมน์) */}
           <div className="md:col-span-2 space-y-3">
             <h4 className="text-xs uppercase tracking-[0.2em] font-semibold text-anchor-gold">
-              เกี่ยวกับเรา
+              {t('footer.aboutCol')}
             </h4>
             <ul className="text-xs space-y-2 text-anchor-text/75">
-              <li><Link to="/about/emblem" className="hover:text-anchor-text transition-colors">ตราสัญลักษณ์</Link></li>
-              <li><Link to="/about/authority" className="hover:text-anchor-text transition-colors">อำนาจหน้าที่</Link></li>
-              <li><Link to="/about/board" className="hover:text-anchor-text transition-colors">คณะกรรมการ</Link></li>
-              <li><Link to="/about/advisors" className="hover:text-anchor-text transition-colors">คณะกรรมการที่ปรึกษา</Link></li>
-              <li><Link to="/about/hall" className="hover:text-anchor-text transition-colors">ทำเนียบนายกองค์การนักเรียน</Link></li>
+              <li><LocLink to="/about/emblem" className="hover:text-anchor-text transition-colors">{t('nav.aboutSub.emblem')}</LocLink></li>
+              <li><LocLink to="/about/authority" className="hover:text-anchor-text transition-colors">{t('nav.aboutSub.authority')}</LocLink></li>
+              <li><LocLink to="/about/board" className="hover:text-anchor-text transition-colors">{t('footer.boardShort')}</LocLink></li>
+              <li><LocLink to="/about/advisors" className="hover:text-anchor-text transition-colors">{t('nav.aboutSub.advisors')}</LocLink></li>
+              <li><LocLink to="/about/hall" className="hover:text-anchor-text transition-colors">{t('nav.aboutSub.hall')}</LocLink></li>
             </ul>
           </div>
 
-          {/* Quick Links Column 3: ระบบที่เกี่ยวข้อง และบริการนักเรียน (4 columns) */}
+          {/* คอลัมน์ลิงก์ 3: ระบบที่เกี่ยวข้อง และบริการนักเรียน (4 คอลัมน์) */}
           <div className="md:col-span-4 grid grid-cols-1 sm:grid-cols-2 gap-6">
             <div className="space-y-3">
               <h4 className="text-xs uppercase tracking-[0.2em] font-semibold text-anchor-gold">
-                ระบบที่เกี่ยวข้อง
+                {t('footer.relatedCol')}
               </h4>
               <ul className="text-xs space-y-2.5 text-anchor-text/75">
                 {relatedLinks.map((lnk, idx) => (
@@ -94,13 +111,13 @@ export const Footer: React.FC = () => {
                         rel="noopener noreferrer"
                         className="hover:text-anchor-text transition-colors inline-flex items-start gap-1"
                       >
-                        <span>{lnk.title}</span>
+                        <span>{resolveRelatedLinkTitle(lnk.title)}</span>
                         <span aria-hidden="true">↗</span>
                       </a>
                     ) : (
-                      <Link to={lnk.url} className="hover:text-anchor-text transition-colors">
-                        {lnk.title}
-                      </Link>
+                      <LocLink to={lnk.url} className="hover:text-anchor-text transition-colors">
+                        {resolveRelatedLinkTitle(lnk.title)}
+                      </LocLink>
                     )}
                   </li>
                 ))}
@@ -111,7 +128,7 @@ export const Footer: React.FC = () => {
                     rel="noopener noreferrer"
                     className="hover:text-anchor-text transition-colors"
                   >
-                    เว็บไซต์โรงเรียนสาธิต มพ. ↗
+                    {t('footer.schoolWebsite')} ↗
                   </a>
                 </li>
                 <li>
@@ -121,7 +138,7 @@ export const Footer: React.FC = () => {
                     rel="noopener noreferrer"
                     className="hover:text-anchor-text transition-colors"
                   >
-                    มหาวิทยาลัยพะเยา ↗
+                    {t('footer.universityWebsite')} ↗
                   </a>
                 </li>
               </ul>
@@ -129,13 +146,13 @@ export const Footer: React.FC = () => {
 
             <div className="space-y-3">
               <h4 className="text-xs uppercase tracking-[0.2em] font-semibold text-anchor-gold">
-                ระบบบริการนักเรียน
+                {t('footer.servicesCol')}
               </h4>
               <ul className="text-xs space-y-2 text-anchor-text/75">
-                <li><Link to="/complaint" className="hover:text-anchor-text transition-colors">ส่งเรื่องร้องเรียน / ข้อเสนอแนะ</Link></li>
-                <li><Link to="/track" className="hover:text-anchor-text transition-colors">ติดตามสถานะเรื่องร้องเรียน</Link></li>
-                <li><Link to="/downloads" className="hover:text-anchor-text transition-colors">ดาวน์โหลดเอกสาร</Link></li>
-                <li><Link to="/contact" className="hover:text-anchor-text transition-colors">ติดต่อเรา</Link></li>
+                <li><LocLink to="/complaint" className="hover:text-anchor-text transition-colors">{t('nav.reportFull')}</LocLink></li>
+                <li><LocLink to="/track" className="hover:text-anchor-text transition-colors">{t('nav.trackComplaint')}</LocLink></li>
+                <li><LocLink to="/downloads" className="hover:text-anchor-text transition-colors">{t('nav.downloadsFull')}</LocLink></li>
+                <li><LocLink to="/contact" className="hover:text-anchor-text transition-colors">{t('nav.contactUs')}</LocLink></li>
               </ul>
 
               <div className="pt-2 space-y-1.5">
@@ -145,7 +162,7 @@ export const Footer: React.FC = () => {
                     onClick={handleOpenCookieSettings}
                     className="text-[11px] text-anchor-text/65 hover:text-anchor-gold underline transition-colors"
                   >
-                    ตั้งค่าคุกกี้ (Cookie Settings)
+                    {t('footer.cookieSettings')}
                   </button>
                 </div>
                 <div>
@@ -153,7 +170,7 @@ export const Footer: React.FC = () => {
                     to="/admin"
                     className="inline-block text-[11px] text-anchor-gold/60 hover:text-anchor-gold transition-colors"
                   >
-                    เข้าสู่ระบบผู้ดูแล (Admin Portal)
+                    {t('footer.adminPortal')}
                   </Link>
                 </div>
               </div>
@@ -161,13 +178,13 @@ export const Footer: React.FC = () => {
           </div>
         </div>
 
-        {/* Bottom copyright & attribution (Evergreen) */}
+        {/* ลิขสิทธิ์และชื่อองค์กรด้านล่างสุด */}
         <div className="pt-6 sm:pt-8 flex flex-col md:flex-row items-center justify-between text-center md:text-left text-xs text-anchor-text/60 gap-3 md:gap-4">
-          <p>© พ.ศ. {new Date().getFullYear() + 543} {SITE_CONFIG.name} {SITE_CONFIG.schoolName}</p>
+          <p>{t('site.copyright', { year: currentYear, name: t('site.name'), school: t('site.schoolName') })}</p>
           <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1">
-            <span className="text-anchor-gold">โรงเรียนสาธิตมหาวิทยาลัยพะเยา</span>
+            <span className="text-anchor-gold">{t('site.schoolName')}</span>
             <span className="text-anchor-text/30 hidden sm:inline">|</span>
-            <span>Demonstration School of University of Phayao Student Union</span>
+            <span>{t('site.englishFullName')}</span>
           </div>
         </div>
       </div>

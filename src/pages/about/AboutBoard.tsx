@@ -4,13 +4,19 @@
  */
 
 import React, { useState, useEffect, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { PersonItem } from '../../types';
 import { SectionEyebrow, CornerBracket } from '../../components/common/Ornament';
 import { Emblem } from '../../components/common/Emblem';
+import { SeoHead } from '../../components/common/SeoHead';
 import { useSiteSettings } from '../../context/SiteSettingsContext';
+import { useLanguage } from '../../context/LanguageContext';
+import { formatAcademicYear } from '../../lib/format';
 import { getCachedPeopleSync, loadPeopleList } from '../../lib/publicDataService';
 
 export const AboutBoard: React.FC = () => {
+  const { t } = useTranslation();
+  const { lang } = useLanguage();
   const { academicYearTH } = useSiteSettings();
   const initialPeople = getCachedPeopleSync();
   const [people, setPeople] = useState<PersonItem[]>(initialPeople || []);
@@ -62,25 +68,29 @@ export const AboutBoard: React.FC = () => {
 
   const boardMembers = allBoard.filter((m) => m.yearTH === selectedYear);
 
+  const displaySelectedYear = formatAcademicYear(selectedYear, lang);
+
   return (
     <div className="max-w-[1240px] mx-auto px-4 sm:px-6 md:px-12 py-6 sm:py-10 space-y-6 sm:space-y-10">
-      {/* Header */}
+      <SeoHead titleKey="seo.pages.board.title" descriptionKey="seo.pages.board.desc" />
+
+      {/* ส่วนหัวหน้า */}
       <div className="border-b border-gold-border/30 pb-5 sm:pb-6 flex flex-col md:flex-row md:items-end justify-between gap-4">
         <div>
-          <SectionEyebrow enText="BOARD & LEADERSHIP" thText="คณะกรรมการองค์การนักเรียน" />
+          <SectionEyebrow enText={t('about.board.eyebrowEn')} thText={t('about.board.eyebrowTh')} />
           <h1 className="font-serif text-3xl md:text-4xl font-semibold text-heading mt-2">
-            คณะกรรมการองค์การนักเรียน
+            {t('about.board.title')}
           </h1>
           <p className="text-xs md:text-sm text-text-muted mt-1">
-            คณะกรรมการองค์การนักเรียน ภายใต้การกำกับดูแลของงานกิจการนักเรียน (วาระ ๑ ปีการศึกษา) ประจำปีการศึกษา {selectedYear}
+            {t('about.board.subtitle', { year: displaySelectedYear })}
           </p>
         </div>
 
-        {/* Dynamic Academic Year Select Dropdown */}
+        {/* ตัวเลือกปีการศึกษา */}
         {availableYears.length > 0 && (
           <div className="flex items-center gap-2.5 text-xs">
             <label htmlFor="board-year-select" className="text-gold-text font-medium whitespace-nowrap">
-              ปีการศึกษา:
+              {t('about.board.yearFilterLabel')}
             </label>
             <select
               id="board-year-select"
@@ -90,7 +100,7 @@ export const AboutBoard: React.FC = () => {
             >
               {availableYears.map((yr) => (
                 <option key={yr} value={yr}>
-                  ปีการศึกษา {yr}
+                  {t('site.academicYearLabel', { year: formatAcademicYear(yr, lang) })}
                 </option>
               ))}
             </select>
@@ -98,7 +108,7 @@ export const AboutBoard: React.FC = () => {
         )}
       </div>
 
-      {/* Board Members Grid */}
+      {/* ตารางรายชื่อคณะกรรมการ */}
       {loading ? (
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-6">
           {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
@@ -132,7 +142,7 @@ export const AboutBoard: React.FC = () => {
                   ) : (
                     <div className="w-full h-full bg-brand-soft flex flex-col items-center justify-center p-3 text-text-muted">
                       <Emblem size={36} />
-                      <span className="text-[10px] text-accent mt-2 font-medium">สธ.มพ</span>
+                      <span className="text-[10px] text-accent mt-2 font-medium">{t('site.shortName')}</span>
                     </div>
                   )}
                 </div>
@@ -157,10 +167,10 @@ export const AboutBoard: React.FC = () => {
       ) : (
         <div className="p-16 text-center border border-dashed border-gold-border/30 rounded-sm bg-surface/60 space-y-2">
           <p className="font-serif text-lg text-heading">
-            ยังไม่มีข้อมูลคณะกรรมการประจำปีการศึกษา {selectedYear}
+            {t('about.board.emptyTitle', { year: displaySelectedYear })}
           </p>
           <p className="text-xs text-text-muted">
-            สามารถเพิ่มรายชื่อคณะกรรมการได้ผ่านระบบจัดการผู้ดูแล (Admin Portal)
+            {t('about.board.emptyHint')}
           </p>
         </div>
       )}

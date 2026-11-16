@@ -5,11 +5,13 @@
 
 import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
+import { useTranslation } from 'react-i18next';
 import { Emblem } from './Emblem';
 
 export const Preloader: React.FC = () => {
+  const { t } = useTranslation();
   const [visible, setVisible] = useState<boolean>(() => {
-    // Show only once on initial device visit so repeat mobile/iPad opens are instant (0ms)
+    // แสดงเฉพาะการเข้าชมครั้งแรกเพื่อความรวดเร็วในการเปิดครั้งถัดไป
     if (typeof window !== 'undefined') {
       try {
         const seen =
@@ -29,7 +31,7 @@ export const Preloader: React.FC = () => {
       localStorage.setItem('desup_preloader_seen', 'true');
       sessionStorage.setItem('desup_preloader_seen', 'true');
     } catch {
-      // Ignore storage error
+      // ข้ามข้อผิดพลาดของ storage
     }
   };
 
@@ -52,7 +54,6 @@ export const Preloader: React.FC = () => {
           onClick={dismiss}
           className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-anchor-bg text-anchor-text select-none cursor-pointer"
         >
-          {/* Subtle Thai gold line motif */}
           <div className="relative flex flex-col items-center">
             <motion.div
               initial={{ scale: 0.94, opacity: 0 }}
@@ -70,10 +71,10 @@ export const Preloader: React.FC = () => {
               className="text-center"
             >
               <h1 className="font-serif text-2xl text-anchor-text tracking-wide mb-1">
-                องค์การนักเรียน
+                {t('site.shortNameNav')}
               </h1>
               <p className="text-xs tracking-[0.25em] text-anchor-gold uppercase">
-                โรงเรียนสาธิตมหาวิทยาลัยพะเยา
+                {t('site.schoolName')}
               </p>
             </motion.div>
 

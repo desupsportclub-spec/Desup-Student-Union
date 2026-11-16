@@ -5,6 +5,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
+import { useTranslation } from 'react-i18next';
 import { CornerBracket } from './Ornament';
 
 const COOKIE_NAME = 'desup_cookie_consent';
@@ -29,6 +30,7 @@ function getBrowserCookie(name: string): string | null {
 }
 
 export const CookieConsent: React.FC = () => {
+  const { t } = useTranslation();
   const [visible, setVisible] = useState(false);
   const [showDetails, setShowDetails] = useState(false);
   const [analyticsEnabled, setAnalyticsEnabled] = useState(true);
@@ -97,7 +99,7 @@ export const CookieConsent: React.FC = () => {
           animate={{ opacity: 1, y: 0, scale: 1 }}
           exit={{ opacity: 0, y: 40, scale: 0.96 }}
           transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
-          aria-label="การตั้งค่าคุกกี้และความเป็นส่วนตัว"
+          aria-label={t('cookie.ariaLabel')}
           className="fixed bottom-3 left-3 right-3 sm:bottom-4 sm:left-4 sm:right-4 md:left-auto md:right-8 md:max-w-lg z-50 bg-anchor-bg text-anchor-text border-2 border-gold p-4 sm:p-6 rounded-sm shadow-2xl"
         >
           <CornerBracket position="top-left" />
@@ -115,13 +117,13 @@ export const CookieConsent: React.FC = () => {
                   <circle cx="15.5" cy="12.5" r="1" fill="currentColor" />
                 </svg>
                 <h3 className="font-serif text-base font-bold text-anchor-gold">
-                  การใช้คุกกี้และความเป็นส่วนตัว (PDPA)
+                  {t('cookie.title')}
                 </h3>
               </div>
               <button
                 type="button"
                 onClick={() => setVisible(false)}
-                aria-label="ปิดหน้าต่างคุกกี้"
+                aria-label={t('cookie.closeAria')}
                 className="text-xs text-anchor-text/60 hover:text-anchor-text"
               >
                 ✕
@@ -129,22 +131,22 @@ export const CookieConsent: React.FC = () => {
             </div>
 
             <p className="text-xs text-anchor-text/85 leading-relaxed font-sans">
-              เว็บไซต์องค์การนักเรียน โรงเรียนสาธิตมหาวิทยาลัยพะเยา ใช้คุกกี้จริงในการจดจำการตั้งค่า การทำงานที่จำเป็นของระบบ ความปลอดภัย และสถิติการเข้าชม โดยเป็นไปตาม พ.ร.บ. คุ้มครองข้อมูลส่วนบุคคล พ.ศ. ๒๕๖๒
+              {t('cookie.description')}
             </p>
 
             {showDetails && (
               <div className="p-3 bg-anchor-text/5 border border-anchor-text/10 rounded text-[11px] space-y-2.5 text-anchor-text/80">
                 <div className="flex items-start justify-between gap-3">
                   <div>
-                    <p className="font-semibold text-anchor-text">คุกกี้ที่จำเป็น (Strictly Necessary)</p>
-                    <p className="text-anchor-text/65">จดจำการตั้งค่าความเป็นส่วนตัว สถานะเซสชัน และความปลอดภัย</p>
+                    <p className="font-semibold text-anchor-text">{t('cookie.necessaryTitle')}</p>
+                    <p className="text-anchor-text/65">{t('cookie.necessaryDesc')}</p>
                   </div>
-                  <span className="text-[10px] px-2 py-0.5 rounded bg-success-bg/70 text-success shrink-0">เปิดใช้งานเสมอ</span>
+                  <span className="text-[10px] px-2 py-0.5 rounded bg-success-bg/70 text-success shrink-0">{t('cookie.alwaysActive')}</span>
                 </div>
                 <label className="flex items-start justify-between gap-3 pt-2 border-t border-anchor-text/10 cursor-pointer">
                   <div>
-                    <p className="font-semibold text-anchor-text">คุกกี้เพื่อการวิเคราะห์และสถิติ (Analytics)</p>
-                    <p className="text-anchor-text/65">นับจำนวนการเปิดอ่านข่าวและสถิติการใช้งานโดยไม่ระบุตัวตน</p>
+                    <p className="font-semibold text-anchor-text">{t('cookie.analyticsTitle')}</p>
+                    <p className="text-anchor-text/65">{t('cookie.analyticsDesc')}</p>
                   </div>
                   <input
                     type="checkbox"
@@ -162,7 +164,7 @@ export const CookieConsent: React.FC = () => {
                 onClick={() => setShowDetails(!showDetails)}
                 className="text-[11px] text-anchor-gold hover:underline text-left"
               >
-                {showDetails ? 'ซ่อนรายละเอียด' : 'ตั้งค่า / ดูรายละเอียดคุกกี้'}
+                {showDetails ? t('cookie.hideDetails') : t('cookie.showDetails')}
               </button>
 
               <div className="flex flex-wrap items-center justify-end gap-2">
@@ -172,7 +174,7 @@ export const CookieConsent: React.FC = () => {
                     onClick={handleSaveCustom}
                     className="px-4 py-1.5 border border-anchor-gold text-xs font-medium text-anchor-gold hover:bg-anchor-text/10 rounded-sm transition-colors"
                   >
-                    บันทึกการตั้งค่า
+                    {t('cookie.saveSettings')}
                   </button>
                 ) : (
                   <button
@@ -180,7 +182,7 @@ export const CookieConsent: React.FC = () => {
                     onClick={handleAcceptNecessary}
                     className="px-3.5 py-1.5 border border-gold/50 text-xs text-anchor-text hover:bg-anchor-text/10 rounded-sm transition-colors"
                   >
-                    จำเป็นเท่านั้น
+                    {t('cookie.necessaryOnly')}
                   </button>
                 )}
                 <button
@@ -188,7 +190,7 @@ export const CookieConsent: React.FC = () => {
                   onClick={handleAcceptAll}
                   className="px-4 py-1.5 bg-gold text-anchor-bg-deep text-xs font-semibold hover:bg-anchor-gold rounded-sm shadow-md transition-colors"
                 >
-                  ยอมรับทั้งหมด
+                  {t('cookie.acceptAll')}
                 </button>
               </div>
             </div>

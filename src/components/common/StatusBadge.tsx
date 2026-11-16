@@ -4,6 +4,7 @@
  */
 
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { ComplaintStatus, NewsCategory } from '../../types';
 
 interface StatusBadgeProps {
@@ -11,28 +12,30 @@ interface StatusBadgeProps {
   className?: string;
 }
 
-export const ComplaintStatusBadge: React.FC<StatusBadgeProps> = ({ status, className = "" }) => {
+export const ComplaintStatusBadge: React.FC<StatusBadgeProps> = ({ status, className = '' }) => {
+  const { t } = useTranslation();
+
   const config: Record<ComplaintStatus, { label: string; dotColor: string; textColor: string }> = {
     received: {
-      label: 'รับเรื่องแล้ว',
+      label: t('status.complaint.received'),
       dotColor: 'bg-accent/70',
-      textColor: 'text-accent'
+      textColor: 'text-accent',
     },
     considering: {
-      label: 'กำลังพิจารณา',
+      label: t('status.complaint.considering'),
       dotColor: 'bg-gold',
-      textColor: 'text-gold-text'
+      textColor: 'text-gold-text',
     },
     in_progress: {
-      label: 'กำลังดำเนินการ',
+      label: t('status.complaint.in_progress'),
       dotColor: 'bg-accent',
-      textColor: 'text-accent'
+      textColor: 'text-accent',
     },
     resolved: {
-      label: 'ดำเนินการเสร็จสิ้น',
+      label: t('status.complaint.resolved'),
       dotColor: 'bg-success',
-      textColor: 'text-success'
-    }
+      textColor: 'text-success',
+    },
   };
 
   const item = config[status] || config.received;
@@ -45,19 +48,19 @@ export const ComplaintStatusBadge: React.FC<StatusBadgeProps> = ({ status, class
   );
 };
 
-export const NewsCategoryBadge: React.FC<{ category: NewsCategory; className?: string }> = ({ category, className = "" }) => {
-  const map: Record<NewsCategory, string> = {
-    pr: 'ข่าวประชาสัมพันธ์',
-    activity: 'ภาพข่าวกิจกรรม',
-    regulation: 'ข้อบังคับ ระเบียบ คำสั่งและประกาศ',
-    order: 'ข้อบังคับ ระเบียบ คำสั่งและประกาศ',
-    knowledge: 'สาระน่ารู้',
-    video: 'คลิปวิดีโอ'
-  };
+export const NewsCategoryBadge: React.FC<{ category: NewsCategory; className?: string }> = ({
+  category,
+  className = '',
+}) => {
+  const { t } = useTranslation();
+
+  const label = t(`status.newsCategory.${category}`, {
+    defaultValue: t('status.newsCategory.fallback'),
+  });
 
   return (
     <span className={`text-[11px] uppercase tracking-[0.16em] font-medium text-gold-text ${className}`}>
-      {map[category] || 'ข่าวสาร'}
+      {label}
     </span>
   );
 };

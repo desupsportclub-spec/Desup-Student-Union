@@ -4,16 +4,21 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
-import { SITE_CONFIG } from '../../config/site';
+import { useTranslation } from 'react-i18next';
 import { ThemeSwitcher } from './ThemeSwitcher';
+import { LanguageSwitcher } from './LanguageSwitcher';
+import { LocLink } from './LocLink';
+import { useLanguage } from '../../context/LanguageContext';
 
 interface NavbarProps {
   tickerItems?: string[];
 }
 
 export const Navbar: React.FC<NavbarProps> = ({ tickerItems = [] }) => {
+  const { t } = useTranslation();
+  const { basePathname } = useLanguage();
   const [isScrolled, setIsScrolled] = useState(false);
   const [isVisible, setIsVisible] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
@@ -23,14 +28,14 @@ export const Navbar: React.FC<NavbarProps> = ({ tickerItems = [] }) => {
 
   const location = useLocation();
 
-  // Close menus on route change
+  // ปิดเมนูดรอปดาวน์และลิ้นชักมือถือเมื่อเปลี่ยนหน้า
   useEffect(() => {
     setMobileMenuOpen(false);
     setActiveDropdown(null);
     setMobileSubmenu(null);
   }, [location.pathname]);
 
-  // Lock background scroll & support Escape key when mobile drawer is open
+  // ล็อกการเลื่อนหน้าจอและรองรับปุ่ม Escape ขณะเปิดเมนูมือถือ
   useEffect(() => {
     if (!mobileMenuOpen) return;
     const prevOverflow = document.body.style.overflow;
@@ -47,7 +52,7 @@ export const Navbar: React.FC<NavbarProps> = ({ tickerItems = [] }) => {
     };
   }, [mobileMenuOpen]);
 
-  // Handle scroll behavior (hide on scroll down, show on scroll up)
+  // ซ่อนแถบนำทางเมื่อเลื่อนลง และแสดงเมื่อเลื่อนขึ้น
   useEffect(() => {
     const handleScroll = () => {
       const currentScrollY = window.scrollY;
@@ -59,10 +64,10 @@ export const Navbar: React.FC<NavbarProps> = ({ tickerItems = [] }) => {
       }
 
       if (currentScrollY > lastScrollY && currentScrollY > 150) {
-        setIsVisible(false); // scrolling down
+        setIsVisible(false);
         setActiveDropdown(null);
       } else {
-        setIsVisible(true); // scrolling up
+        setIsVisible(true);
       }
 
       setLastScrollY(currentScrollY);
@@ -72,15 +77,27 @@ export const Navbar: React.FC<NavbarProps> = ({ tickerItems = [] }) => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, [lastScrollY]);
 
-  // Default ticker announcements if none stored yet
-  const displayTicker = tickerItems.length > 0 ? tickerItems : [
-    "ยินดีต้อนรับสู่เว็บไซต์ทางการ องค์การนักเรียน โรงเรียนสาธิตมหาวิทยาลัยพะเยา",
-    "ร่วมส่งเสียงและข้อเสนอแนะเพื่อพัฒนาโรงเรียนของเราผ่านระบบรับเรื่องร้องเรียนออนไลน์",
-    "ติดตามปฏิทินกิจกรรมและการดาวน์โหลดเอกสารระเบียบข้อบังคับได้ที่นี่"
-  ];
+  const fallbackTicker = t('nav.defaultTicker', { returnObjects: true }) as string[];
+  const displayTicker = tickerItems.length > 0 ? tickerItems : fallbackTicker;
 
   const isActivePath = (path: string) =>
-    path === '/' ? location.pathname === '/' : location.pathname.startsWith(path);
+    path === '/' ? basePathname === '/' : basePathname.startsWith(path);
+
+  const aboutSubLinks = [
+    { to: '/about/emblem', label: t('nav.aboutSub.emblem') },
+    { to: '/about/authority', label: t('nav.aboutSub.authority') },
+    { to: '/about/board', label: t('nav.aboutSub.board') },
+    { to: '/about/advisors', label: t('nav.aboutSub.advisors') },
+    { to: '/about/hall', label: t('nav.aboutSub.hall') },
+  ];
+
+  const newsSubLinks = [
+    { to: '/news/pr', label: t('nav.newsSub.pr') },
+    { to: '/news/activity', label: t('nav.newsSub.activity') },
+    { to: '/news/regulation', label: t('nav.newsSub.regulation') },
+    { to: '/news/knowledge', label: t('nav.newsSub.knowledge') },
+    { to: '/news/video', label: t('nav.newsSub.video') },
+  ];
 
   return (
     <>
@@ -93,47 +110,47 @@ export const Navbar: React.FC<NavbarProps> = ({ tickerItems = [] }) => {
             : 'bg-header-bg border-b border-gold-border/15'
         }`}
       >
-        <div className="max-w-[1240px] mx-auto px-4 sm:px-6 md:px-12 h-16 sm:h-20 flex items-center justify-between gap-3 sm:gap-8 relative z-30">
-          {/* Zone 1: Emblem Brand Mark directly */}
-          <Link
+        <div className="max-w-[1240px] mx-auto px-4 sm:px-6 md:px-10 h-16 sm:h-20 flex items-center justify-between gap-2 sm:gap-4 relative z-30">
+          {/* ส่วนที่ 1: ตราประจำองค์การนักเรียน */}
+          <LocLink
             to="/"
             className="flex items-center group shrink-0 py-1"
-            aria-label="หน้าหลัก องค์การนักเรียน โรงเรียนสาธิตมหาวิทยาลัยพะเยา"
+            aria-label={t('nav.homeAria')}
           >
             <img
               src="/emblem.png"
-              alt="ตราองค์การนักเรียน โรงเรียนสาธิตมหาวิทยาลัยพะเยา"
+              alt={t('about.emblem.imgAlt')}
               data-emblem="true"
               className="h-11 sm:h-14 md:h-16 w-auto object-contain transition-transform duration-300 group-hover:scale-105 drop-shadow-sm"
             />
-          </Link>
+          </LocLink>
 
-          {/* Zone 2: Navigation Links */}
-          <nav className="hidden lg:flex items-center gap-8 text-sm font-medium text-text">
-            <Link
+          {/* ส่วนที่ 2: เมนูนำทางหลักบนเดสก์ท็อป */}
+          <nav className="hidden lg:flex items-center gap-5 xl:gap-7 text-sm font-medium text-text">
+            <LocLink
               to="/"
               className={`hover:text-accent transition-colors whitespace-nowrap shrink-0 ${
-                location.pathname === '/' ? 'text-accent font-semibold' : ''
+                basePathname === '/' ? 'text-accent font-semibold' : ''
               }`}
             >
-              หน้าหลัก
-            </Link>
+              {t('nav.home')}
+            </LocLink>
 
-            {/* Dropdown: เกี่ยวกับเรา */}
+            {/* เมนูย่อย: เกี่ยวกับเรา */}
             <div
               className="relative"
               onMouseEnter={() => setActiveDropdown('about')}
               onMouseLeave={() => setActiveDropdown(null)}
             >
-              <Link
+              <LocLink
                 to="/about/emblem"
                 className={`flex items-center gap-1 hover:text-accent transition-colors whitespace-nowrap shrink-0 py-2 ${
-                  location.pathname.startsWith('/about') ? 'text-accent font-semibold' : ''
+                  basePathname.startsWith('/about') ? 'text-accent font-semibold' : ''
                 }`}
               >
-                <span>เกี่ยวกับเรา</span>
+                <span>{t('nav.about')}</span>
                 <span className="text-[10px] text-gold-text">▾</span>
-              </Link>
+              </LocLink>
 
               <AnimatePresence>
                 {activeDropdown === 'about' && (
@@ -144,43 +161,36 @@ export const Navbar: React.FC<NavbarProps> = ({ tickerItems = [] }) => {
                     transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
                     className="absolute left-0 top-full mt-2 w-64 bg-surface border-2 border-gold p-3 shadow-2xl rounded-sm z-50"
                   >
-                    <Link to="/about/emblem" className="block px-3 py-1.5 text-xs hover:bg-brand-soft rounded transition-colors text-heading">
-                      ตราสัญลักษณ์
-                    </Link>
-                    <Link to="/about/authority" className="block px-3 py-1.5 text-xs hover:bg-brand-soft rounded transition-colors text-heading">
-                      อำนาจหน้าที่
-                    </Link>
-                    <Link to="/about/board" className="block px-3 py-1.5 text-xs hover:bg-brand-soft rounded transition-colors text-heading">
-                      คณะกรรมการองค์การนักเรียน
-                    </Link>
-                    <Link to="/about/advisors" className="block px-3 py-1.5 text-xs hover:bg-brand-soft rounded transition-colors text-heading">
-                      คณะกรรมการที่ปรึกษา
-                    </Link>
-                    <Link to="/about/hall" className="block px-3 py-1.5 text-xs hover:bg-brand-soft rounded transition-colors text-heading">
-                      ทำเนียบนายกองค์การนักเรียน
-                    </Link>
+                    {aboutSubLinks.map((sub) => (
+                      <LocLink
+                        key={sub.to}
+                        to={sub.to}
+                        className="block px-3 py-1.5 text-xs hover:bg-brand-soft rounded transition-colors text-heading"
+                      >
+                        {sub.label}
+                      </LocLink>
+                    ))}
                   </motion.div>
                 )}
               </AnimatePresence>
             </div>
 
-            {/* Dropdown: ข่าวสาร */}
+            {/* เมนูย่อย: ข่าวสาร */}
             <div
               className="relative"
               onMouseEnter={() => setActiveDropdown('news')}
               onMouseLeave={() => setActiveDropdown(null)}
             >
-              <Link
+              <LocLink
                 to="/news"
                 className={`flex items-center gap-1 hover:text-accent transition-colors whitespace-nowrap shrink-0 py-2 ${
-                  location.pathname.startsWith('/news') ? 'text-accent font-semibold' : ''
+                  basePathname.startsWith('/news') ? 'text-accent font-semibold' : ''
                 }`}
               >
-                <span>ข่าวสาร</span>
+                <span>{t('nav.news')}</span>
                 <span className="text-[10px] text-gold-text">▾</span>
-              </Link>
+              </LocLink>
 
-              {/* Mega panel dropdown floating cleanly above ticker with z-50 */}
               <AnimatePresence>
                 {activeDropdown === 'news' && (
                   <motion.div
@@ -190,73 +200,68 @@ export const Navbar: React.FC<NavbarProps> = ({ tickerItems = [] }) => {
                     transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
                     className="absolute left-0 top-full mt-2 w-72 bg-surface border-2 border-gold p-3 shadow-2xl rounded-sm z-50"
                   >
-                    <Link to="/news/pr" className="block px-3 py-2 text-xs hover:bg-brand-soft rounded transition-colors">
-                      <div className="font-medium text-heading">ข่าวประชาสัมพันธ์</div>
-                    </Link>
-                    <Link to="/news/activity" className="block px-3 py-2 text-xs hover:bg-brand-soft rounded transition-colors">
-                      <div className="font-medium text-heading">ภาพข่าวกิจกรรม</div>
-                    </Link>
-                    <Link to="/news/regulation" className="block px-3 py-2 text-xs hover:bg-brand-soft rounded transition-colors">
-                      <div className="font-medium text-heading">ข้อบังคับ ระเบียบ คำสั่งและประกาศ</div>
-                    </Link>
-                    <Link to="/news/knowledge" className="block px-3 py-2 text-xs hover:bg-brand-soft rounded transition-colors">
-                      <div className="font-medium text-heading">สาระน่ารู้</div>
-                    </Link>
-                    <Link to="/news/video" className="block px-3 py-2 text-xs hover:bg-brand-soft rounded transition-colors">
-                      <div className="font-medium text-heading">คลิปวิดีโอ</div>
-                    </Link>
+                    {newsSubLinks.map((sub) => (
+                      <LocLink
+                        key={sub.to}
+                        to={sub.to}
+                        className="block px-3 py-2 text-xs hover:bg-brand-soft rounded transition-colors"
+                      >
+                        <div className="font-medium text-heading">{sub.label}</div>
+                      </LocLink>
+                    ))}
                   </motion.div>
                 )}
               </AnimatePresence>
             </div>
 
-            <Link
+            <LocLink
               to="/calendar"
               className={`hover:text-accent transition-colors whitespace-nowrap shrink-0 ${
-                location.pathname === '/calendar' ? 'text-accent font-semibold' : ''
+                basePathname === '/calendar' ? 'text-accent font-semibold' : ''
               }`}
             >
-              ปฏิทินกิจกรรม
-            </Link>
+              {t('nav.calendar')}
+            </LocLink>
 
-            <Link
+            <LocLink
               to="/downloads"
               className={`hover:text-accent transition-colors whitespace-nowrap shrink-0 ${
-                location.pathname === '/downloads' ? 'text-accent font-semibold' : ''
+                basePathname === '/downloads' ? 'text-accent font-semibold' : ''
               }`}
             >
-              ดาวน์โหลด
-            </Link>
+              {t('nav.downloads')}
+            </LocLink>
 
-            <Link
+            <LocLink
               to="/contact"
               className={`hover:text-accent transition-colors whitespace-nowrap shrink-0 ${
-                location.pathname === '/contact' ? 'text-accent font-semibold' : ''
+                basePathname === '/contact' ? 'text-accent font-semibold' : ''
               }`}
             >
-              ติดต่อ
-            </Link>
+              {t('nav.contact')}
+            </LocLink>
           </nav>
 
-          {/* Zone 3: Theme Switcher + Primary CTA button + Mobile trigger */}
-          <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+          {/* ส่วนที่ 3: ปุ่มสลับภาษา + ปุ่มสลับโหมดสี + ปุ่มร้องเรียน + ปุ่มเปิดเมนูมือถือ */}
+          <div className="flex items-center gap-1.5 sm:gap-2.5 shrink-0">
+            <LanguageSwitcher compact className="hidden sm:inline-flex" />
             <ThemeSwitcher variant="dropdown" />
 
-            <Link
+            <LocLink
               to="/complaint"
-              className="relative inline-flex items-center gap-1.5 sm:gap-2 px-3.5 py-2 sm:px-5 sm:py-2.5 rounded-full bg-brand text-brand-contrast text-[11px] sm:text-xs font-medium tracking-wide shadow-editorial group overflow-hidden border border-gold-light/40 hover:bg-brand-hover transition-all duration-300 whitespace-nowrap"
+              className="relative inline-flex items-center gap-1.5 sm:gap-2 px-3 py-2 sm:px-4 sm:py-2.5 rounded-full bg-brand text-brand-contrast text-[11px] sm:text-xs font-medium tracking-wide shadow-editorial group overflow-hidden border border-gold-light/40 hover:bg-brand-hover transition-all duration-300 whitespace-nowrap"
             >
               <span className="absolute inset-[2.5px] rounded-full border border-gold-light/25 pointer-events-none" />
-              <span>ร้องเรียน/เสนอแนะ</span>
+              <span>{t('nav.reportButton')}</span>
               <span className="transition-transform duration-300 group-hover:translate-x-1 text-gold-light">→</span>
-            </Link>
+            </LocLink>
 
-            {/* Mobile Menu Trigger */}
+            {/* ปุ่มเปิดเมนูมือถือ */}
             <button
               type="button"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               className="lg:hidden w-10 h-10 -mr-1.5 flex items-center justify-center rounded-sm text-heading hover:bg-brand-soft/70 transition-colors focus-visible:outline-2 focus-visible:outline-focus-ring"
-              aria-label="เปิดเมนูนำทาง"
+              aria-label={t('nav.openMenu')}
               aria-expanded={mobileMenuOpen}
             >
               <div className="w-5 h-4 flex flex-col justify-between items-center relative">
@@ -268,11 +273,11 @@ export const Navbar: React.FC<NavbarProps> = ({ tickerItems = [] }) => {
           </div>
         </div>
 
-        {/* Ticker bar right below header */}
+        {/* แถบประกาศวิ่งใต้แถบนำทาง */}
         <div className="bg-anchor-bg text-anchor-gold py-1 sm:py-1.5 px-3 sm:px-4 overflow-hidden border-t border-gold/30 relative z-20">
           <div className="max-w-[1240px] mx-auto flex items-center gap-2 sm:gap-3 text-[11px] sm:text-xs">
             <span className="text-[10px] tracking-widest uppercase font-semibold text-brand-contrast shrink-0 bg-brand px-1.5 sm:px-2 py-0.5 rounded-sm">
-              ประกาศ
+              {t('nav.tickerBadge')}
             </span>
             <div className="overflow-hidden relative flex-1 group">
               <div className="whitespace-nowrap animate-marquee group-hover:[animation-play-state:paused]">
@@ -288,18 +293,17 @@ export const Navbar: React.FC<NavbarProps> = ({ tickerItems = [] }) => {
                 ))}
               </div>
             </div>
-            <Link to="/track" className="shrink-0 text-[10px] sm:text-[11px] underline text-anchor-text/85 hover:text-anchor-text whitespace-nowrap">
-              ติดตามเรื่องร้องเรียน
-            </Link>
+            <LocLink to="/track" className="shrink-0 text-[10px] sm:text-[11px] underline text-anchor-text/85 hover:text-anchor-text whitespace-nowrap">
+              {t('nav.tickerTrackLink')}
+            </LocLink>
           </div>
         </div>
       </header>
 
-      {/* Mobile Slide-Over Drawer (Compact, crisp, non-bulky sheet) */}
+      {/* ลิ้นชักเมนูสำหรับหน้าจอมือถือและแท็บเล็ต */}
       <AnimatePresence>
         {mobileMenuOpen && (
           <>
-            {/* Backdrop */}
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -310,43 +314,42 @@ export const Navbar: React.FC<NavbarProps> = ({ tickerItems = [] }) => {
               aria-hidden="true"
             />
 
-            {/* Drawer Panel */}
             <motion.aside
               initial={{ x: '100%' }}
               animate={{ x: 0 }}
               exit={{ x: '100%' }}
               transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
-              aria-label="เมนูนำทางหลัก"
+              aria-label={t('nav.mainMenuAria')}
               className="fixed top-0 right-0 bottom-0 z-50 w-[84vw] max-w-[320px] bg-anchor-bg text-anchor-text border-l border-gold/40 shadow-2xl flex flex-col lg:hidden"
             >
-              {/* Drawer Header */}
+              {/* ส่วนหัวลิ้นชักเมนู */}
               <div className="px-4 py-3.5 border-b border-gold/25 flex items-center justify-between gap-3 shrink-0">
-                <Link
+                <LocLink
                   to="/"
                   onClick={() => setMobileMenuOpen(false)}
                   className="flex items-center gap-2.5 min-w-0"
                 >
                   <img
                     src="/emblem.png"
-                    alt="ตราองค์การนักเรียน"
+                    alt={t('about.emblem.imgAlt')}
                     data-emblem="true"
                     className="h-10 w-10 object-contain shrink-0"
                   />
                   <div className="min-w-0">
                     <div className="font-serif text-sm font-semibold text-anchor-text truncate leading-tight">
-                      องค์การนักเรียน
+                      {t('site.shortNameNav')}
                     </div>
                     <div className="text-[11px] text-anchor-gold truncate leading-tight mt-0.5">
-                      โรงเรียนสาธิตมหาวิทยาลัยพะเยา
+                      {t('site.schoolName')}
                     </div>
                   </div>
-                </Link>
+                </LocLink>
 
                 <button
                   type="button"
                   onClick={() => setMobileMenuOpen(false)}
                   className="w-10 h-10 -mr-1 rounded-sm flex items-center justify-center text-anchor-text/80 hover:text-anchor-text hover:bg-anchor-text/10 transition-colors shrink-0"
-                  aria-label="ปิดเมนู"
+                  aria-label={t('nav.closeMenu')}
                 >
                   <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M18 6L6 18M6 6l12 12" />
@@ -354,24 +357,24 @@ export const Navbar: React.FC<NavbarProps> = ({ tickerItems = [] }) => {
                 </button>
               </div>
 
-              {/* Navigation Links */}
+              {/* รายการเมนูนำทาง */}
               <nav className="flex-1 overflow-y-auto overscroll-contain px-3 py-3 space-y-0.5">
-                <Link
+                <LocLink
                   to="/"
                   onClick={() => setMobileMenuOpen(false)}
                   className={`flex items-center justify-between min-h-[42px] px-3 py-2 rounded-sm text-[15px] font-medium whitespace-nowrap transition-colors ${
-                    location.pathname === '/'
+                    basePathname === '/'
                       ? 'bg-brand/80 text-anchor-gold'
                       : 'text-anchor-text/90 hover:bg-anchor-text/5 hover:text-anchor-text'
                   }`}
                 >
-                  <span>หน้าหลัก</span>
-                </Link>
+                  <span>{t('nav.home')}</span>
+                </LocLink>
 
-                {/* About with optional expandable sub-links */}
+                {/* เมนูย่อย: เกี่ยวกับเรา */}
                 <div>
                   <div className="flex items-center">
-                    <Link
+                    <LocLink
                       to="/about/emblem"
                       onClick={() => setMobileMenuOpen(false)}
                       className={`flex-1 flex items-center min-h-[42px] px-3 py-2 rounded-sm text-[15px] font-medium whitespace-nowrap transition-colors ${
@@ -380,12 +383,12 @@ export const Navbar: React.FC<NavbarProps> = ({ tickerItems = [] }) => {
                           : 'text-anchor-text/90 hover:bg-anchor-text/5 hover:text-anchor-text'
                       }`}
                     >
-                      <span>เกี่ยวกับเรา</span>
-                    </Link>
+                      <span>{t('nav.about')}</span>
+                    </LocLink>
                     <button
                       type="button"
                       onClick={() => setMobileSubmenu(mobileSubmenu === 'about' ? null : 'about')}
-                      aria-label="แสดงเมนูย่อยเกี่ยวกับเรา"
+                      aria-label={t('nav.toggleAboutSub')}
                       aria-expanded={mobileSubmenu === 'about'}
                       className="w-10 h-[42px] flex items-center justify-center text-anchor-gold/80 hover:text-anchor-gold hover:bg-anchor-text/5 rounded-sm transition-colors shrink-0"
                     >
@@ -403,34 +406,28 @@ export const Navbar: React.FC<NavbarProps> = ({ tickerItems = [] }) => {
 
                   {mobileSubmenu === 'about' && (
                     <div className="ml-3 pl-3 mt-0.5 mb-1.5 border-l border-gold/30 space-y-0.5">
-                      {[
-                        { to: '/about/emblem', label: 'ตราสัญลักษณ์' },
-                        { to: '/about/authority', label: 'อำนาจหน้าที่' },
-                        { to: '/about/board', label: 'คณะกรรมการองค์การนักเรียน' },
-                        { to: '/about/advisors', label: 'คณะกรรมการที่ปรึกษา' },
-                        { to: '/about/hall', label: 'ทำเนียบนายกองค์การนักเรียน' },
-                      ].map((sub) => (
-                        <Link
+                      {aboutSubLinks.map((sub) => (
+                        <LocLink
                           key={sub.to}
                           to={sub.to}
                           onClick={() => setMobileMenuOpen(false)}
                           className={`block py-2 px-2.5 rounded-sm text-xs transition-colors ${
-                            location.pathname === sub.to
+                            basePathname === sub.to
                               ? 'text-anchor-gold font-semibold bg-anchor-text/5'
                               : 'text-anchor-text/75 hover:text-anchor-text hover:bg-anchor-text/5'
                           }`}
                         >
                           {sub.label}
-                        </Link>
+                        </LocLink>
                       ))}
                     </div>
                   )}
                 </div>
 
-                {/* News with optional expandable sub-links */}
+                {/* เมนูย่อย: ข่าวสารและประกาศ */}
                 <div>
                   <div className="flex items-center">
-                    <Link
+                    <LocLink
                       to="/news"
                       onClick={() => setMobileMenuOpen(false)}
                       className={`flex-1 flex items-center min-h-[42px] px-3 py-2 rounded-sm text-[15px] font-medium whitespace-nowrap transition-colors ${
@@ -439,12 +436,12 @@ export const Navbar: React.FC<NavbarProps> = ({ tickerItems = [] }) => {
                           : 'text-anchor-text/90 hover:bg-anchor-text/5 hover:text-anchor-text'
                       }`}
                     >
-                      <span>ข่าวสารและประกาศ</span>
-                    </Link>
+                      <span>{t('nav.newsAndAnnouncements')}</span>
+                    </LocLink>
                     <button
                       type="button"
                       onClick={() => setMobileSubmenu(mobileSubmenu === 'news' ? null : 'news')}
-                      aria-label="แสดงหมวดหมู่ข่าวสาร"
+                      aria-label={t('nav.toggleNewsSub')}
                       aria-expanded={mobileSubmenu === 'news'}
                       className="w-10 h-[42px] flex items-center justify-center text-anchor-gold/80 hover:text-anchor-gold hover:bg-anchor-text/5 rounded-sm transition-colors shrink-0"
                     >
@@ -462,31 +459,25 @@ export const Navbar: React.FC<NavbarProps> = ({ tickerItems = [] }) => {
 
                   {mobileSubmenu === 'news' && (
                     <div className="ml-3 pl-3 mt-0.5 mb-1.5 border-l border-gold/30 space-y-0.5">
-                      {[
-                        { to: '/news/pr', label: 'ข่าวประชาสัมพันธ์' },
-                        { to: '/news/activity', label: 'ภาพข่าวกิจกรรม' },
-                        { to: '/news/regulation', label: 'ข้อบังคับ ระเบียบ คำสั่งและประกาศ' },
-                        { to: '/news/knowledge', label: 'สาระน่ารู้' },
-                        { to: '/news/video', label: 'คลิปวิดีโอ' },
-                      ].map((sub) => (
-                        <Link
+                      {newsSubLinks.map((sub) => (
+                        <LocLink
                           key={sub.to}
                           to={sub.to}
                           onClick={() => setMobileMenuOpen(false)}
                           className={`block py-2 px-2.5 rounded-sm text-xs transition-colors ${
-                            location.pathname === sub.to
+                            basePathname === sub.to
                               ? 'text-anchor-gold font-semibold bg-anchor-text/5'
                               : 'text-anchor-text/75 hover:text-anchor-text hover:bg-anchor-text/5'
                           }`}
                         >
                           {sub.label}
-                        </Link>
+                        </LocLink>
                       ))}
                     </div>
                   )}
                 </div>
 
-                <Link
+                <LocLink
                   to="/calendar"
                   onClick={() => setMobileMenuOpen(false)}
                   className={`flex items-center justify-between min-h-[42px] px-3 py-2 rounded-sm text-[15px] font-medium whitespace-nowrap transition-colors ${
@@ -495,10 +486,10 @@ export const Navbar: React.FC<NavbarProps> = ({ tickerItems = [] }) => {
                       : 'text-anchor-text/90 hover:bg-anchor-text/5 hover:text-anchor-text'
                   }`}
                 >
-                  <span>ปฏิทินกิจกรรม</span>
-                </Link>
+                  <span>{t('nav.calendar')}</span>
+                </LocLink>
 
-                <Link
+                <LocLink
                   to="/downloads"
                   onClick={() => setMobileMenuOpen(false)}
                   className={`flex items-center justify-between min-h-[42px] px-3 py-2 rounded-sm text-[15px] font-medium whitespace-nowrap transition-colors ${
@@ -507,10 +498,10 @@ export const Navbar: React.FC<NavbarProps> = ({ tickerItems = [] }) => {
                       : 'text-anchor-text/90 hover:bg-anchor-text/5 hover:text-anchor-text'
                   }`}
                 >
-                  <span>ดาวน์โหลดเอกสาร</span>
-                </Link>
+                  <span>{t('nav.downloadsFull')}</span>
+                </LocLink>
 
-                <Link
+                <LocLink
                   to="/track"
                   onClick={() => setMobileMenuOpen(false)}
                   className={`flex items-center justify-between min-h-[42px] px-3 py-2 rounded-sm text-[15px] font-medium whitespace-nowrap transition-colors ${
@@ -519,10 +510,10 @@ export const Navbar: React.FC<NavbarProps> = ({ tickerItems = [] }) => {
                       : 'text-anchor-text/90 hover:bg-anchor-text/5 hover:text-anchor-text'
                   }`}
                 >
-                  <span>ติดตามสถานะเรื่องร้องเรียน</span>
-                </Link>
+                  <span>{t('nav.trackComplaint')}</span>
+                </LocLink>
 
-                <Link
+                <LocLink
                   to="/contact"
                   onClick={() => setMobileMenuOpen(false)}
                   className={`flex items-center justify-between min-h-[42px] px-3 py-2 rounded-sm text-[15px] font-medium whitespace-nowrap transition-colors ${
@@ -531,26 +522,31 @@ export const Navbar: React.FC<NavbarProps> = ({ tickerItems = [] }) => {
                       : 'text-anchor-text/90 hover:bg-anchor-text/5 hover:text-anchor-text'
                   }`}
                 >
-                  <span>ติดต่อเรา</span>
-                </Link>
+                  <span>{t('nav.contactUs')}</span>
+                </LocLink>
               </nav>
 
-              {/* Drawer Footer */}
+              {/* ส่วนท้ายลิ้นชักเมนู: สลับภาษา + สลับโหมดสี + ปุ่มส่งเรื่อง */}
               <div className="px-4 py-4 border-t border-gold/25 space-y-3 shrink-0 bg-anchor-bg-deep">
                 <div className="flex items-center justify-between gap-2">
-                  <span className="text-[11px] text-anchor-gold">โหมดสี</span>
+                  <span className="text-[11px] text-anchor-gold">{t('nav.languageLabel')}</span>
+                  <LanguageSwitcher onDarkSurface />
+                </div>
+
+                <div className="flex items-center justify-between gap-2">
+                  <span className="text-[11px] text-anchor-gold">{t('nav.themeLabel')}</span>
                   <ThemeSwitcher variant="compact" onDarkSurface />
                 </div>
 
-                <Link
+                <LocLink
                   to="/complaint"
                   onClick={() => setMobileMenuOpen(false)}
                   className="block w-full text-center py-2.5 px-4 bg-brand hover:bg-brand-hover text-brand-contrast rounded-sm border border-gold/60 font-medium text-xs tracking-wide transition-colors"
                 >
-                  ส่งเรื่องร้องเรียน / ข้อเสนอแนะ
-                </Link>
+                  {t('nav.reportFull')}
+                </LocLink>
                 <p className="text-center text-[11px] text-anchor-text/60 leading-snug">
-                  {SITE_CONFIG.name}
+                  {t('site.name')}
                 </p>
               </div>
             </motion.aside>
@@ -558,7 +554,7 @@ export const Navbar: React.FC<NavbarProps> = ({ tickerItems = [] }) => {
         )}
       </AnimatePresence>
 
-      {/* Spacer to push page content below fixed navbar + ticker */}
+      {/* ตัวเว้นระยะด้านบนให้พ้นความสูงแถบนำทาง */}
       <div className="h-[92px] sm:h-28" />
     </>
   );

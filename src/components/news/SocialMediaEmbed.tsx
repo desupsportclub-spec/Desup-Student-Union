@@ -4,6 +4,7 @@
  */
 
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { SocialMediaLink, SocialPlatform } from '../../types';
 
 export function detectSocialPlatform(url: string): SocialPlatform {
@@ -148,39 +149,39 @@ function getInstagramEmbedUrl(url: string): string | null {
   return null;
 }
 
-const PLATFORM_META: Record<
+const PLATFORM_STYLE: Record<
   SocialPlatform,
-  { name: string; colorClass: string; badgeBg: string; ctaLabel: string }
+  { nameKey?: string; fixedName?: string; colorClass: string; badgeBg: string; ctaKey: string }
 > = {
   youtube: {
-    name: 'YouTube',
+    fixedName: 'YouTube',
     colorClass: 'text-error',
     badgeBg: 'bg-error-bg border-error/30 text-error',
-    ctaLabel: 'เปิดดูบน YouTube ↗',
+    ctaKey: 'social.cta.youtube',
   },
   facebook: {
-    name: 'Facebook',
+    fixedName: 'Facebook',
     colorClass: 'text-[var(--social-fb)]',
     badgeBg: 'bg-[var(--social-fb)]/10 border-[var(--social-fb)]/30 text-[var(--social-fb)]',
-    ctaLabel: 'เปิดดูโพสต์/วิดีโอบน Facebook ↗',
+    ctaKey: 'social.cta.facebook',
   },
   instagram: {
-    name: 'Instagram',
+    fixedName: 'Instagram',
     colorClass: 'text-[var(--social-ig)]',
     badgeBg: 'bg-[var(--social-ig)]/10 border-[var(--social-ig)]/30 text-[var(--social-ig)]',
-    ctaLabel: 'เปิดดูบน Instagram ↗',
+    ctaKey: 'social.cta.instagram',
   },
   tiktok: {
-    name: 'TikTok',
+    fixedName: 'TikTok',
     colorClass: 'text-heading',
     badgeBg: 'bg-anchor-bg-deep text-anchor-text border-gold/30',
-    ctaLabel: 'เปิดดูบน TikTok ↗',
+    ctaKey: 'social.cta.tiktok',
   },
   other: {
-    name: 'ลิงก์ภายนอก',
+    nameKey: 'social.externalLink',
     colorClass: 'text-accent',
     badgeBg: 'bg-brand-soft border-gold-border/25 text-accent',
-    ctaLabel: 'เปิดลิงก์ต้นทาง ↗',
+    ctaKey: 'social.cta.other',
   },
 };
 
@@ -227,11 +228,13 @@ export const YouTubeLitePlayer: React.FC<{
   title?: string;
   eagerEmbed?: boolean;
   className?: string;
-}> = ({ url, title = 'วิดีโอ YouTube', eagerEmbed = false, className = '' }) => {
+}> = ({ url, title, eagerEmbed = false, className = '' }) => {
+  const { t } = useTranslation();
   const [playing, setPlaying] = useState(eagerEmbed);
   const videoId = extractYouTubeVideoId(url);
   if (!videoId) return null;
 
+  const displayTitle = title || t('social.youtubeTitle');
   const thumbUrl = `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`;
   const embedSrc = getYouTubeEmbedUrl(url, !eagerEmbed && playing);
 
@@ -240,7 +243,7 @@ export const YouTubeLitePlayer: React.FC<{
       {playing && embedSrc ? (
         <iframe
           src={embedSrc}
-          title={title}
+          title={displayTitle}
           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
           allowFullScreen
           className="w-full h-full border-0"
@@ -249,12 +252,12 @@ export const YouTubeLitePlayer: React.FC<{
         <button
           type="button"
           onClick={() => setPlaying(true)}
-          aria-label={`เล่นวิดีโอ: ${title}`}
+          aria-label={t('social.playVideoAria', { title: displayTitle })}
           className="group relative w-full h-full block text-left focus:outline-none cursor-pointer"
         >
           <img
             src={thumbUrl}
-            alt={title}
+            alt={displayTitle}
             loading="lazy"
             decoding="async"
             className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
@@ -287,15 +290,19 @@ interface SocialMediaEmbedProps {
 export const SocialMediaEmbed: React.FC<SocialMediaEmbedProps> = ({
   url,
   platform,
-  title = 'สื่อประชาสัมพันธ์',
+  title,
   label,
   eagerYouTube = true,
 }) => {
+  const { t } = useTranslation();
   if (!url || !url.trim()) return null;
 
   const cleanUrl = url.trim();
+  const displayTitle = title || t('social.defaultTitle');
   const detected = platform || detectSocialPlatform(cleanUrl);
-  const meta = PLATFORM_META[detected];
+  const style = PLATFORM_STYLE[detected];
+  const platformName = style.fixedName || (style.nameKey ? t(style.nameKey) : '');
+  const ctaLabel = t(style.ctaKey);
 
   // 1. YouTube Embed
   if (detected === 'youtube') {
@@ -303,7 +310,7 @@ export const SocialMediaEmbed: React.FC<SocialMediaEmbedProps> = ({
     if (embedSrc) {
       return (
         <div className="space-y-2">
-          <YouTubeLitePlayer url={cleanUrl} title={title} eagerEmbed={eagerYouTube} />
+          <YouTubeLitePlayer url={cleanUrl} title={displayTitle} eagerEmbed={eagerYouTube} />
           <div className="flex justify-end">
             <a
               href={cleanUrl}
@@ -311,7 +318,7 @@ export const SocialMediaEmbed: React.FC<SocialMediaEmbedProps> = ({
               rel="noopener noreferrer"
               className="text-xs text-gold-text hover:underline"
             >
-              {meta.ctaLabel}
+              {ctaLabel}
             </a>
           </div>
         </div>
@@ -326,9 +333,9 @@ export const SocialMediaEmbed: React.FC<SocialMediaEmbedProps> = ({
       return (
         <div className="bg-surface border border-gold-border/40 rounded-sm p-4 shadow-editorial space-y-3">
           <div className="flex items-center justify-between gap-3">
-            <div className={`inline-flex items-center gap-2 px-3 py-1 rounded-sm border text-xs font-semibold ${meta.badgeBg}`}>
+            <div className={`inline-flex items-center gap-2 px-3 py-1 rounded-sm border text-xs font-semibold ${style.badgeBg}`}>
               <PlatformIcon platform="tiktok" />
-              <span>{label || 'วิดีโอ TikTok'}</span>
+              <span>{label || t('social.tiktokDefaultLabel')}</span>
             </div>
             <a
               href={cleanUrl}
@@ -336,13 +343,13 @@ export const SocialMediaEmbed: React.FC<SocialMediaEmbedProps> = ({
               rel="noopener noreferrer"
               className="text-xs font-medium text-accent hover:underline"
             >
-              {meta.ctaLabel}
+              {ctaLabel}
             </a>
           </div>
           <div className="max-w-[340px] mx-auto aspect-[9/16] rounded-sm overflow-hidden bg-anchor-bg-deep">
             <iframe
               src={tikTokSrc}
-              title={title}
+              title={displayTitle}
               allowFullScreen
               allow="encrypted-media"
               className="w-full h-full border-0"
@@ -360,9 +367,9 @@ export const SocialMediaEmbed: React.FC<SocialMediaEmbedProps> = ({
       return (
         <div className="bg-surface border border-gold-border/40 rounded-sm p-4 shadow-editorial space-y-3">
           <div className="flex items-center justify-between gap-3">
-            <div className={`inline-flex items-center gap-2 px-3 py-1 rounded-sm border text-xs font-semibold ${meta.badgeBg}`}>
+            <div className={`inline-flex items-center gap-2 px-3 py-1 rounded-sm border text-xs font-semibold ${style.badgeBg}`}>
               <PlatformIcon platform="instagram" />
-              <span>{label || 'โพสต์ / Reels บน Instagram'}</span>
+              <span>{label || t('social.instagramDefaultLabel')}</span>
             </div>
             <a
               href={cleanUrl}
@@ -370,13 +377,13 @@ export const SocialMediaEmbed: React.FC<SocialMediaEmbedProps> = ({
               rel="noopener noreferrer"
               className="text-xs font-medium text-accent hover:underline"
             >
-              {meta.ctaLabel}
+              {ctaLabel}
             </a>
           </div>
           <div className="max-w-[460px] mx-auto rounded-sm overflow-hidden border border-gold-border/25 bg-surface-elevated">
             <iframe
               src={igSrc}
-              title={title}
+              title={displayTitle}
               className="w-full h-[520px] border-0"
               loading="lazy"
             />
@@ -386,7 +393,7 @@ export const SocialMediaEmbed: React.FC<SocialMediaEmbedProps> = ({
     }
   }
 
-  // 4. Facebook & Shortlink / Profile Card (Never render raw Facebook URL in iframe due to X-Frame-Options)
+  // 4. การ์ดลิงก์ Facebook หรือแพลตฟอร์มอื่น (ไม่ใช้ iframe กับ Facebook เนื่องจากข้อจำกัด X-Frame-Options)
   return (
     <a
       href={cleanUrl}
@@ -396,15 +403,15 @@ export const SocialMediaEmbed: React.FC<SocialMediaEmbedProps> = ({
     >
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="flex items-start gap-3.5 min-w-0">
-          <div className={`p-3 rounded-sm border shrink-0 ${meta.badgeBg}`}>
+          <div className={`p-3 rounded-sm border shrink-0 ${style.badgeBg}`}>
             <PlatformIcon platform={detected} />
           </div>
           <div className="min-w-0 space-y-1">
-            <span className={`text-[11px] uppercase tracking-wider font-semibold ${meta.colorClass}`}>
-              {meta.name}
+            <span className={`text-[11px] uppercase tracking-wider font-semibold ${style.colorClass}`}>
+              {platformName}
             </span>
             <h4 className="font-serif text-base font-semibold text-heading group-hover:text-accent transition-colors">
-              {label || `ติดตามรายละเอียดเพิ่มเติมบน ${meta.name}`}
+              {label || t('social.followDetailsOn', { platform: platformName })}
             </h4>
             <p className="text-xs text-text-muted truncate font-mono">
               {cleanUrl}
@@ -413,7 +420,7 @@ export const SocialMediaEmbed: React.FC<SocialMediaEmbedProps> = ({
         </div>
 
         <span className="shrink-0 inline-flex items-center justify-center px-5 py-2.5 bg-brand group-hover:bg-brand-hover text-brand-contrast text-xs font-medium rounded-full border border-gold-light/40 transition-colors">
-          {meta.ctaLabel}
+          {ctaLabel}
         </span>
       </div>
     </a>
