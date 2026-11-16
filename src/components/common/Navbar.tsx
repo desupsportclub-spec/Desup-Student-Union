@@ -530,7 +530,7 @@ export const Navbar: React.FC<NavbarProps> = ({ tickerItems = [] }) => {
                       : 'text-[#FAF7F0]/90 hover:bg-white/5 hover:text-[#FAF7F0]'
                   }`}
                 >
-                  <span>ติดต่อองค์การ</span>
+                  <span>ติดต่อเรา</span>
                 </Link>
               </nav>
 
