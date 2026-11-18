@@ -188,7 +188,7 @@ export const Footer: React.FC = () => {
         <div className="pt-6 sm:pt-8 flex flex-col md:flex-row items-center justify-between text-center md:text-left text-xs text-anchor-text/60 gap-3 md:gap-4">
           <p>{t('site.copyright', { year: currentYear, name: t('site.name'), school: t('site.schoolName') })}</p>
           <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1">
-            <span className="text-anchor-gold">{t('site.schoolName')}</span>
+            <span className="text-anchor-gold">{t('site.thaiFullName')}</span>
             <span className="text-anchor-text/30 hidden sm:inline">|</span>
             <span>{t('site.englishFullName')}</span>
           </div>
