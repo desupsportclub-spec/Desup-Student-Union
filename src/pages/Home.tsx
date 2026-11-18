@@ -735,7 +735,7 @@ export const Home: React.FC = () => {
           <div className="grid grid-cols-1 md:grid-cols-12 gap-6 sm:gap-8 md:gap-12 items-center">
             <div className="md:col-span-4 flex justify-center">
               <div className="relative w-36 h-44 sm:w-48 sm:h-60 md:w-56 md:h-72 border border-gold rounded-sm overflow-hidden shadow-editorial bg-bg-alt">
-                {president?.photo?.url || president?.photoUrl ? (
+                {(president?.photo?.url || president?.photoUrl) && (
                   <img
                     src={president.photo?.url || president.photoUrl}
                     alt={presidentNameRes.text}
@@ -743,11 +743,6 @@ export const Home: React.FC = () => {
                     decoding="async"
                     className="w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-500"
                   />
-                ) : (
-                  <div className="w-full h-full bg-brand-soft flex flex-col items-center justify-center p-4 text-center">
-                    <Emblem size={56} />
-                    <span className="text-xs text-accent mt-3 font-medium">{t('home.presidentRoleFallback')}</span>
-                  </div>
                 )}
               </div>
             </div>

@@ -25,6 +25,7 @@ export const AdminPeople: React.FC = () => {
   const [successModalTitle, setSuccessModalTitle] = useState('');
   const [reordering, setReordering] = useState(false);
   const [orderDrafts, setOrderDrafts] = useState<Record<string, string>>({});
+  const [deleteTarget, setDeleteTarget] = useState<{ id: string; name: string } | null>(null);
 
   // ฟิลด์ข้อมูลฟอร์ม 2 ภาษา
   const [editLang, setEditLang] = useState<AdminLangMode>('th');
@@ -90,8 +91,7 @@ export const AdminPeople: React.FC = () => {
     setIsModalOpen(true);
   };
 
-  const handleSave = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const performSave = async () => {
     if (!name.trim() || !position.trim()) return;
 
     setSaving(true);
@@ -158,16 +158,29 @@ export const AdminPeople: React.FC = () => {
     }
   };
 
-  const handleDelete = async (id: string, personName: string) => {
-    if (!window.confirm(`คุณแน่ใจว่าต้องการลบข้อมูล "${personName}" หรือไม่?`)) return;
+  const handleSave = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!name.trim() || !position.trim()) return;
+    void performSave();
+  };
+
+  const performDelete = async (id: string) => {
+    setSaving(true);
     try {
       await deleteDoc(doc(db, 'people', id));
       invalidatePublicDataCache('people');
+      setDeleteTarget(null);
       await fetchPeople();
       setSuccessModalTitle('ลบข้อมูลบุคลากรเรียบร้อยแล้ว');
     } catch (err) {
       console.error("Delete person failed:", err);
+    } finally {
+      setSaving(false);
     }
+  };
+
+  const handleDelete = (id: string, personName: string) => {
+    setDeleteTarget({ id, name: personName });
   };
 
   const filteredPeople = people.filter(p => p.role === selectedRole);
@@ -204,6 +217,7 @@ export const AdminPeople: React.FC = () => {
       });
       await batch.commit();
       invalidatePublicDataCache('people');
+      setOrderDrafts({});
     } catch (err) {
       console.error('Reorder people failed:', err);
       setPeople(previousPeople);
@@ -212,41 +226,73 @@ export const AdminPeople: React.FC = () => {
     }
   };
 
-  const handleMoveItem = (fromIndex: number, toIndex: number) => {
-    if (
-      reordering ||
-      fromIndex === toIndex ||
-      fromIndex < 0 ||
-      toIndex < 0 ||
-      fromIndex >= filteredPeople.length ||
-      toIndex >= filteredPeople.length
-    ) {
-      return;
+  const computeReorderedList = (
+    currentList: PersonItem[],
+    drafts: Record<string, string>
+  ): { nextList: PersonItem[]; changedCount: number; hasInvalidDraft: boolean } => {
+    const unchanged: PersonItem[] = [];
+    const changed: { item: PersonItem; targetOrder: number; originalIndex: number }[] = [];
+    let hasInvalidDraft = false;
+
+    currentList.forEach((item, index) => {
+      const currentOrder = item.order || index + 1;
+      const raw = item.id ? drafts[item.id] : undefined;
+      if (raw === undefined) {
+        unchanged.push(item);
+        return;
+      }
+      if (raw.trim() === '') {
+        hasInvalidDraft = true;
+        unchanged.push(item);
+        return;
+      }
+      const parsed = Math.floor(Number(raw));
+      if (!Number.isFinite(parsed) || parsed < 1) {
+        hasInvalidDraft = true;
+        unchanged.push(item);
+        return;
+      }
+      const clampedTarget = Math.max(1, Math.min(currentList.length, parsed));
+      if (clampedTarget === currentOrder) {
+        unchanged.push(item);
+        return;
+      }
+      changed.push({ item, targetOrder: clampedTarget, originalIndex: index });
+    });
+
+    if (changed.length === 0) {
+      return { nextList: currentList, changedCount: 0, hasInvalidDraft };
     }
-    const next = [...filteredPeople];
-    const [moved] = next.splice(fromIndex, 1);
-    next.splice(toIndex, 0, moved);
-    void persistReorderedList(next);
+
+    changed.sort((a, b) => a.targetOrder - b.targetOrder || a.originalIndex - b.originalIndex);
+    const nextList = [...unchanged];
+    changed.forEach(({ item, targetOrder }) => {
+      const insertIdx = Math.max(0, Math.min(nextList.length, targetOrder - 1));
+      nextList.splice(insertIdx, 0, item);
+    });
+
+    return { nextList, changedCount: changed.length, hasInvalidDraft };
   };
 
-  const commitOrderInput = (item: PersonItem, currentIndex: number) => {
-    if (!item.id) return;
-    const raw = orderDrafts[item.id];
+  const orderRecompute = computeReorderedList(filteredPeople, orderDrafts);
+  const hasOrderDrafts = Object.keys(orderDrafts).length > 0;
+
+  const handleCancelOrderDrafts = (targetId?: string) => {
+    if (!targetId) {
+      setOrderDrafts({});
+      return;
+    }
     setOrderDrafts((prev) => {
-      if (!(item.id! in prev)) return prev;
+      if (!(targetId in prev)) return prev;
       const next = { ...prev };
-      delete next[item.id!];
+      delete next[targetId];
       return next;
     });
-    if (raw === undefined || raw.trim() === '') return;
+  };
 
-    const parsed = Math.floor(Number(raw));
-    if (!Number.isFinite(parsed) || parsed < 1) return;
-
-    const targetIndex = Math.max(0, Math.min(filteredPeople.length - 1, parsed - 1));
-    if (targetIndex !== currentIndex) {
-      handleMoveItem(currentIndex, targetIndex);
-    }
+  const handleConfirmOrderDrafts = () => {
+    if (reordering || orderRecompute.changedCount === 0) return;
+    void persistReorderedList(orderRecompute.nextList);
   };
 
   return (
@@ -279,7 +325,10 @@ export const AdminPeople: React.FC = () => {
         ].map((t) => (
           <button
             key={t.id}
-            onClick={() => setSelectedRole(t.id as PersonRole)}
+            onClick={() => {
+              setSelectedRole(t.id as PersonRole);
+              setOrderDrafts({});
+            }}
             className={`pb-2 whitespace-nowrap transition-colors relative ${
               selectedRole === t.id
                 ? 'text-accent font-semibold'
@@ -301,7 +350,7 @@ export const AdminPeople: React.FC = () => {
         ) : filteredPeople.length > 0 ? (
           <>
             <div className="px-4 py-2 bg-surface border-b border-gold-border/15 flex items-center justify-between text-[11px] text-text-muted">
-              <span>พิมพ์แก้ตัวเลขลำดับ (กด Enter หรือคลิกนอกช่อง) เพื่ออัปเดตลำดับได้ทันที</span>
+              <span>พิมพ์แก้ตัวเลขลำดับ แล้วกดปุ่มยืนยันด้านล่างขวาเพื่อบันทึกลำดับใหม่</span>
               {reordering && <span className="text-gold-text font-medium">กำลังบันทึกลำดับ...</span>}
             </div>
             <div className="overflow-x-auto">
@@ -318,7 +367,20 @@ export const AdminPeople: React.FC = () => {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gold-border/10">
-                  {filteredPeople.map((item, idx) => (
+                  {filteredPeople.map((item, idx) => {
+                    const currentOrder = item.order || idx + 1;
+                    const draftVal = item.id ? orderDrafts[item.id] : undefined;
+                    const isRowDrafted = draftVal !== undefined;
+                    const parsedDraft = isRowDrafted ? Math.floor(Number(draftVal)) : currentOrder;
+                    const isRowValid =
+                      !isRowDrafted ||
+                      (draftVal.trim() !== '' && Number.isFinite(parsedDraft) && parsedDraft >= 1);
+                    const isRowChanged =
+                      isRowDrafted &&
+                      isRowValid &&
+                      Math.max(1, Math.min(filteredPeople.length, parsedDraft)) !== currentOrder;
+
+                    return (
                     <tr
                       key={item.id}
                       className="transition-colors hover:bg-bg-alt/60"
@@ -329,50 +391,45 @@ export const AdminPeople: React.FC = () => {
                           min={1}
                           max={filteredPeople.length}
                           disabled={reordering}
-                          value={
-                            item.id && orderDrafts[item.id] !== undefined
-                              ? orderDrafts[item.id]
-                              : String(item.order || idx + 1)
-                          }
+                          value={isRowDrafted ? draftVal : String(currentOrder)}
                           onChange={(e) => {
                             if (!item.id) return;
                             const val = e.target.value;
+                            if (val === String(currentOrder)) {
+                              handleCancelOrderDrafts(item.id);
+                              return;
+                            }
                             setOrderDrafts((prev) => ({ ...prev, [item.id!]: val }));
                           }}
                           onFocus={(e) => e.currentTarget.select()}
-                          onBlur={() => commitOrderInput(item, idx)}
                           onKeyDown={(e) => {
                             if (e.key === 'Enter') {
                               e.preventDefault();
-                              e.currentTarget.blur();
+                              handleConfirmOrderDrafts();
                             } else if (e.key === 'Escape') {
-                              if (item.id) {
-                                setOrderDrafts((prev) => {
-                                  const next = { ...prev };
-                                  delete next[item.id!];
-                                  return next;
-                                });
-                              }
+                              handleCancelOrderDrafts(item.id);
                               e.currentTarget.blur();
                             }
                           }}
                           aria-label={`ลำดับของ ${item.name}`}
-                          title="พิมพ์เลขลำดับแล้วกด Enter หรือคลิกนอกช่องเพื่ออัปเดต"
-                          className="w-14 px-1.5 py-1 text-center font-mono text-xs bg-surface border border-gold-border/35 rounded-sm text-heading focus:outline-none focus:border-gold disabled:opacity-50"
+                          title="พิมพ์เลขลำดับใหม่ แล้วกดยืนยันด้านล่างขวา"
+                          className={`w-14 px-1.5 py-1 text-center font-mono text-xs bg-surface rounded-sm text-heading focus:outline-none disabled:opacity-50 ${
+                            !isRowValid
+                              ? 'border-2 border-error'
+                              : isRowChanged
+                              ? 'border-2 border-gold'
+                              : 'border border-gold-border/35 focus:border-gold'
+                          }`}
                         />
                       </td>
                       <td className="py-2.5 px-4">
                         <div className="w-10 h-12 bg-bg-alt rounded-sm overflow-hidden border border-gold-border/20">
-                          {item.photo?.url || item.photoUrl ? (
+                          {(item.photo?.url || item.photoUrl) && (
                             <img
                               src={item.photo?.url || item.photoUrl}
                               alt={item.name}
                               className="w-full h-full object-cover"
                             />
-                          ) : (
-                            <div className="w-full h-full bg-brand-soft flex items-center justify-center text-[10px] text-accent">
-                              สธ
-                            </div>
                           )}
                         </div>
                       </td>
@@ -413,7 +470,8 @@ export const AdminPeople: React.FC = () => {
                       </button>
                     </td>
                     </tr>
-                  ))}
+                    );
+                  })}
                 </tbody>
               </table>
             </div>
@@ -424,6 +482,35 @@ export const AdminPeople: React.FC = () => {
           </div>
         )}
       </div>
+
+      {/* Bottom-right action bar when order edits exist */}
+      {hasOrderDrafts && (
+        <div className="sticky bottom-4 z-30 flex justify-end">
+          <div className="bg-surface-elevated border border-gold-border/40 rounded-sm shadow-editorial px-4 py-2.5 flex flex-wrap items-center gap-3 text-xs">
+            <span className="text-text-muted">
+              {orderRecompute.changedCount > 0
+                ? `แก้ไขลำดับ ${orderRecompute.changedCount} รายการ`
+                : 'กรุณาระบุเลขลำดับที่ถูกต้อง'}
+            </span>
+            <button
+              type="button"
+              disabled={reordering}
+              onClick={() => handleCancelOrderDrafts()}
+              className="px-4 py-1.5 border border-gold-border/35 bg-surface text-text rounded-sm hover:bg-bg-alt disabled:opacity-50 transition-colors"
+            >
+              ยกเลิก
+            </button>
+            <button
+              type="button"
+              disabled={reordering || orderRecompute.changedCount === 0}
+              onClick={handleConfirmOrderDrafts}
+              className="px-5 py-1.5 bg-brand text-brand-contrast font-medium rounded-sm hover:bg-brand-hover disabled:opacity-50 transition-colors"
+            >
+              {reordering ? 'กำลังบันทึก...' : 'ยืนยัน'}
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Modal */}
       {isModalOpen && (
@@ -576,10 +663,43 @@ export const AdminPeople: React.FC = () => {
                   disabled={saving}
                   className="px-6 py-2 bg-brand text-brand-contrast rounded-sm hover:bg-brand-hover transition-colors"
                 >
-                  {saving ? 'กำลังบันทึก...' : 'บันทึก'}
+                  {saving ? 'กำลังบันทึก...' : editingItem ? 'ยืนยัน' : 'บันทึก'}
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {deleteTarget && (
+        <div className="fixed inset-0 z-[60] bg-overlay-backdrop backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-surface border border-gold-border/50 rounded-sm max-w-md w-full p-6 space-y-4 shadow-2xl">
+            <h3 className="font-serif text-lg font-semibold text-heading">
+              ยืนยันการลบข้อมูล
+            </h3>
+            <p className="text-xs text-text-muted leading-relaxed">
+              คุณแน่ใจว่าต้องการลบข้อมูล{' '}
+              <span className="font-semibold text-heading">{deleteTarget.name}</span>{' '}
+              หรือไม่? การลบไม่สามารถกู้คืนได้
+            </p>
+            <div className="flex justify-end gap-3 pt-3 border-t border-gold-border/20">
+              <button
+                type="button"
+                onClick={() => setDeleteTarget(null)}
+                disabled={saving}
+                className="px-4 py-2 border border-gold-border/30 bg-surface-elevated text-xs text-text rounded-sm hover:bg-bg-alt transition-colors"
+              >
+                ยกเลิก
+              </button>
+              <button
+                type="button"
+                disabled={saving}
+                onClick={() => void performDelete(deleteTarget.id)}
+                className="px-5 py-2 bg-error text-brand-contrast text-xs font-medium rounded-sm hover:opacity-90 disabled:opacity-60 transition-opacity"
+              >
+                {saving ? 'กำลังลบ...' : 'ยืนยัน'}
+              </button>
+            </div>
           </div>
         </div>
       )}

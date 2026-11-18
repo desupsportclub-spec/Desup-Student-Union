@@ -7,7 +7,6 @@ import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { PersonItem } from '../../types';
 import { SectionEyebrow, CornerBracket } from '../../components/common/Ornament';
-import { Emblem } from '../../components/common/Emblem';
 import { SeoHead } from '../../components/common/SeoHead';
 import { useLanguage } from '../../context/LanguageContext';
 import { formatAcademicYear } from '../../lib/format';
@@ -100,16 +99,12 @@ export const AboutHall: React.FC = () => {
 
                       <div className="flex gap-4 items-center">
                         <div className="w-20 h-24 bg-bg-alt rounded-sm shrink-0 overflow-hidden border border-gold-border/20">
-                          {pres.photo?.url || pres.photoUrl ? (
+                          {(pres.photo?.url || pres.photoUrl) && (
                             <img
                               src={pres.photo?.url || pres.photoUrl}
                               alt={nameRes.text}
                               className="w-full h-full object-cover"
                             />
-                          ) : (
-                            <div className="w-full h-full bg-brand-soft flex items-center justify-center">
-                              <Emblem size={28} />
-                            </div>
                           )}
                         </div>
 

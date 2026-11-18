@@ -7,7 +7,6 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { PersonItem } from '../../types';
 import { SectionEyebrow, CornerBracket } from '../../components/common/Ornament';
-import { Emblem } from '../../components/common/Emblem';
 import { SeoHead } from '../../components/common/SeoHead';
 import { useSiteSettings } from '../../context/SiteSettingsContext';
 import { useLanguage } from '../../context/LanguageContext';
@@ -139,17 +138,12 @@ export const AboutBoard: React.FC = () => {
 
                 <div>
                   <div className="aspect-[4/5] bg-bg-alt rounded-sm overflow-hidden mb-3 sm:mb-4 border border-gold-border/20">
-                    {member.photo?.url || member.photoUrl ? (
+                    {(member.photo?.url || member.photoUrl) && (
                       <img
                         src={member.photo?.url || member.photoUrl}
                         alt={nameRes.text}
                         className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500 ease-out"
                       />
-                    ) : (
-                      <div className="w-full h-full bg-brand-soft flex flex-col items-center justify-center p-3 text-text-muted">
-                        <Emblem size={36} />
-                        <span className="text-[10px] text-accent mt-2 font-medium">{t('site.shortName')}</span>
-                      </div>
                     )}
                   </div>
 

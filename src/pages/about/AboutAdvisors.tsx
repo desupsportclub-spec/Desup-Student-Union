@@ -7,7 +7,6 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { AdvisorGroup, PersonItem } from '../../types';
 import { SectionEyebrow, CornerBracket } from '../../components/common/Ornament';
-import { Emblem } from '../../components/common/Emblem';
 import { SeoHead } from '../../components/common/SeoHead';
 import { getCachedPeopleSync, loadPeopleList } from '../../lib/publicDataService';
 import { ADVISOR_GROUPS, resolveAdvisorGroup } from '../../config/site';
@@ -119,7 +118,7 @@ export const AboutAdvisors: React.FC = () => {
                           <CornerBracket position="bottom-right" />
 
                           <div className="w-40 h-48 mx-auto bg-bg-alt rounded-sm overflow-hidden border border-gold-border/20">
-                            {advisor.photo?.url || advisor.photoUrl ? (
+                            {(advisor.photo?.url || advisor.photoUrl) && (
                               <img
                                 src={advisor.photo?.url || advisor.photoUrl}
                                 alt={nameRes.text}
@@ -127,13 +126,6 @@ export const AboutAdvisors: React.FC = () => {
                                 decoding="async"
                                 className="w-full h-full object-cover"
                               />
-                            ) : (
-                              <div className="w-full h-full bg-brand-soft flex flex-col items-center justify-center p-3 text-text-muted">
-                                <Emblem size={44} />
-                                <span className="text-[11px] text-accent mt-2 font-medium text-center">
-                                  {groupShortLabel}
-                                </span>
-                              </div>
                             )}
                           </div>
 
