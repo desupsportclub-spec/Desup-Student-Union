@@ -82,6 +82,7 @@ export const Footer: React.FC = () => {
               <li><LocLink to="/news/pr" className="hover:text-anchor-text transition-colors">{t('nav.newsSub.pr')}</LocLink></li>
               <li><LocLink to="/news/activity" className="hover:text-anchor-text transition-colors">{t('nav.newsSub.activity')}</LocLink></li>
               <li><LocLink to="/calendar" className="hover:text-anchor-text transition-colors">{t('nav.calendar')}</LocLink></li>
+              <li><LocLink to="/news/knowledge" className="hover:text-anchor-text transition-colors">{t('nav.newsSub.knowledge')}</LocLink></li>
               <li><LocLink to="/news/video" className="hover:text-anchor-text transition-colors">{t('nav.newsSub.video')}</LocLink></li>
             </ul>
           </div>
@@ -156,7 +157,7 @@ export const Footer: React.FC = () => {
               <ul className="text-xs space-y-2 text-anchor-text/75">
                 <li><LocLink to="/complaint" className="hover:text-anchor-text transition-colors">{t('nav.reportFull')}</LocLink></li>
                 <li><LocLink to="/track" className="hover:text-anchor-text transition-colors">{t('nav.trackComplaint')}</LocLink></li>
-                <li><LocLink to="/downloads" className="hover:text-anchor-text transition-colors">{t('nav.downloadsFull')}</LocLink></li>
+                <li><LocLink to="/downloads" className="hover:text-anchor-text transition-colors">{t('nav.downloads')}</LocLink></li>
                 <li><LocLink to="/contact" className="hover:text-anchor-text transition-colors">{t('nav.contactUs')}</LocLink></li>
               </ul>
 

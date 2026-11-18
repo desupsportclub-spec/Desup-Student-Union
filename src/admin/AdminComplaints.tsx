@@ -252,7 +252,7 @@ export const AdminComplaints: React.FC = () => {
             ระบบรับเรื่องร้องเรียนและข้อเสนอแนะ
           </h1>
           <p className="text-xs text-text-muted">
-            พิจารณา ดำเนินการ ตอบกลับสาธารณะ และสืบค้นเรื่องร้องเรียนทั้งหมด
+            พิจารณา ดำเนินการ ตอบกลับ และสืบค้นเรื่องร้องเรียนทั้งหมด
           </p>
         </div>
 
@@ -260,7 +260,7 @@ export const AdminComplaints: React.FC = () => {
           onClick={handleExportCSV}
           className="px-4 py-2 bg-surface-elevated border border-gold text-xs font-medium text-heading hover:bg-surface rounded-sm shadow-sm self-start sm:self-auto transition-colors"
         >
-          📥 ส่งออกเป็น CSV
+          ส่งออกเป็น CSV
         </button>
       </div>
 
@@ -273,12 +273,15 @@ export const AdminComplaints: React.FC = () => {
 
       {/* Filter and Search Bar */}
       <div className="flex flex-wrap items-center gap-4 bg-surface-elevated p-4 border border-gold-border/20 rounded-sm">
-        <div className="flex-1 min-w-[200px]">
+        <div className="flex-1 min-w-[200px] flex items-center gap-2 text-xs">
+          <label htmlFor="admin-complaints-search" className="text-text-muted shrink-0">
+            ค้นหา:
+          </label>
           <input
+            id="admin-complaints-search"
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="ค้นหาตามหัวข้อ หรือรหัสติดตาม (SC-...)..."
             className="w-full text-xs input-underline"
           />
         </div>
@@ -325,7 +328,7 @@ export const AdminComplaints: React.FC = () => {
             <table className="w-full text-left text-xs">
               <thead className="bg-surface border-b border-gold-border/15 text-gold-text uppercase tracking-wider font-medium">
                 <tr>
-                  <th className="py-3 px-4">รหัสติดตาม</th>
+                  <th className="py-3 px-4">Case ID</th>
                   <th className="py-3 px-4">ประเภท</th>
                   <th className="py-3 px-4">หัวข้อเรื่อง</th>
                   <th className="py-3 px-4">สถานะ</th>
@@ -467,8 +470,8 @@ export const AdminComplaints: React.FC = () => {
               ) : privateContact ? (
                 <div className="p-3 bg-surface border border-gold-border/20 rounded-sm text-xs text-text space-y-1">
                   <p><strong>ชื่อ-นามสกุล:</strong> {privateContact.name || '-'}</p>
-                  <p><strong>ชั้น/ห้อง:</strong> {privateContact.gradeClass || '-'}</p>
-                  <p><strong>ช่องทางติดต่อกลับ:</strong> {privateContact.contactMethod || '-'}</p>
+                  <p><strong>เลขประจำตัวนักเรียน:</strong> {privateContact.gradeClass || '-'}</p>
+                  <p><strong>หมายเลขโทรศัพท์ / ติดต่อกลับ:</strong> {privateContact.contactMethod || '-'}</p>
                 </div>
               ) : (
                 <p className="text-xs text-text-muted">ไม่มีข้อมูลติดต่อส่วนตัว</p>
@@ -503,7 +506,6 @@ export const AdminComplaints: React.FC = () => {
                   value={replyText}
                   onChange={(e) => setReplyText(e.target.value)}
                   rows={3}
-                  placeholder="พิมพ์ข้อความตอบกลับเพื่อแจ้งผลการพิจารณาหรือความคืบหน้าแก่นักเรียน..."
                   className="w-full text-xs input-underline bg-surface p-2 border border-gold-border/25 rounded-sm"
                   required
                 />

@@ -195,8 +195,15 @@ export function isEventOnDateKey(
 }
 
 /**
- * Generate Tracking Code for Complaints
- * Format: SC-2569-XXXXXX (no 0, O, 1, I to prevent human transcription errors)
+ * สร้างรหัส Case ID ตามรูปแบบ SU-ปีการศึกษา-ลำดับ 4 หลัก (เช่น SU-2569-0001)
+ */
+export function formatCaseId(yearBE = 2569, sequence = 1): string {
+  const padded = String(Math.max(1, sequence)).padStart(4, '0');
+  return `SU-${yearBE}-${padded}`;
+}
+
+/**
+ * ฟังก์ชันสำรองสำหรับสร้างรหัสติดตามแบบสุ่มกรณีไม่สามารถเชื่อมต่อตัวนับลำดับได้
  */
 export function generateTrackingCode(yearBE = 2569): string {
   const chars = '23456789ABCDEFGHJKLMNPQRSTUVWXYZ';
@@ -205,7 +212,7 @@ export function generateTrackingCode(yearBE = 2569): string {
     const idx = Math.floor(Math.random() * chars.length);
     randomPart += chars[idx];
   }
-  return `SC-${yearBE}-${randomPart}`;
+  return `SU-${yearBE}-${randomPart}`;
 }
 
 /**

@@ -14,28 +14,14 @@ import { formatAcademicYear } from '../../lib/format';
 import { getCachedPeopleSync, loadPeopleList } from '../../lib/publicDataService';
 import { pickL10n } from '../../lib/l10n';
 import { FallbackLangBadge } from '../../components/common/FallbackLangBadge';
-
-function filterPresidents(all: PersonItem[]): PersonItem[] {
-  const list = all.filter((item) => {
-    const pos = (item.position || '').trim();
-    const isVice = pos.includes('อุปนายก') || pos.includes('รองนายก') || pos.includes('รองประธาน');
-    const isPresidentTitle = (pos.includes('นายก') || pos.includes('ประธาน')) && !isVice;
-    return item.role === 'president' || isPresidentTitle;
-  });
-  list.sort((a, b) => {
-    const yrDiff = (b.yearTH || '').localeCompare(a.yearTH || '');
-    if (yrDiff !== 0) return yrDiff;
-    return (b.updatedAt || b.createdAt || '').localeCompare(a.updatedAt || a.createdAt || '');
-  });
-  return list;
-}
+import { filterHallPresidents } from '../../lib/personRoles';
 
 export const AboutHall: React.FC = () => {
   const { t } = useTranslation();
   const { lang } = useLanguage();
   const initialPeople = getCachedPeopleSync();
   const [presidents, setPresidents] = useState<PersonItem[]>(
-    initialPeople ? filterPresidents(initialPeople) : []
+    initialPeople ? filterHallPresidents(initialPeople) : []
   );
   const [loading, setLoading] = useState(!initialPeople);
 
@@ -43,7 +29,7 @@ export const AboutHall: React.FC = () => {
     let active = true;
     loadPeopleList((list) => {
       if (!active) return;
-      setPresidents(filterPresidents(list));
+      setPresidents(filterHallPresidents(list));
       setLoading(false);
     })
       .catch((err) => {

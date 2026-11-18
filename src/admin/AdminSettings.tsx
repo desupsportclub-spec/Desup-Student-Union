@@ -330,7 +330,6 @@ export const AdminSettings: React.FC = () => {
             value={academicYearTH}
             onChange={(e) => setAcademicYearTH(e.target.value)}
             maxLength={4}
-            placeholder="2569"
             className="w-32 input-underline font-serif text-base font-bold text-accent"
           />
         </div>
@@ -357,7 +356,6 @@ export const AdminSettings: React.FC = () => {
                 type="text"
                 value={presidentHeadline}
                 onChange={(e) => setPresidentHeadline(e.target.value)}
-                placeholder={DEFAULT_HEADLINE}
                 className="w-full input-underline text-sm font-serif"
               />
             </div>
@@ -370,7 +368,6 @@ export const AdminSettings: React.FC = () => {
                 type="text"
                 value={presidentHeadlineEn}
                 onChange={(e) => setPresidentHeadlineEn(e.target.value)}
-                placeholder='"We are ready to represent and listen to every voice of DeSUP students."'
                 className="w-full input-underline text-sm font-serif"
               />
             </div>
@@ -385,7 +382,6 @@ export const AdminSettings: React.FC = () => {
                 value={presidentMessage}
                 onChange={(e) => setPresidentMessage(e.target.value)}
                 rows={4}
-                placeholder={DEFAULT_MESSAGE}
                 className="w-full input-underline leading-relaxed"
               />
             </div>
@@ -398,7 +394,6 @@ export const AdminSettings: React.FC = () => {
                 value={presidentMessageEn}
                 onChange={(e) => setPresidentMessageEn(e.target.value)}
                 rows={4}
-                placeholder="Welcome students, faculty, and parents to the official Student Union portal..."
                 className="w-full input-underline leading-relaxed"
               />
             </div>
@@ -441,7 +436,6 @@ export const AdminSettings: React.FC = () => {
                 type="text"
                 value={newTickerText}
                 onChange={(e) => setNewTickerText(e.target.value)}
-                placeholder="พิมพ์ข้อความประกาศใหม่ (ไทย)..."
                 className="flex-1 text-xs input-underline"
               />
               <button
@@ -482,7 +476,6 @@ export const AdminSettings: React.FC = () => {
                 type="text"
                 value={newTickerTextEn}
                 onChange={(e) => setNewTickerTextEn(e.target.value)}
-                placeholder="Type English ticker notice..."
                 className="flex-1 text-xs input-underline"
               />
               <button
@@ -508,27 +501,32 @@ export const AdminSettings: React.FC = () => {
         </div>
 
         <div className="space-y-3 text-xs">
+          {links.length > 0 && (
+            <div className="hidden sm:grid sm:grid-cols-12 gap-2 px-3 text-[11px] font-medium text-text-muted">
+              <span className="sm:col-span-3">ชื่อระบบ (ไทย)</span>
+              <span className="sm:col-span-3">English Title (ไม่บังคับ)</span>
+              <span className="sm:col-span-5">ลิงก์ (URL)</span>
+              <span className="sm:col-span-1 text-right">จัดการ</span>
+            </div>
+          )}
           {links.map((lk, idx) => (
             <div key={idx} className="grid grid-cols-1 sm:grid-cols-12 gap-2 p-3 bg-surface border border-gold-border/20 rounded-sm items-center">
               <input
                 type="text"
                 value={lk.title}
                 onChange={(e) => handleUpdateLink(idx, 'title', e.target.value)}
-                placeholder="ชื่อระบบ (ไทย)"
                 className="sm:col-span-3 input-underline bg-surface-elevated px-2"
               />
               <input
                 type="text"
                 value={lk.titleEn || ''}
                 onChange={(e) => handleUpdateLink(idx, 'titleEn', e.target.value)}
-                placeholder="English Title (ไม่บังคับ)"
                 className="sm:col-span-3 input-underline bg-surface-elevated px-2"
               />
               <input
                 type="url"
                 value={lk.url}
                 onChange={(e) => handleUpdateLink(idx, 'url', e.target.value)}
-                placeholder="https://..."
                 className="sm:col-span-5 input-underline bg-surface-elevated px-2 font-mono"
               />
               <button
@@ -542,35 +540,43 @@ export const AdminSettings: React.FC = () => {
           ))}
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-12 gap-2 pt-2 text-xs">
-          <input
-            type="text"
-            value={newLinkTitle}
-            onChange={(e) => setNewLinkTitle(e.target.value)}
-            placeholder="ชื่อระบบ (ไทย)..."
-            className="sm:col-span-3 input-underline"
-          />
-          <input
-            type="text"
-            value={newLinkTitleEn}
-            onChange={(e) => setNewLinkTitleEn(e.target.value)}
-            placeholder="English Title (ไม่บังคับ)"
-            className="sm:col-span-3 input-underline"
-          />
-          <input
-            type="text"
-            value={newLinkDesc}
-            onChange={(e) => setNewLinkDesc(e.target.value)}
-            placeholder="คำอธิบายสั้น (ไม่บังคับ)"
-            className="sm:col-span-2 input-underline"
-          />
-          <input
-            type="url"
-            value={newLinkUrl}
-            onChange={(e) => setNewLinkUrl(e.target.value)}
-            placeholder="https://..."
-            className="sm:col-span-2 input-underline font-mono"
-          />
+        <div className="grid grid-cols-1 sm:grid-cols-12 gap-2 pt-2 text-xs items-end">
+          <div className="sm:col-span-3">
+            <label className="block text-[11px] text-text-muted mb-1">ชื่อระบบ (ไทย)</label>
+            <input
+              type="text"
+              value={newLinkTitle}
+              onChange={(e) => setNewLinkTitle(e.target.value)}
+              className="w-full input-underline"
+            />
+          </div>
+          <div className="sm:col-span-3">
+            <label className="block text-[11px] text-text-muted mb-1">English Title (ไม่บังคับ)</label>
+            <input
+              type="text"
+              value={newLinkTitleEn}
+              onChange={(e) => setNewLinkTitleEn(e.target.value)}
+              className="w-full input-underline"
+            />
+          </div>
+          <div className="sm:col-span-2">
+            <label className="block text-[11px] text-text-muted mb-1">คำอธิบายสั้น (ไม่บังคับ)</label>
+            <input
+              type="text"
+              value={newLinkDesc}
+              onChange={(e) => setNewLinkDesc(e.target.value)}
+              className="w-full input-underline"
+            />
+          </div>
+          <div className="sm:col-span-2">
+            <label className="block text-[11px] text-text-muted mb-1">ลิงก์ (URL)</label>
+            <input
+              type="url"
+              value={newLinkUrl}
+              onChange={(e) => setNewLinkUrl(e.target.value)}
+              className="w-full input-underline font-mono"
+            />
+          </div>
           <button
             type="button"
             onClick={handleAddLink}
@@ -624,7 +630,6 @@ export const AdminSettings: React.FC = () => {
               type="text"
               value={contactAddressEn}
               onChange={(e) => setContactAddressEn(e.target.value)}
-              placeholder="Demonstration School, University of Phayao..."
               className="w-full input-underline"
             />
           </div>
@@ -645,7 +650,6 @@ export const AdminSettings: React.FC = () => {
               type="text"
               value={facebookNameEn}
               onChange={(e) => setFacebookNameEn(e.target.value)}
-              placeholder="Demonstration School of University of Phayao Student Union"
               className="w-full input-underline"
             />
           </div>

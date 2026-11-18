@@ -7,9 +7,11 @@ import React, { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import { useTranslation } from 'react-i18next';
+import { MagnifyingGlass } from '@phosphor-icons/react';
 import { ThemeSwitcher } from './ThemeSwitcher';
 import { LanguageSwitcher } from './LanguageSwitcher';
 import { LocLink } from './LocLink';
+import { SiteSearchModal } from './SiteSearchModal';
 import { useLanguage } from '../../context/LanguageContext';
 
 interface NavbarProps {
@@ -25,15 +27,29 @@ export const Navbar: React.FC<NavbarProps> = ({ tickerItems = [] }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [activeDropdown, setActiveDropdown] = useState<'news' | 'about' | null>(null);
   const [mobileSubmenu, setMobileSubmenu] = useState<'news' | 'about' | null>(null);
+  const [searchOpen, setSearchOpen] = useState(false);
 
   const location = useLocation();
 
-  // ปิดเมนูดรอปดาวน์และลิ้นชักมือถือเมื่อเปลี่ยนหน้า
+  // ปิดเมนูดรอปดาวน์ ลิ้นชักมือถือ และหน้าต่างค้นหาเมื่อเปลี่ยนหน้า
   useEffect(() => {
     setMobileMenuOpen(false);
     setActiveDropdown(null);
     setMobileSubmenu(null);
+    setSearchOpen(false);
   }, [location.pathname]);
+
+  // รองรับปุ่มลัด Ctrl+K / Cmd+K เพื่อเปิดค้นหา
+  useEffect(() => {
+    const handleGlobalKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        setSearchOpen((prev) => !prev);
+      }
+    };
+    window.addEventListener('keydown', handleGlobalKeyDown);
+    return () => window.removeEventListener('keydown', handleGlobalKeyDown);
+  }, []);
 
   // ล็อกการเลื่อนหน้าจอและรองรับปุ่ม Escape ขณะเปิดเมนูมือถือ
   useEffect(() => {
@@ -242,9 +258,18 @@ export const Navbar: React.FC<NavbarProps> = ({ tickerItems = [] }) => {
             </LocLink>
           </nav>
 
-          {/* ส่วนที่ 3: ปุ่มสลับภาษา + ปุ่มสลับโหมดสี + ปุ่มร้องเรียน + ปุ่มเปิดเมนูมือถือ */}
+          {/* ส่วนที่ 3: ปุ่มสลับภาษา + ปุ่มค้นหา + ปุ่มสลับโหมดสี + ปุ่มร้องเรียน + ปุ่มเปิดเมนูมือถือ */}
           <div className="flex items-center gap-1.5 sm:gap-2.5 shrink-0">
             <LanguageSwitcher compact className="hidden sm:inline-flex" />
+            <button
+              type="button"
+              onClick={() => setSearchOpen(true)}
+              aria-label={t('nav.searchButton')}
+              title={t('nav.searchButton')}
+              className="relative inline-flex items-center justify-center w-9 h-9 rounded-sm border border-gold-border/30 bg-surface/60 text-heading hover:border-gold-text hover:bg-surface transition-colors cursor-pointer"
+            >
+              <MagnifyingGlass className="w-4 h-4" weight="light" />
+            </button>
             <ThemeSwitcher variant="dropdown" />
 
             <LocLink
@@ -553,6 +578,9 @@ export const Navbar: React.FC<NavbarProps> = ({ tickerItems = [] }) => {
           </>
         )}
       </AnimatePresence>
+
+      {/* หน้าต่างค้นหาข้อมูลทั่วเว็บไซต์ */}
+      <SiteSearchModal open={searchOpen} onClose={() => setSearchOpen(false)} />
 
       {/* ตัวเว้นระยะด้านบนให้พ้นความสูงแถบนำทาง */}
       <div className="h-[92px] sm:h-28" />

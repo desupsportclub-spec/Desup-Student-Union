@@ -4,7 +4,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { collection, getDocs, doc, setDoc, deleteDoc } from 'firebase/firestore';
+import { collection, getDocs, doc, setDoc, deleteDoc, writeBatch } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { PersonItem, PersonRole, AdvisorGroup, ImageAsset } from '../types';
 import { ImageUploader } from '../components/common/ImageUploader';
@@ -23,6 +23,8 @@ export const AdminPeople: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<PersonItem | null>(null);
   const [successModalTitle, setSuccessModalTitle] = useState('');
+  const [reordering, setReordering] = useState(false);
+  const [orderDrafts, setOrderDrafts] = useState<Record<string, string>>({});
 
   // ฟิลด์ข้อมูลฟอร์ม 2 ภาษา
   const [editLang, setEditLang] = useState<AdminLangMode>('th');
@@ -32,11 +34,7 @@ export const AdminPeople: React.FC = () => {
   const [advisorGroup, setAdvisorGroup] = useState<AdvisorGroup>('teacher');
   const [position, setPosition] = useState('');
   const [positionEn, setPositionEn] = useState('');
-  const [grade, setGrade] = useState('');
-  const [gradeEn, setGradeEn] = useState('');
   const [yearTH, setYearTH] = useState(academicYearTH);
-  const [quote, setQuote] = useState('');
-  const [quoteEn, setQuoteEn] = useState('');
   const [order, setOrder] = useState(1);
   const [photo, setPhoto] = useState<ImageAsset>({ url: '', alt: '' });
   const [saving, setSaving] = useState(false);
@@ -68,14 +66,10 @@ export const AdminPeople: React.FC = () => {
     setName('');
     setNameEn('');
     setRole(selectedRole);
-    setAdvisorGroup('teacher');
+    setAdvisorGroup('executive');
     setPosition(selectedRole === 'president' ? 'นายกองค์การนักเรียน' : '');
     setPositionEn(selectedRole === 'president' ? 'Student Union President' : '');
-    setGrade('');
-    setGradeEn('');
     setYearTH(academicYearTH);
-    setQuote('');
-    setQuoteEn('');
     setOrder(people.filter(p => p.role === selectedRole).length + 1);
     setPhoto({ url: '', alt: '' });
     setIsModalOpen(true);
@@ -90,11 +84,7 @@ export const AdminPeople: React.FC = () => {
     setAdvisorGroup(resolveAdvisorGroup(item));
     setPosition(item.position);
     setPositionEn(item.positionEn || '');
-    setGrade(item.grade || '');
-    setGradeEn(item.gradeEn || '');
     setYearTH(item.yearTH || academicYearTH);
-    setQuote(item.quote || '');
-    setQuoteEn(item.quoteEn || '');
     setOrder(item.order || 1);
     setPhoto(item.photo || (item.photoUrl ? { url: item.photoUrl, alt: item.name } : { url: '', alt: '' }));
     setIsModalOpen(true);
@@ -108,6 +98,10 @@ export const AdminPeople: React.FC = () => {
     try {
       const id = editingItem?.id || doc(collection(db, 'people')).id;
       const now = new Date().toISOString();
+      const normalizedPhoto: ImageAsset = {
+        url: photo.url,
+        alt: name.trim(),
+      };
       const personDoc: PersonItem = {
         name: name.trim(),
         nameEn: nameEn.trim(),
@@ -115,19 +109,44 @@ export const AdminPeople: React.FC = () => {
         ...(role === 'advisor' ? { advisorGroup } : {}),
         position: position.trim(),
         positionEn: positionEn.trim(),
-        grade: grade.trim(),
-        gradeEn: gradeEn.trim(),
+        grade: '',
+        gradeEn: '',
         yearTH: yearTH.trim() || academicYearTH,
-        quote: quote.trim(),
-        quoteEn: quoteEn.trim(),
+        quote: '',
+        quoteEn: '',
         order: Number(order) || 1,
-        photo,
+        photo: normalizedPhoto,
         photoUrl: photo.url,
         createdAt: editingItem?.createdAt || now,
         updatedAt: now
       };
 
       await setDoc(doc(db, 'people', id), personDoc);
+
+      // จัดเรียงลำดับในหมวดหมู่เดียวกันใหม่ให้ต่อเนื่องไม่ซ้ำกันเมื่อกำหนดลำดับจากหน้าต่างเพิ่ม/แก้ไข
+      const savedItem: PersonItem = { ...personDoc, id };
+      const sameRoleOthers = people
+        .filter((p) => p.role === role && p.id !== id)
+        .sort((a, b) => (a.order || 999) - (b.order || 999));
+      const targetIndex = Math.max(0, Math.min(sameRoleOthers.length, (Number(order) || 1) - 1));
+      sameRoleOthers.splice(targetIndex, 0, savedItem);
+
+      const batch = writeBatch(db);
+      let hasOrderShifts = false;
+      sameRoleOthers.forEach((p, index) => {
+        const expectedOrder = index + 1;
+        if (p.id && p.order !== expectedOrder) {
+          hasOrderShifts = true;
+          batch.update(doc(db, 'people', p.id), {
+            order: expectedOrder,
+            updatedAt: now,
+          });
+        }
+      });
+      if (hasOrderShifts) {
+        await batch.commit();
+      }
+
       invalidatePublicDataCache('people');
       setIsModalOpen(false);
       await fetchPeople();
@@ -152,6 +171,83 @@ export const AdminPeople: React.FC = () => {
   };
 
   const filteredPeople = people.filter(p => p.role === selectedRole);
+
+  const persistReorderedList = async (reorderedRoleList: PersonItem[]) => {
+    const now = new Date().toISOString();
+    const updatedRoleList = reorderedRoleList.map((item, index) => ({
+      ...item,
+      order: index + 1,
+      updatedAt: now,
+    }));
+
+    const orderMap = new Map<string, PersonItem>();
+    updatedRoleList.forEach((item) => {
+      if (item.id) orderMap.set(item.id, item);
+    });
+
+    const previousPeople = people;
+    const nextAll = people
+      .map((item) => (item.id && orderMap.has(item.id) ? orderMap.get(item.id)! : item))
+      .sort((a, b) => (a.order || 999) - (b.order || 999));
+    setPeople(nextAll);
+
+    setReordering(true);
+    try {
+      const batch = writeBatch(db);
+      updatedRoleList.forEach((item) => {
+        if (item.id) {
+          batch.update(doc(db, 'people', item.id), {
+            order: item.order,
+            updatedAt: now,
+          });
+        }
+      });
+      await batch.commit();
+      invalidatePublicDataCache('people');
+    } catch (err) {
+      console.error('Reorder people failed:', err);
+      setPeople(previousPeople);
+    } finally {
+      setReordering(false);
+    }
+  };
+
+  const handleMoveItem = (fromIndex: number, toIndex: number) => {
+    if (
+      reordering ||
+      fromIndex === toIndex ||
+      fromIndex < 0 ||
+      toIndex < 0 ||
+      fromIndex >= filteredPeople.length ||
+      toIndex >= filteredPeople.length
+    ) {
+      return;
+    }
+    const next = [...filteredPeople];
+    const [moved] = next.splice(fromIndex, 1);
+    next.splice(toIndex, 0, moved);
+    void persistReorderedList(next);
+  };
+
+  const commitOrderInput = (item: PersonItem, currentIndex: number) => {
+    if (!item.id) return;
+    const raw = orderDrafts[item.id];
+    setOrderDrafts((prev) => {
+      if (!(item.id! in prev)) return prev;
+      const next = { ...prev };
+      delete next[item.id!];
+      return next;
+    });
+    if (raw === undefined || raw.trim() === '') return;
+
+    const parsed = Math.floor(Number(raw));
+    if (!Number.isFinite(parsed) || parsed < 1) return;
+
+    const targetIndex = Math.max(0, Math.min(filteredPeople.length - 1, parsed - 1));
+    if (targetIndex !== currentIndex) {
+      handleMoveItem(currentIndex, targetIndex);
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -203,71 +299,105 @@ export const AdminPeople: React.FC = () => {
         {loading ? (
           <div className="p-8 text-center text-xs text-text-muted">กำลังโหลด...</div>
         ) : filteredPeople.length > 0 ? (
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs">
-              <thead className="bg-surface border-b border-gold-border/15 text-gold-text uppercase tracking-wider font-medium">
-                <tr>
-                  <th className="py-3 px-4">รูปภาพ</th>
-                  <th className="py-3 px-4">ชื่อ-นามสกุล</th>
-                  <th className="py-3 px-4">ภาษา</th>
-                  <th className="py-3 px-4">ตำแหน่ง</th>
-                  <th className="py-3 px-4">ปีการศึกษา</th>
-                  <th className="py-3 px-4">ชั้น/ห้อง</th>
-                  <th className="py-3 px-4">ลำดับ</th>
-                  <th className="py-3 px-4 text-center">การจัดการ</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gold-border/10">
-                {filteredPeople.map((item) => (
-                  <tr key={item.id} className="hover:bg-bg-alt/60 transition-colors">
-                    <td className="py-2.5 px-4">
-                      <div className="w-10 h-12 bg-bg-alt rounded-sm overflow-hidden border border-gold-border/20">
-                        {item.photo?.url || item.photoUrl ? (
-                          <img
-                            src={item.photo?.url || item.photoUrl}
-                            alt={item.name}
-                            className="w-full h-full object-cover"
-                          />
-                        ) : (
-                          <div className="w-full h-full bg-brand-soft flex items-center justify-center text-[10px] text-accent">
-                            สธ
+          <>
+            <div className="px-4 py-2 bg-surface border-b border-gold-border/15 flex items-center justify-between text-[11px] text-text-muted">
+              <span>พิมพ์แก้ตัวเลขลำดับ (กด Enter หรือคลิกนอกช่อง) เพื่ออัปเดตลำดับได้ทันที</span>
+              {reordering && <span className="text-gold-text font-medium">กำลังบันทึกลำดับ...</span>}
+            </div>
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-xs">
+                <thead className="bg-surface border-b border-gold-border/15 text-gold-text uppercase tracking-wider font-medium">
+                  <tr>
+                    <th className="py-3 px-4 w-24">ลำดับ</th>
+                    <th className="py-3 px-4">รูปภาพ</th>
+                    <th className="py-3 px-4">ชื่อ-นามสกุล</th>
+                    <th className="py-3 px-4">ภาษา</th>
+                    <th className="py-3 px-4">ตำแหน่ง</th>
+                    <th className="py-3 px-4">ปีการศึกษา</th>
+                    <th className="py-3 px-4 text-center">การจัดการ</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gold-border/10">
+                  {filteredPeople.map((item, idx) => (
+                    <tr
+                      key={item.id}
+                      className="transition-colors hover:bg-bg-alt/60"
+                    >
+                      <td className="py-3 px-4 whitespace-nowrap">
+                        <input
+                          type="number"
+                          min={1}
+                          max={filteredPeople.length}
+                          disabled={reordering}
+                          value={
+                            item.id && orderDrafts[item.id] !== undefined
+                              ? orderDrafts[item.id]
+                              : String(item.order || idx + 1)
+                          }
+                          onChange={(e) => {
+                            if (!item.id) return;
+                            const val = e.target.value;
+                            setOrderDrafts((prev) => ({ ...prev, [item.id!]: val }));
+                          }}
+                          onFocus={(e) => e.currentTarget.select()}
+                          onBlur={() => commitOrderInput(item, idx)}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter') {
+                              e.preventDefault();
+                              e.currentTarget.blur();
+                            } else if (e.key === 'Escape') {
+                              if (item.id) {
+                                setOrderDrafts((prev) => {
+                                  const next = { ...prev };
+                                  delete next[item.id!];
+                                  return next;
+                                });
+                              }
+                              e.currentTarget.blur();
+                            }
+                          }}
+                          aria-label={`ลำดับของ ${item.name}`}
+                          title="พิมพ์เลขลำดับแล้วกด Enter หรือคลิกนอกช่องเพื่ออัปเดต"
+                          className="w-14 px-1.5 py-1 text-center font-mono text-xs bg-surface border border-gold-border/35 rounded-sm text-heading focus:outline-none focus:border-gold disabled:opacity-50"
+                        />
+                      </td>
+                      <td className="py-2.5 px-4">
+                        <div className="w-10 h-12 bg-bg-alt rounded-sm overflow-hidden border border-gold-border/20">
+                          {item.photo?.url || item.photoUrl ? (
+                            <img
+                              src={item.photo?.url || item.photoUrl}
+                              alt={item.name}
+                              className="w-full h-full object-cover"
+                            />
+                          ) : (
+                            <div className="w-full h-full bg-brand-soft flex items-center justify-center text-[10px] text-accent">
+                              สธ
+                            </div>
+                          )}
+                        </div>
+                      </td>
+                      <td className="py-3 px-4 font-medium text-text">
+                        <div>{item.name}</div>
+                        {item.nameEn && (
+                          <div className="text-[10px] text-text-muted mt-0.5">EN: {item.nameEn}</div>
+                        )}
+                      </td>
+                      <td className="py-3 px-4 whitespace-nowrap">
+                        <AdminEnStatusBadge
+                          translated={hasAnyEnTranslation(item.nameEn, item.positionEn)}
+                        />
+                      </td>
+                      <td className="py-3 px-4 text-accent font-medium">
+                        <div>{item.position}</div>
+                        {item.role === 'advisor' && (
+                          <div className="text-[10px] text-gold-text font-normal mt-0.5">
+                            {getAdvisorGroupLabel(resolveAdvisorGroup(item), true)}
                           </div>
                         )}
-                      </div>
-                    </td>
-                    <td className="py-3 px-4 font-medium text-text">
-                      <div>{item.name}</div>
-                      {item.nameEn && (
-                        <div className="text-[10px] text-text-muted mt-0.5">EN: {item.nameEn}</div>
-                      )}
-                    </td>
-                    <td className="py-3 px-4 whitespace-nowrap">
-                      <AdminEnStatusBadge
-                        translated={hasAnyEnTranslation(
-                          item.nameEn,
-                          item.positionEn,
-                          item.gradeEn,
-                          item.quoteEn
-                        )}
-                      />
-                    </td>
-                    <td className="py-3 px-4 text-accent font-medium">
-                      <div>{item.position}</div>
-                      {item.role === 'advisor' && (
-                        <div className="text-[10px] text-gold-text font-normal mt-0.5">
-                          {getAdvisorGroupLabel(resolveAdvisorGroup(item), true)}
-                        </div>
-                      )}
-                    </td>
-                    <td className="py-3 px-4 text-gold-text">
-                      {item.yearTH}
-                    </td>
-                    <td className="py-3 px-4 text-text-muted">
-                      {item.grade || '-'}
-                    </td>
-                    <td className="py-3 px-4 font-mono text-text">
-                      {item.order}
-                    </td>
+                      </td>
+                      <td className="py-3 px-4 text-gold-text">
+                        {item.yearTH}
+                      </td>
                     <td className="py-3 px-4 text-center space-x-2">
                       <button
                         onClick={() => handleOpenEdit(item)}
@@ -282,11 +412,12 @@ export const AdminPeople: React.FC = () => {
                         ลบ
                       </button>
                     </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </>
         ) : (
           <div className="p-12 text-center text-xs text-text-muted">
             ยังไม่มีข้อมูลในหมวดหมู่นี้ กดปุ่ม "เพิ่มข้อมูลบุคคล" เพื่อเริ่มบันทึก
@@ -328,7 +459,6 @@ export const AdminPeople: React.FC = () => {
                     type="text"
                     value={yearTH}
                     onChange={(e) => setYearTH(e.target.value)}
-                    placeholder={academicYearTH}
                     className="w-full input-underline"
                     required
                   />
@@ -338,7 +468,7 @@ export const AdminPeople: React.FC = () => {
               {role === 'advisor' && (
                 <div>
                   <label className="block font-semibold text-heading mb-1">
-                    ฝ่ายในคณะกรรมการที่ปรึกษา *
+                    ฝ่าย *
                   </label>
                   <select
                     value={advisorGroup}
@@ -357,7 +487,7 @@ export const AdminPeople: React.FC = () => {
               <AdminLangTabs
                 value={editLang}
                 onChange={setEditLang}
-                enReady={hasAnyEnTranslation(nameEn, positionEn, gradeEn, quoteEn)}
+                enReady={hasAnyEnTranslation(nameEn, positionEn)}
               />
 
               <div className={editLang === 'th' ? 'space-y-4' : 'hidden'}>
@@ -367,35 +497,20 @@ export const AdminPeople: React.FC = () => {
                     type="text"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
-                    placeholder="เช่น นายธนภัทร สุขสมบูรณ์"
                     className="w-full input-underline"
                     required
                   />
                 </div>
 
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <label className="block font-semibold text-heading mb-1">ตำแหน่ง (ภาษาไทย) *</label>
-                    <input
-                      type="text"
-                      value={position}
-                      onChange={(e) => setPosition(e.target.value)}
-                      placeholder="เช่น นายกองค์การนักเรียน, อุปนายกองค์การนักเรียน, ฝ่ายเลขานุการ"
-                      className="w-full input-underline"
-                      required
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block font-semibold text-heading mb-1">ระดับชั้น / ห้องเรียน (ภาษาไทย)</label>
-                    <input
-                      type="text"
-                      value={grade}
-                      onChange={(e) => setGrade(e.target.value)}
-                      placeholder="เช่น ม.6/1 (ถ้ามี)"
-                      className="w-full input-underline"
-                    />
-                  </div>
+                <div>
+                  <label className="block font-semibold text-heading mb-1">ตำแหน่ง (ภาษาไทย) *</label>
+                  <input
+                    type="text"
+                    value={position}
+                    onChange={(e) => setPosition(e.target.value)}
+                    className="w-full input-underline"
+                    required
+                  />
                 </div>
               </div>
 
@@ -406,40 +521,25 @@ export const AdminPeople: React.FC = () => {
                     type="text"
                     value={nameEn}
                     onChange={(e) => setNameEn(e.target.value)}
-                    placeholder="e.g., Mr. Thanaphat Suksamboon"
                     className="w-full input-underline"
                   />
                 </div>
 
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <label className="block font-semibold text-heading mb-1">Position / Title (English — Optional)</label>
-                    <input
-                      type="text"
-                      value={positionEn}
-                      onChange={(e) => setPositionEn(e.target.value)}
-                      placeholder="e.g., Student Union President, Secretary"
-                      className="w-full input-underline"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block font-semibold text-heading mb-1">Grade / Class (English — Optional)</label>
-                    <input
-                      type="text"
-                      value={gradeEn}
-                      onChange={(e) => setGradeEn(e.target.value)}
-                      placeholder="e.g., M.6/1"
-                      className="w-full input-underline"
-                    />
-                  </div>
+                <div>
+                  <label className="block font-semibold text-heading mb-1">Position / Title (English — Optional)</label>
+                  <input
+                    type="text"
+                    value={positionEn}
+                    onChange={(e) => setPositionEn(e.target.value)}
+                    className="w-full input-underline"
+                  />
                 </div>
               </div>
 
               {/* อัปโหลดรูปถ่ายบุคคล (ใช้ร่วมกันทั้งสองภาษา) */}
               <div>
                 <label className="block font-semibold text-heading mb-1">
-                  รูปถ่ายบุคคล (อัปโหลดจากเครื่อง หรือระบุลิงก์)
+                  รูปถ่ายบุคคล
                 </label>
                 <ImageUploader
                   value={photo}
@@ -447,32 +547,8 @@ export const AdminPeople: React.FC = () => {
                   aspectRatioLabel="สัดส่วนแนวตั้ง 4:5"
                   folder="people_photos"
                   maxDimension={800}
-                />
-              </div>
-
-              <div className={editLang === 'th' ? 'block' : 'hidden'}>
-                <label className="block font-semibold text-heading mb-1">
-                  คติประจำใจ / สารประจำตัว — ภาษาไทย (ใช้แสดงหน้าแรกหากเป็นนายกองค์การนักเรียน)
-                </label>
-                <textarea
-                  value={quote}
-                  onChange={(e) => setQuote(e.target.value)}
-                  rows={3}
-                  placeholder="เช่น พวกเราพร้อมเป็นตัวแทนและรับฟังทุกเสียงของเพื่อนนักเรียนสาธิต มพ."
-                  className="w-full input-underline"
-                />
-              </div>
-
-              <div className={editLang === 'en' ? 'block' : 'hidden'}>
-                <label className="block font-semibold text-heading mb-1">
-                  Motto / Quote — English (Optional)
-                </label>
-                <textarea
-                  value={quoteEn}
-                  onChange={(e) => setQuoteEn(e.target.value)}
-                  rows={3}
-                  placeholder="e.g., We are ready to represent and listen to every student's voice."
-                  className="w-full input-underline"
+                  hideUrlTab
+                  hideAltText
                 />
               </div>
 

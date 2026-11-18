@@ -14,6 +14,8 @@ interface ImageUploaderProps {
   folder?: string;
   maxDimension?: number;
   maxSizeMB?: number;
+  hideUrlTab?: boolean;
+  hideAltText?: boolean;
 }
 
 export const ImageUploader: React.FC<ImageUploaderProps> = ({
@@ -22,7 +24,9 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
   aspectRatioLabel = "สัดส่วนแนะนำ 3:2 หรือ 4:5",
   folder = "uploads",
   maxDimension = 1600,
-  maxSizeMB
+  maxSizeMB,
+  hideUrlTab = false,
+  hideAltText = false,
 }) => {
   const [tab, setTab] = useState<'upload' | 'url'>('upload');
   const [isUploading, setIsUploading] = useState(false);
@@ -96,13 +100,15 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
           >
             อัปโหลดไฟล์จากเครื่อง / ถ่ายภาพ
           </button>
-          <button
-            type="button"
-            onClick={() => setTab('url')}
-            className={`pb-1 transition-colors ${tab === 'url' ? 'border-b-2 border-gold text-heading font-semibold' : 'text-text-muted hover:text-heading'}`}
-          >
-            ระบุลิงก์รูปภาพ (URL)
-          </button>
+          {!hideUrlTab && (
+            <button
+              type="button"
+              onClick={() => setTab('url')}
+              className={`pb-1 transition-colors ${tab === 'url' ? 'border-b-2 border-gold text-heading font-semibold' : 'text-text-muted hover:text-heading'}`}
+            >
+              ระบุลิงก์รูปภาพ (URL)
+            </button>
+          )}
         </div>
         <span className="text-[11px] text-gold-text">{aspectRatioLabel}</span>
       </div>
@@ -116,7 +122,9 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
             className="max-h-64 w-auto object-contain"
           />
           <div className="absolute inset-0 bg-anchor-bg/80 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-2 p-3 text-anchor-text text-xs">
-            <p className="line-clamp-1 text-center font-medium">{altText || "ไม่มีคำอธิบาย alt"}</p>
+            {!hideAltText && (
+              <p className="line-clamp-1 text-center font-medium">{altText || "ไม่มีคำอธิบาย alt"}</p>
+            )}
             <div className="flex items-center gap-2">
               <button
                 type="button"
@@ -138,7 +146,7 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
       ) : null}
 
       {/* Upload Tab */}
-      {tab === 'upload' && !currentUrl && (
+      {(hideUrlTab || tab === 'upload') && !currentUrl && (
         <div
           onClick={() => !isUploading && fileInputRef.current?.click()}
           className="border-2 border-dashed border-gold-border/30 hover:border-gold transition-colors cursor-pointer p-6 flex flex-col items-center justify-center text-center bg-bg-alt/40"
@@ -173,12 +181,11 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
       )}
 
       {/* URL Tab */}
-      {tab === 'url' && !currentUrl && (
+      {!hideUrlTab && tab === 'url' && !currentUrl && (
         <form onSubmit={handleUrlSubmit} className="space-y-2">
           <div className="flex gap-2">
             <input
               type="url"
-              placeholder="https://example.com/image.jpg"
               value={urlInput}
               onChange={(e) => setUrlInput(e.target.value)}
               className="flex-1 input-underline text-xs"
@@ -199,27 +206,28 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
       )}
 
       {/* Alt Text Input (Required for accessibility) */}
-      <div className="pt-2 border-t border-gold-border/15">
-        <label className="block text-[11px] font-medium text-heading mb-1">
-          คำอธิบายรูปภาพ (Alt Text ภาษาไทย - สำหรับการเข้าถึงและ SEO)
-        </label>
-        <input
-          type="text"
-          value={altText}
-          onChange={(e) => {
-            const nextAlt = e.target.value;
-            setAltText(nextAlt);
-            if (currentUrl) {
-              onChange({
-                url: currentUrl,
-                alt: nextAlt
-              });
-            }
-          }}
-          placeholder="เช่น พิธีไหว้ครูประจำปีการศึกษา 2569"
-          className="w-full text-xs input-underline"
-        />
-      </div>
+      {!hideAltText && (
+        <div className="pt-2 border-t border-gold-border/15">
+          <label className="block text-[11px] font-medium text-heading mb-1">
+            คำอธิบายรูปภาพ (Alt Text ภาษาไทย - สำหรับการเข้าถึงและ SEO)
+          </label>
+          <input
+            type="text"
+            value={altText}
+            onChange={(e) => {
+              const nextAlt = e.target.value;
+              setAltText(nextAlt);
+              if (currentUrl) {
+                onChange({
+                  url: currentUrl,
+                  alt: nextAlt
+                });
+              }
+            }}
+            className="w-full text-xs input-underline"
+          />
+        </div>
+      )}
 
       {errorMsg && (
         <p className="text-xs text-error bg-error-bg p-2 border-l-2 border-error">

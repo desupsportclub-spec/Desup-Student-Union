@@ -159,10 +159,10 @@ export const AdminBanners: React.FC = () => {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-gold-border/20">
         <div>
           <h1 className="font-serif text-2xl font-bold text-heading">
-            จัดการแบนเนอร์หน้าแรก (Hero Banner Slider)
+            จัดการแบนเนอร์หน้าแรก
           </h1>
           <p className="text-xs text-text-muted mt-1">
-            เพิ่ม แก้ไข และจัดลำดับแบนเนอร์ภาพสไลด์กว้างด้านบนสุดของหน้าหลักแบบเดียวกับ DSA UP
+            เพิ่ม แก้ไข และจัดลำดับแบนเนอร์ภาพ
           </p>
         </div>
         <div className="flex items-center gap-3">
@@ -320,7 +320,6 @@ export const AdminBanners: React.FC = () => {
                     type="text"
                     value={title}
                     onChange={(e) => setTitle(e.target.value)}
-                    placeholder="เช่น ยินดีต้อนรับสู่เว็บไซต์ทางการ องค์การนักเรียน"
                     className="w-full text-xs input-underline"
                   />
                 </div>
@@ -333,7 +332,6 @@ export const AdminBanners: React.FC = () => {
                     type="text"
                     value={subtitle}
                     onChange={(e) => setSubtitle(e.target.value)}
-                    placeholder="เช่น มุ่งมั่นพัฒนาวิชาการ ควบคู่กิจกรรมสร้างสรรค์"
                     className="w-full text-xs input-underline"
                   />
                 </div>
@@ -348,7 +346,6 @@ export const AdminBanners: React.FC = () => {
                     type="text"
                     value={titleEn}
                     onChange={(e) => setTitleEn(e.target.value)}
-                    placeholder="e.g., Welcome to the Official DeSUP Student Union Portal"
                     className="w-full text-xs input-underline"
                   />
                 </div>
@@ -361,7 +358,6 @@ export const AdminBanners: React.FC = () => {
                     type="text"
                     value={subtitleEn}
                     onChange={(e) => setSubtitleEn(e.target.value)}
-                    placeholder="e.g., Promoting identity and protecting student rights"
                     className="w-full text-xs input-underline"
                   />
                 </div>
@@ -389,7 +385,6 @@ export const AdminBanners: React.FC = () => {
                     type="text"
                     value={linkUrl}
                     onChange={(e) => setLinkUrl(e.target.value)}
-                    placeholder="เช่น /news หรือ /complaint หรือ https://..."
                     className="w-full text-xs input-underline"
                   />
                 </div>

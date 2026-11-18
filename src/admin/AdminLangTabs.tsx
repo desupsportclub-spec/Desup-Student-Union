@@ -91,7 +91,7 @@ export const AdminEnStatusBadge: React.FC<AdminEnStatusBadgeProps> = ({ translat
       title="ยังไม่มีข้อมูลภาษาอังกฤษ (จะแสดงภาษาไทยแทนในหน้า EN)"
       className="inline-flex items-center px-2 py-0.5 rounded-sm text-[10px] font-medium bg-bg-alt text-text-muted border border-gold-border/25 whitespace-nowrap"
     >
-      TH เท่านั้น
+      TH
     </span>
   );
 };

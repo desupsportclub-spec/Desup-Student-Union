@@ -3,14 +3,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useEffect } from 'react';
-import { setDoc, doc } from 'firebase/firestore';
-import { onAuthStateChanged, signInWithPopup, User } from 'firebase/auth';
+import React, { useState } from 'react';
+import { setDoc, doc, runTransaction } from 'firebase/firestore';
 import { motion } from 'motion/react';
-import { auth, db, googleProvider } from '../lib/firebase';
+import { db } from '../lib/firebase';
 import { useTranslation } from 'react-i18next';
 import { ComplaintType, ImageAsset } from '../types';
-import { generateTrackingCode, formatDateTime } from '../lib/format';
+import { formatCaseId, formatDateTime } from '../lib/format';
 import { SectionEyebrow, CornerBracket } from '../components/common/Ornament';
 import { LocLink } from '../components/common/LocLink';
 import { SeoHead } from '../components/common/SeoHead';
@@ -18,7 +17,6 @@ import { compressImageFile, fileToDataUrl, getImageDimensions } from '../lib/ima
 import {
   generateTicketReceiptBlob,
   saveComplaintToLocalHistory,
-  saveRecoveryLookup,
 } from '../lib/complaintTracking';
 import { incrementPublicComplaintStats } from '../lib/complaintStatsSync';
 import { SuccessCheck } from '../components/SuccessCheck';
@@ -47,7 +45,6 @@ export const Complaint: React.FC = () => {
   const [type, setType] = useState<ComplaintType>('complaint');
   const [title, setTitle] = useState('');
   const [body, setBody] = useState('');
-  const [location, setLocation] = useState('');
   const [anonymous, setAnonymous] = useState(true);
 
   // Contact Info (if not anonymous)
@@ -63,28 +60,13 @@ export const Complaint: React.FC = () => {
   const [attachedImages, setAttachedImages] = useState<ImageAsset[]>([]);
   const [imageCompressing, setImageCompressing] = useState(false);
 
-  // Recovery & Cross-device sync (Optional)
-  const [recoveryKeyword, setRecoveryKeyword] = useState('');
-  const [recoveryPin, setRecoveryPin] = useState('');
-  const [currentUser, setCurrentUser] = useState<User | null>(() => auth.currentUser);
-  const [linkGoogleAccount, setLinkGoogleAccount] = useState<boolean>(Boolean(auth.currentUser));
-  const [authLoading, setAuthLoading] = useState(false);
-
-  // Result Tracking Code
+  // รหัส Case ID ที่ออกหลังส่งเรื่องสำเร็จ
   const [generatedCode, setGeneratedCode] = useState<string>('');
   const [submittedTitle, setSubmittedTitle] = useState<string>('');
   const [submittedAtISO, setSubmittedAtISO] = useState<string>('');
   const [copied, setCopied] = useState(false);
   const [copiedLink, setCopiedLink] = useState(false);
   const [downloadingTicket, setDownloadingTicket] = useState(false);
-
-  useEffect(() => {
-    const unsub = onAuthStateChanged(auth, (u) => {
-      setCurrentUser(u);
-      if (u) setLinkGoogleAccount(true);
-    });
-    return () => unsub();
-  }, []);
 
   // Handle Image Attachments (compressed to webp <= 300KB)
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -170,49 +152,54 @@ export const Complaint: React.FC = () => {
       return;
     }
 
-    // 4. ตรวจสอบคำจำส่วนตัวและรหัส PIN กรณีกู้คืน
-    const hasKeyword = recoveryKeyword.trim().length > 0;
-    const hasPin = recoveryPin.trim().length > 0;
-    if (hasKeyword || hasPin) {
-      if (recoveryKeyword.trim().length < 2) {
-        setErrorMsg(t('complaint.errors.keywordTooShort'));
-        return;
-      }
-      if (recoveryPin.trim().length < 4) {
-        setErrorMsg(t('complaint.errors.pinTooShort'));
-        return;
-      }
-    }
-
     setSubmitting(true);
     setErrorMsg(null);
 
     const yearNum = parseInt(academicYearTH, 10) || 2569;
-    const trackingCode = generateTrackingCode(yearNum);
+    const yearKey = String(yearNum).padStart(4, '0');
     const cleanTitle = title.trim();
 
     try {
       const nowISO = new Date().toISOString();
 
-      const complaintPayload: Record<string, unknown> = {
-        trackingCode,
-        type,
-        title: cleanTitle,
-        body: body.trim(),
-        location: location.trim() || 'ไม่ระบุ',
-        anonymous,
-        status: 'received',
-        publicReplies: [],
-        createdAt: nowISO,
-        updatedAt: nowISO
-      };
+      // ออกรหัส Case ID แบบเรียงลำดับ SU-ปีการศึกษา-0001 พร้อมบันทึกเอกสารแบบ atomic transaction
+      const trackingCode = await runTransaction(db, async (tx) => {
+        const counterRef = doc(db, 'complaintCounters', yearKey);
+        const counterSnap = await tx.get(counterRef);
+        let seq = counterSnap.exists() ? Number(counterSnap.data().lastSeq || 0) + 1 : 1;
 
-      if (linkGoogleAccount && currentUser?.uid) {
-        complaintPayload.reporterUid = currentUser.uid;
-      }
+        while (true) {
+          const candidate = formatCaseId(yearNum, seq);
+          const existingSnap = await tx.get(doc(db, 'complaints', candidate));
+          if (!existingSnap.exists()) {
+            break;
+          }
+          seq += 1;
+        }
 
-      // Write public complaint document
-      await setDoc(doc(db, 'complaints', trackingCode), complaintPayload);
+        const finalCode = formatCaseId(yearNum, seq);
+        const complaintPayload: Record<string, unknown> = {
+          trackingCode: finalCode,
+          type,
+          title: cleanTitle,
+          body: body.trim(),
+          location: 'ไม่ระบุ',
+          anonymous,
+          status: 'received',
+          publicReplies: [],
+          createdAt: nowISO,
+          updatedAt: nowISO
+        };
+
+        if (counterSnap.exists()) {
+          tx.update(counterRef, { lastSeq: seq, updatedAt: nowISO });
+        } else {
+          tx.set(counterRef, { lastSeq: seq, updatedAt: nowISO });
+        }
+        tx.set(doc(db, 'complaints', finalCode), complaintPayload);
+
+        return finalCode;
+      });
 
       const followUpTasks: Promise<unknown>[] = [];
 
@@ -238,19 +225,12 @@ export const Complaint: React.FC = () => {
         );
       }
 
-      // Write SHA-256 recovery lookup entry if user configured personal recovery PIN
-      if (hasKeyword && hasPin) {
-        followUpTasks.push(
-          saveRecoveryLookup(recoveryKeyword, recoveryPin, trackingCode)
-        );
-      }
-
       // Increment public homepage summary counters
       followUpTasks.push(incrementPublicComplaintStats());
 
       await Promise.all(followUpTasks);
 
-      // Automatically save to this device's local history so user never loses it on this phone/iPad
+      // บันทึกรหัส Case ID ลงเครื่องไว้เพื่อให้เปิดติดตามซ้ำได้สะดวก
       saveComplaintToLocalHistory({
         trackingCode,
         title: cleanTitle,
@@ -270,20 +250,6 @@ export const Complaint: React.FC = () => {
       setErrorMsg(t('complaint.errors.submitFailed'));
     } finally {
       setSubmitting(false);
-    }
-  };
-
-  const handleConnectGoogle = async () => {
-    setAuthLoading(true);
-    setErrorMsg(null);
-    try {
-      const res = await signInWithPopup(auth, googleProvider);
-      setCurrentUser(res.user);
-      setLinkGoogleAccount(true);
-    } catch {
-      setErrorMsg(t('complaint.errors.googleFailed'));
-    } finally {
-      setAuthLoading(false);
     }
   };
 
@@ -422,27 +388,22 @@ export const Complaint: React.FC = () => {
               <label
                 key={typeId}
                 onClick={() => setType(typeId)}
-                className={`p-4 border rounded-sm cursor-pointer transition-all flex flex-col justify-between ${
+                className={`p-4 border rounded-sm cursor-pointer transition-all flex items-center justify-between gap-3 ${
                   type === typeId
                     ? 'border-gold bg-brand-soft/60 ring-1 ring-gold'
                     : 'border-gold-border/20 bg-surface-elevated hover:border-gold/60'
                 }`}
               >
-                <div className="flex items-start justify-between">
-                  <h3 className="font-serif text-base font-semibold text-heading">
-                    {t(`complaint.types.${typeId}.title`)}
-                  </h3>
-                  <input
-                    type="radio"
-                    name="complaintType"
-                    checked={type === typeId}
-                    onChange={() => setType(typeId)}
-                    className="accent-brand"
-                  />
-                </div>
-                <p className="text-xs text-text-muted mt-2 leading-relaxed">
-                  {t(`complaint.types.${typeId}.desc`)}
-                </p>
+                <h3 className="font-serif text-base font-semibold text-heading">
+                  {t(`complaint.types.${typeId}.title`)}
+                </h3>
+                <input
+                  type="radio"
+                  name="complaintType"
+                  checked={type === typeId}
+                  onChange={() => setType(typeId)}
+                  className="accent-brand shrink-0"
+                />
               </label>
             ))}
           </div>
@@ -480,22 +441,8 @@ export const Complaint: React.FC = () => {
                 type="text"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
-                placeholder={t('complaint.subjectPlaceholder')}
                 className="w-full text-xs input-underline"
                 required
-              />
-            </div>
-
-            <div>
-              <label className="block text-xs font-semibold text-heading mb-1">
-                {t('complaint.locationLabel')}
-              </label>
-              <input
-                type="text"
-                value={location}
-                onChange={(e) => setLocation(e.target.value)}
-                placeholder={t('complaint.locationPlaceholder')}
-                className="w-full text-xs input-underline"
               />
             </div>
 
@@ -507,7 +454,6 @@ export const Complaint: React.FC = () => {
                 value={body}
                 onChange={(e) => setBody(e.target.value)}
                 rows={6}
-                placeholder={t('complaint.bodyPlaceholder')}
                 className="w-full text-xs input-underline"
                 required
               />
@@ -515,13 +461,9 @@ export const Complaint: React.FC = () => {
 
             {/* แนบภาพถ่าย (สูงสุด 2 รูป เก็บใน subcollection ส่วนตัว) */}
             <div className="pt-2">
-              <label className="block text-xs font-semibold text-heading mb-1">
+              <label className="block text-xs font-semibold text-heading mb-2">
                 {t('complaint.attachLabel')}
               </label>
-
-              <div className="bg-warning-bg border border-warning/30 p-2.5 rounded-sm text-[11px] text-warning mb-2">
-                {t('complaint.attachWarning')}
-              </div>
 
               {attachedImages.length < 2 && (
                 <div className="flex items-center gap-2">
@@ -603,14 +545,9 @@ export const Complaint: React.FC = () => {
                   onChange={() => setAnonymous(true)}
                   className="accent-brand"
                 />
-                <div>
-                  <span className="font-serif text-sm font-semibold text-heading">
-                    {t('complaint.anonTitle')}
-                  </span>
-                  <p className="text-xs text-text-muted">
-                    {t('complaint.anonDesc')}
-                  </p>
-                </div>
+                <span className="font-serif text-sm font-semibold text-heading">
+                  {t('complaint.anonTitle')}
+                </span>
               </label>
 
               <label className="flex items-center gap-3 cursor-pointer pt-3 border-t border-gold-border/15">
@@ -621,14 +558,9 @@ export const Complaint: React.FC = () => {
                   onChange={() => setAnonymous(false)}
                   className="accent-brand"
                 />
-                <div>
-                  <span className="font-serif text-sm font-semibold text-heading">
-                    {t('complaint.identifiedTitle')}
-                  </span>
-                  <p className="text-xs text-text-muted">
-                    {t('complaint.identifiedDesc')}
-                  </p>
-                </div>
+                <span className="font-serif text-sm font-semibold text-heading">
+                  {t('complaint.identifiedTitle')}
+                </span>
               </label>
             </div>
 
@@ -643,7 +575,6 @@ export const Complaint: React.FC = () => {
                     type="text"
                     value={contactName}
                     onChange={(e) => setContactName(e.target.value)}
-                    placeholder={t('complaint.contactNamePlaceholder')}
                     className="w-full text-xs input-underline"
                     required={!anonymous}
                   />
@@ -655,9 +586,9 @@ export const Complaint: React.FC = () => {
                   </label>
                   <input
                     type="text"
+                    inputMode="numeric"
                     value={gradeClass}
                     onChange={(e) => setGradeClass(e.target.value)}
-                    placeholder={t('complaint.gradeClassPlaceholder')}
                     className="w-full text-xs input-underline"
                   />
                 </div>
@@ -667,10 +598,10 @@ export const Complaint: React.FC = () => {
                     {t('complaint.contactMethodLabel')}
                   </label>
                   <input
-                    type="text"
+                    type="tel"
+                    inputMode="tel"
                     value={contactMethod}
                     onChange={(e) => setContactMethod(e.target.value)}
-                    placeholder={t('complaint.contactMethodPlaceholder')}
                     className="w-full text-xs input-underline"
                     required={!anonymous}
                   />
@@ -692,78 +623,6 @@ export const Complaint: React.FC = () => {
                 </div>
               </div>
             )}
-
-            {/* ตัวเลือกช่วยจำและกู้คืนข้ามเครื่อง */}
-            <div className="p-4 sm:p-5 bg-surface border border-gold-border/40 rounded-sm space-y-4">
-              <div className="space-y-1">
-                <h3 className="font-serif text-sm font-semibold text-heading">
-                  {t('complaint.recoveryBoxTitle')}
-                </h3>
-                <p className="text-xs text-text-muted leading-relaxed">
-                  {t('complaint.recoveryBoxDesc')}
-                </p>
-              </div>
-
-              {/* ตัวเลือก ก: คำจำส่วนตัว + รหัส PIN */}
-              <div className="pt-2 border-t border-gold-border/15 space-y-2">
-                <label className="block text-xs font-semibold text-heading">
-                  {t('complaint.recoveryPinLabel')}
-                </label>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <input
-                    type="text"
-                    value={recoveryKeyword}
-                    onChange={(e) => setRecoveryKeyword(e.target.value)}
-                    placeholder={t('complaint.recoveryKeywordPlaceholder')}
-                    className="w-full text-xs input-underline bg-surface-elevated px-2.5"
-                    maxLength={50}
-                  />
-                  <input
-                    type="password"
-                    inputMode="numeric"
-                    value={recoveryPin}
-                    onChange={(e) => setRecoveryPin(e.target.value)}
-                    placeholder={t('complaint.recoveryPinPlaceholder')}
-                    className="w-full text-xs input-underline bg-surface-elevated px-2.5"
-                    maxLength={12}
-                  />
-                </div>
-                <p className="text-[11px] text-text-muted">
-                  {t('complaint.recoveryHashNote')}
-                </p>
-              </div>
-
-              {/* ตัวเลือก ข: เชื่อมต่อบัญชี Google เพื่อซิงค์ข้ามเครื่อง */}
-              <div className="pt-2 border-t border-gold-border/15 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                {currentUser ? (
-                  <label className="flex items-center gap-2 text-xs text-heading cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={linkGoogleAccount}
-                      onChange={(e) => setLinkGoogleAccount(e.target.checked)}
-                      className="accent-brand"
-                    />
-                    <span>
-                      {t('complaint.googleLinkChecked')}<strong>{currentUser.email}</strong>{t('complaint.googleLinkCheckedEnd')}
-                    </span>
-                  </label>
-                ) : (
-                  <>
-                    <span className="text-xs text-text-muted">
-                      {t('complaint.googleSyncDesc')}
-                    </span>
-                    <button
-                      type="button"
-                      onClick={handleConnectGoogle}
-                      disabled={authLoading}
-                      className="px-3.5 py-1.5 bg-surface-elevated border border-gold-border/25 hover:border-gold text-xs font-medium text-heading rounded-sm shrink-0 transition-colors"
-                    >
-                      {authLoading ? t('complaint.connectingGoogle') : t('complaint.connectGoogle')}
-                    </button>
-                  </>
-                )}
-              </div>
-            </div>
           </div>
 
           <div className="flex items-center justify-between pt-4">

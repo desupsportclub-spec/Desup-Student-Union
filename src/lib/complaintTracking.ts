@@ -171,7 +171,7 @@ export async function generateTicketReceiptBlob(params: {
 
   ctx.fillStyle = '#9C7A2B';
   ctx.font = '600 15px sans-serif';
-  ctx.fillText('รหัสติดตามเรื่องร้องเรียน (TRACKING CODE)', 68, 166);
+  ctx.fillText('CASE ID สำหรับติดตามความคืบหน้า', 68, 166);
 
   ctx.fillStyle = '#4B1F7A';
   ctx.font = '700 44px monospace';

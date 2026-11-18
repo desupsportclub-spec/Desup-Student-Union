@@ -42,6 +42,7 @@ import { useSiteSettings } from '../context/SiteSettingsContext';
 import { computeComplaintStats, syncComplaintStatsToSettings } from '../lib/complaintStatsSync';
 import { pickL10n } from '../lib/l10n';
 import { FallbackLangBadge } from '../components/common/FallbackLangBadge';
+import { resolveCurrentPresident } from '../lib/personRoles';
 import {
   getNewsCoverUrl,
   getNewsYouTubeUrl,
@@ -75,24 +76,6 @@ function splitHomeNews(newsList: NewsItem[]) {
   return { featured, recent, pinnedList, photos };
 }
 
-function resolvePresident(peopleList: PersonItem[]): PersonItem | null {
-  const candidates = peopleList.filter((p) => {
-    const pos = (p.position || '').trim();
-    const isVice = pos.includes('อุปนายก') || pos.includes('รองนายก') || pos.includes('รองประธาน');
-    const isPresidentTitle = (pos.includes('นายก') || pos.includes('ประธาน')) && !isVice;
-    return p.role === 'president' || isPresidentTitle;
-  });
-  candidates.sort((a, b) => {
-    const yrDiff = (b.yearTH || '').localeCompare(a.yearTH || '');
-    if (yrDiff !== 0) return yrDiff;
-    const timeA = a.updatedAt || a.createdAt || '';
-    const timeB = b.updatedAt || b.createdAt || '';
-    if (timeB !== timeA) return timeB.localeCompare(timeA);
-    return (a.order || 999) - (b.order || 999);
-  });
-  return candidates.length > 0 ? candidates[0] : null;
-}
-
 export const Home: React.FC = () => {
   const { t } = useTranslation();
   const { lang } = useLanguage();
@@ -118,7 +101,9 @@ export const Home: React.FC = () => {
   const [upcomingEvents, setUpcomingEvents] = useState<EventItem[]>(() =>
     initialEvents ? initialEvents.filter((e) => isEventActiveOrUpcoming(e)).slice(0, 6) : []
   );
-  const [president, setPresident] = useState<PersonItem | null>(() => (initialPeople ? resolvePresident(initialPeople) : null));
+  const [president, setPresident] = useState<PersonItem | null>(() =>
+    initialPeople ? resolveCurrentPresident(initialPeople, academicYearTH) : null
+  );
   const [galleryPhotos, setGalleryPhotos] = useState<{ src: string; title: string; titleEn?: string }[]>(
     () => initialNewsSplit?.photos || []
   );
@@ -163,7 +148,7 @@ export const Home: React.FC = () => {
 
     const loadPeopleTask = loadPeopleList((list) => {
       if (!active) return;
-      setPresident(resolvePresident(list));
+      setPresident(resolveCurrentPresident(list, academicYearTH));
     });
 
     const loadComplaintsTask = auth.currentUser
@@ -193,7 +178,7 @@ export const Home: React.FC = () => {
     return () => {
       active = false;
     };
-  }, [applyNewsList]);
+  }, [applyNewsList, academicYearTH]);
 
   // เลือกคำกล่าวหัวข้อ สาร และชื่อนายกองค์การตามภาษาปัจจุบัน พร้อมคำแปลเริ่มต้นกรณีข้อความยังเป็นค่าตั้งต้น
   const headlineRes =

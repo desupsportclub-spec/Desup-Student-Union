@@ -69,7 +69,7 @@ export const AdminDashboard: React.FC = () => {
             ภาพรวมระบบบริหารจัดการ
           </h1>
           <p className="text-xs text-text-muted mt-1">
-            ยินดีต้อนรับสู่ระบบหลังบ้าน องค์การนักเรียน โรงเรียนสาธิตมหาวิทยาลัยพะเยา
+            ยินดีต้อนรับสู่ระบบผู้ดูแล องค์การนักเรียน โรงเรียนสาธิตมหาวิทยาลัยพะเยา
           </p>
         </div>
 
@@ -94,7 +94,7 @@ export const AdminDashboard: React.FC = () => {
       <div className="grid grid-cols-2 md:grid-cols-4 gap-5">
         <div className="bg-surface-elevated border border-gold-border/20 p-5 rounded-sm shadow-editorial-sm">
           <span className="text-[11px] text-gold-text font-semibold uppercase tracking-wider">
-            เรื่องร้องเรียนรอตรวจ
+            เรื่องร้องเรียนรอดำเนินการ
           </span>
           <div className="font-serif text-3xl font-bold text-accent mt-2">
             {pendingComplaints.length}
@@ -112,7 +112,7 @@ export const AdminDashboard: React.FC = () => {
             {newsCount}
           </div>
           <p className="text-[10px] text-text-muted mt-1">
-            บทความและประกาศ
+            เรื่อง
           </p>
         </div>
 
@@ -124,7 +124,7 @@ export const AdminDashboard: React.FC = () => {
             {eventsCount}
           </div>
           <p className="text-[10px] text-text-muted mt-1">
-            กำหนดการตลอดปีการศึกษา
+            กิจกรรม
           </p>
         </div>
 
@@ -136,7 +136,7 @@ export const AdminDashboard: React.FC = () => {
             {formatNumber(totalVisits)}
           </div>
           <p className="text-[10px] text-text-muted mt-1">
-            ครั้งสะสม
+            ครั้ง
           </p>
         </div>
       </div>

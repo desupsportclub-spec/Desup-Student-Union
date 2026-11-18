@@ -211,7 +211,7 @@ export const AdminDownloads: React.FC = () => {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-gold-border/20 pb-4">
         <div>
           <h1 className="font-serif text-2xl font-semibold text-heading">
-            จัดการเอกสารดาวน์โหลด & ไฟล์ PDF
+            จัดการเอกสารดาวน์โหลด
           </h1>
           <p className="text-xs text-text-muted mt-1">
             รองรับการอัปโหลดไฟล์ PDF จากเครื่องโดยตรง (สูงสุด 15MB) พร้อมระบบเปิดดูและพิมพ์ออนไลน์
@@ -336,7 +336,6 @@ export const AdminDownloads: React.FC = () => {
                   type="text"
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
-                  placeholder="เช่น แบบฟอร์มขออนุมัติโครงการ (สธ.๐๑)"
                   className="w-full input-underline text-xs"
                   required
                 />
@@ -350,7 +349,6 @@ export const AdminDownloads: React.FC = () => {
                   type="text"
                   value={titleEn}
                   onChange={(e) => setTitleEn(e.target.value)}
-                  placeholder="e.g., Student Project Proposal Request Form"
                   className="w-full input-underline text-xs"
                 />
               </div>
@@ -444,7 +442,6 @@ export const AdminDownloads: React.FC = () => {
                       type="url"
                       value={fileUrl}
                       onChange={(e) => setFileUrl(e.target.value)}
-                      placeholder="https://example.com/document.pdf หรือ Google Drive"
                       className="w-full input-underline text-xs"
                     />
                   </div>

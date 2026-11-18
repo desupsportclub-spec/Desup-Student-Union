@@ -156,7 +156,7 @@ const AdminLayoutShell: React.FC = () => {
           {/* สลับโหมดสว่าง / มืด สำหรับผู้ดูแลระบบ */}
           <div className="flex items-center justify-between gap-2 pb-1">
             <span className="text-[11px] text-text-muted font-medium">ธีมหน้าจอ</span>
-            <ThemeSwitcher variant="compact" className="shrink-0" />
+            <ThemeSwitcher variant="dropdown" dropUp className="shrink-0" />
           </div>
 
           <button
@@ -259,8 +259,8 @@ const AdminLayoutShell: React.FC = () => {
             })}
             <div className="pt-2 border-t border-gold-border/15 space-y-2">
               <div className="flex items-center justify-between gap-2 px-1 py-1">
-                <span className="text-xs text-text-muted">โหมดแสดงผล</span>
-                <ThemeSwitcher variant="compact" />
+                <span className="text-xs text-text-muted">ธีมหน้าจอ</span>
+                <ThemeSwitcher variant="dropdown" dropUp />
               </div>
               <button
                 type="button"

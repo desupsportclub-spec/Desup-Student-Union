@@ -365,7 +365,6 @@ export const AdminUsers: React.FC = () => {
                   type="email"
                   value={newEmail}
                   onChange={(e) => setNewEmail(e.target.value)}
-                  placeholder="example@gmail.com หรือ @up.ac.th"
                   className="w-full input-underline"
                   required
                 />
@@ -382,7 +381,6 @@ export const AdminUsers: React.FC = () => {
                   type="text"
                   value={newDisplayName}
                   onChange={(e) => setNewDisplayName(e.target.value)}
-                  placeholder="เช่น นายธนภัทร (ฝ่ายประชาสัมพันธ์)"
                   className="w-full input-underline"
                 />
               </div>

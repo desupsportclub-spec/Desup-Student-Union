@@ -169,6 +169,30 @@ service cloud.firestore {
       }
     }
 
+    // Sequential Case ID counter per academic year (SU-YYYY-0001)
+    match /complaintCounters/{yearTH} {
+      allow get: if yearTH.matches('^[0-9]{4}$');
+      allow list: if isAdmin();
+      allow create: if yearTH.matches('^[0-9]{4}$') &&
+                       request.resource.data.keys().hasAll(['lastSeq', 'updatedAt']) &&
+                       request.resource.data.keys().hasOnly(['lastSeq', 'updatedAt']) &&
+                       request.resource.data.lastSeq is int &&
+                       request.resource.data.lastSeq >= 1 &&
+                       request.resource.data.lastSeq <= 1000000 &&
+                       request.resource.data.updatedAt is string &&
+                       request.resource.data.updatedAt.size() <= 40;
+      allow update: if isAdmin() || (
+                       yearTH.matches('^[0-9]{4}$') &&
+                       request.resource.data.diff(resource.data).affectedKeys().hasOnly(['lastSeq', 'updatedAt']) &&
+                       request.resource.data.lastSeq is int &&
+                       request.resource.data.lastSeq > resource.data.lastSeq &&
+                       request.resource.data.lastSeq <= resource.data.lastSeq + 20 &&
+                       request.resource.data.updatedAt is string &&
+                       request.resource.data.updatedAt.size() <= 40
+                     );
+      allow delete: if isAdmin();
+    }
+
     // Privacy-preserving SHA-256 complaint recovery lookup index (get by exact 64-char hex hash only, no listing)
     match /complaintLookups/{lookupHash} {
       allow get: if lookupHash.matches('^[a-f0-9]{64}$');

@@ -144,7 +144,7 @@ export const AdminEvents: React.FC = () => {
             จัดการปฏิทินกิจกรรม
           </h1>
           <p className="text-xs text-text-muted">
-            กำหนดการ กิจกรรมวิชาการ กีฬา และการประชุมขององค์การนักเรียน
+            กำหนดการกิจกรรมนักเรียน
           </p>
         </div>
 
@@ -275,7 +275,6 @@ export const AdminEvents: React.FC = () => {
                   type="text"
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
-                  placeholder="เช่น การแข่งขันกรีฑาสาธิตเกมส์"
                   className="w-full input-underline"
                   required
                 />
@@ -287,7 +286,6 @@ export const AdminEvents: React.FC = () => {
                   type="text"
                   value={titleEn}
                   onChange={(e) => setTitleEn(e.target.value)}
-                  placeholder="e.g., Satit Games Annual Athletics Competition"
                   className="w-full input-underline"
                 />
               </div>
@@ -326,7 +324,6 @@ export const AdminEvents: React.FC = () => {
                   type="text"
                   value={location}
                   onChange={(e) => setLocation(e.target.value)}
-                  placeholder="เช่น สนามกีฬา, หอประชุม"
                   className="w-full input-underline"
                 />
               </div>
@@ -337,7 +334,6 @@ export const AdminEvents: React.FC = () => {
                   type="text"
                   value={locationEn}
                   onChange={(e) => setLocationEn(e.target.value)}
-                  placeholder="e.g., Main Stadium, Assembly Hall"
                   className="w-full input-underline"
                 />
               </div>
@@ -349,7 +345,6 @@ export const AdminEvents: React.FC = () => {
                   onChange={(e) => setDescription(e.target.value)}
                   rows={3}
                   className="w-full input-underline"
-                  placeholder="รายละเอียดกำหนดการ..."
                 />
               </div>
 
@@ -360,7 +355,6 @@ export const AdminEvents: React.FC = () => {
                   onChange={(e) => setDescriptionEn(e.target.value)}
                   rows={3}
                   className="w-full input-underline"
-                  placeholder="Schedule details and activity overview in English..."
                 />
               </div>
 

@@ -368,10 +368,10 @@ export const AdminNews: React.FC = () => {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-gold-border/20 pb-4">
         <div>
           <h1 className="font-serif text-2xl font-semibold text-heading">
-            จัดการข่าวสารและประกาศ
+            จัดการข่าวสาร
           </h1>
           <p className="text-xs text-text-muted">
-            สร้าง แก้ไข กดปุ่มปักหมุดขึ้นหน้าแรก และดึงวิดีโอ/ปกจาก YouTube อัตโนมัติ
+            สร้าง แก้ไข ปักหมุด
           </p>
         </div>
 
@@ -401,12 +401,15 @@ export const AdminNews: React.FC = () => {
       )}
 
       {/* Search Input */}
-      <div className="w-full max-w-sm">
+      <div className="w-full max-w-sm flex items-center gap-2">
+        <label htmlFor="admin-news-search" className="text-xs font-medium text-heading shrink-0">
+          ค้นหาข่าว:
+        </label>
         <input
+          id="admin-news-search"
           type="text"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          placeholder="ค้นหาตามหัวข้อข่าว..."
           className="w-full text-xs input-underline bg-surface-elevated px-3 py-2 border border-gold-border/25 rounded-sm"
         />
       </div>
@@ -565,7 +568,6 @@ export const AdminNews: React.FC = () => {
                   type="text"
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
-                  placeholder="เช่น สรุปผลการแข่งขันกีฬาสาธิตเกมส์ ครั้งที่ 12 (หรือวางลิงก์ YouTube เพื่อดึงชื่ออัตโนมัติ)"
                   className="w-full text-xs input-underline"
                   required
                 />
@@ -579,7 +581,6 @@ export const AdminNews: React.FC = () => {
                   type="text"
                   value={titleEn}
                   onChange={(e) => setTitleEn(e.target.value)}
-                  placeholder="e.g., Summary of the 12th Satit Games Sports Competition"
                   className="w-full text-xs input-underline"
                 />
               </div>
@@ -610,7 +611,6 @@ export const AdminNews: React.FC = () => {
                     type="url"
                     value={videoUrl}
                     onChange={(e) => setVideoUrl(e.target.value)}
-                    placeholder="วางลิงก์ YouTube, Facebook, Instagram หรือ TikTok..."
                     className="w-full text-xs input-underline"
                   />
                 </div>
@@ -717,21 +717,25 @@ export const AdminNews: React.FC = () => {
                   </div>
                 )}
 
-                <div className="grid grid-cols-1 sm:grid-cols-12 gap-2">
-                  <input
-                    type="url"
-                    value={newSocialUrl}
-                    onChange={(e) => setNewSocialUrl(e.target.value)}
-                    placeholder="วางลิงก์ Facebook / Instagram / TikTok / YouTube..."
-                    className="sm:col-span-7 text-xs input-underline bg-surface-elevated px-2"
-                  />
-                  <input
-                    type="text"
-                    value={newSocialLabel}
-                    onChange={(e) => setNewSocialLabel(e.target.value)}
-                    placeholder="คำอธิบายลิงก์ (ไม่บังคับ)"
-                    className="sm:col-span-3 text-xs input-underline bg-surface-elevated px-2"
-                  />
+                <div className="grid grid-cols-1 sm:grid-cols-12 gap-2 items-end">
+                  <div className="sm:col-span-7">
+                    <label className="block text-[11px] text-text-muted mb-1">ลิงก์โซเชียลมีเดีย</label>
+                    <input
+                      type="url"
+                      value={newSocialUrl}
+                      onChange={(e) => setNewSocialUrl(e.target.value)}
+                      className="w-full text-xs input-underline bg-surface-elevated px-2"
+                    />
+                  </div>
+                  <div className="sm:col-span-3">
+                    <label className="block text-[11px] text-text-muted mb-1">คำอธิบายลิงก์ (ไม่บังคับ)</label>
+                    <input
+                      type="text"
+                      value={newSocialLabel}
+                      onChange={(e) => setNewSocialLabel(e.target.value)}
+                      className="w-full text-xs input-underline bg-surface-elevated px-2"
+                    />
+                  </div>
                   <button
                     type="button"
                     onClick={handleAddSocialLink}
@@ -766,7 +770,6 @@ export const AdminNews: React.FC = () => {
                   value={excerpt}
                   onChange={(e) => setExcerpt(e.target.value)}
                   rows={2}
-                  placeholder="ข้อความสรุป 1-2 บรรทัดสำหรับแสดงบนการ์ดข่าวหน้าแรก..."
                   className="w-full text-xs input-underline"
                 />
               </div>
@@ -779,7 +782,6 @@ export const AdminNews: React.FC = () => {
                   value={excerptEn}
                   onChange={(e) => setExcerptEn(e.target.value)}
                   rows={2}
-                  placeholder="Short 1-2 line summary shown on news cards in English view..."
                   className="w-full text-xs input-underline"
                 />
               </div>
