@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { AdvisorGroup, PersonItem } from '../types';
+import { AdvisorGroup, NewsItem, PersonItem, RegulationSubType } from '../types';
 
 export interface SiteConfig {
   name: string;
@@ -157,4 +157,31 @@ export function getAdvisorGroupLabel(group: AdvisorGroup, short = false): string
   const found = ADVISOR_GROUPS.find((g) => g.id === group);
   if (!found) return ADVISOR_GROUPS[1].label;
   return short ? found.shortLabel : found.label;
+}
+
+export const REGULATION_SUBTYPES: { id: RegulationSubType; label: string; labelEn: string }[] = [
+  { id: 'bylaw', label: 'ข้อบังคับ', labelEn: 'Bylaws' },
+  { id: 'rule', label: 'ระเบียบ', labelEn: 'Regulations' },
+  { id: 'order', label: 'คำสั่ง', labelEn: 'Orders' },
+  { id: 'announcement', label: 'ประกาศ', labelEn: 'Announcements' },
+];
+
+export function resolveRegulationSubType(
+  item: Pick<NewsItem, 'category' | 'regulationType' | 'title' | 'titleEn'>
+): RegulationSubType | null {
+  if (
+    item.regulationType === 'bylaw' ||
+    item.regulationType === 'rule' ||
+    item.regulationType === 'order' ||
+    item.regulationType === 'announcement'
+  ) {
+    return item.regulationType;
+  }
+  if (item.category === 'order') return 'order';
+  const title = `${item.title || ''} ${item.titleEn || ''}`.toLowerCase();
+  if (title.includes('ข้อบังคับ') || title.includes('bylaw') || title.includes('charter')) return 'bylaw';
+  if (title.includes('ระเบียบ') || title.includes('regulation') || title.includes('rule')) return 'rule';
+  if (title.includes('คำสั่ง') || title.includes('order')) return 'order';
+  if (title.includes('ประกาศ') || title.includes('announcement') || title.includes('notice')) return 'announcement';
+  return null;
 }

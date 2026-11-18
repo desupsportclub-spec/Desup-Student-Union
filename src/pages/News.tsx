@@ -3,11 +3,12 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { MagnifyingGlass, X } from '@phosphor-icons/react';
 import { getCachedNewsSync, loadPublishedNews } from '../lib/publicDataService';
-import { NewsItem } from '../types';
+import { NewsItem, RegulationSubType } from '../types';
 import { formatDate, formatNumber } from '../lib/format';
 import { NewsCategoryBadge } from '../components/common/StatusBadge';
 import { SectionEyebrow, CornerBracket, PinIcon } from '../components/common/Ornament';
@@ -18,6 +19,7 @@ import { SeoHead } from '../components/common/SeoHead';
 import { useLanguage } from '../context/LanguageContext';
 import { pickL10n } from '../lib/l10n';
 import { FallbackLangBadge } from '../components/common/FallbackLangBadge';
+import { REGULATION_SUBTYPES, resolveRegulationSubType } from '../config/site';
 
 const CATEGORY_IDS = ['all', 'pr', 'activity', 'regulation', 'knowledge', 'video'] as const;
 
@@ -32,8 +34,11 @@ export const News: React.FC = () => {
   const { lang } = useLanguage();
   const { category: urlCategory } = useParams<{ category?: string }>();
   const [selectedCat, setSelectedCat] = useState<string>(normalizeNewsFilterCategory(urlCategory));
+  const [selectedRegType, setSelectedRegType] = useState<'all' | RegulationSubType>('all');
+  const [searchOpen, setSearchOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
+  const searchInputRef = useRef<HTMLInputElement>(null);
 
   const initialCached = getCachedNewsSync();
   const [allNews, setAllNews] = useState<NewsItem[]>(() => initialCached || []);
@@ -42,6 +47,7 @@ export const News: React.FC = () => {
 
   useEffect(() => {
     setSelectedCat(normalizeNewsFilterCategory(urlCategory));
+    setSelectedRegType('all');
     setDisplayCount(9);
   }, [urlCategory]);
 
@@ -51,6 +57,13 @@ export const News: React.FC = () => {
     }, 200);
     return () => clearTimeout(handler);
   }, [searchTerm]);
+
+  useEffect(() => {
+    if (searchOpen) {
+      const timer = window.setTimeout(() => searchInputRef.current?.focus(), 20);
+      return () => window.clearTimeout(timer);
+    }
+  }, [searchOpen]);
 
   useEffect(() => {
     let active = true;
@@ -78,6 +91,9 @@ export const News: React.FC = () => {
       if (selectedCat !== 'all') {
         if (selectedCat === 'regulation') {
           if (item.category !== 'regulation' && item.category !== 'order') return false;
+          if (selectedRegType !== 'all' && resolveRegulationSubType(item) !== selectedRegType) {
+            return false;
+          }
         } else if (item.category !== selectedCat) {
           return false;
         }
@@ -90,7 +106,7 @@ export const News: React.FC = () => {
         (item.excerptEn || '').toLowerCase().includes(term)
       );
     });
-  }, [allNews, selectedCat, debouncedSearch]);
+  }, [allNews, selectedCat, selectedRegType, debouncedSearch]);
 
   const visibleNews = useMemo(
     () => filteredNews.slice(0, displayCount),
@@ -109,14 +125,15 @@ export const News: React.FC = () => {
         </h1>
       </div>
 
-      {/* แถบตัวกรองหมวดหมู่และช่องค้นหา */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-gold-border/15">
-        <div className="flex items-center gap-6 overflow-x-auto pb-2 scrollbar-none text-xs font-medium">
+      {/* แถบตัวกรองหมวดหมู่และปุ่มค้นหา */}
+      <div className="flex flex-wrap items-center justify-between gap-3 pb-4 border-b border-gold-border/15">
+        <div className="flex-1 min-w-0 flex items-center gap-5 sm:gap-6 overflow-x-auto pb-2 scrollbar-none text-xs font-medium">
           {CATEGORY_IDS.map((catId) => (
             <button
               key={catId}
               onClick={() => {
                 setSelectedCat(catId);
+                setSelectedRegType('all');
                 setDisplayCount(9);
               }}
               className={`pb-2 whitespace-nowrap transition-colors relative ${
@@ -133,25 +150,73 @@ export const News: React.FC = () => {
           ))}
         </div>
 
-        <div className="relative w-full md:w-64">
-          <input
-            type="text"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            placeholder={t('news.searchPlaceholder')}
-            className="w-full text-xs input-underline pr-6"
-          />
-          {searchTerm && (
+        {searchOpen || searchTerm ? (
+          <div className="w-full md:w-64 h-9 px-3 rounded-sm border border-gold-border/40 bg-surface flex items-center gap-2 focus-within:border-gold transition-colors shrink-0">
+            <MagnifyingGlass className="w-4 h-4 text-gold-text shrink-0" weight="light" />
+            <input
+              ref={searchInputRef}
+              type="text"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Escape') {
+                  setSearchTerm('');
+                  setSearchOpen(false);
+                }
+              }}
+              aria-label={t('nav.searchButton')}
+              className="flex-1 min-w-0 bg-transparent text-xs text-heading focus:outline-none"
+            />
             <button
-              onClick={() => setSearchTerm('')}
+              type="button"
+              onClick={() => {
+                setSearchTerm('');
+                setSearchOpen(false);
+              }}
               aria-label={t('site.close')}
-              className="absolute right-1 top-2.5 text-xs text-text-muted hover:text-heading"
+              className="text-text-muted hover:text-heading transition-colors cursor-pointer shrink-0"
             >
-              ✕
+              <X className="w-3.5 h-3.5" />
             </button>
-          )}
-        </div>
+          </div>
+        ) : (
+          <button
+            type="button"
+            onClick={() => setSearchOpen(true)}
+            aria-label={t('nav.searchButton')}
+            title={t('nav.searchButton')}
+            className="relative inline-flex items-center justify-center w-9 h-9 rounded-sm border border-gold-border/30 bg-surface/60 text-heading hover:border-gold-text hover:bg-surface transition-colors cursor-pointer shrink-0"
+          >
+            <MagnifyingGlass className="w-4 h-4" weight="light" />
+          </button>
+        )}
       </div>
+
+      {/* ปุ่มเลือกประเภทในหน้า ข้อบังคับ ระเบียบ คำสั่ง ประกาศ */}
+      {selectedCat === 'regulation' && (
+        <div className="flex flex-wrap items-center gap-2 -mt-2 sm:-mt-4">
+          {(['all', ...REGULATION_SUBTYPES.map((s) => s.id)] as const).map((subId) => {
+            const active = selectedRegType === subId;
+            return (
+              <button
+                key={subId}
+                type="button"
+                onClick={() => {
+                  setSelectedRegType(subId);
+                  setDisplayCount(9);
+                }}
+                className={`px-3.5 py-1.5 text-xs font-medium rounded-sm border transition-colors cursor-pointer ${
+                  active
+                    ? 'bg-brand text-brand-contrast border-gold shadow-editorial-sm'
+                    : 'bg-surface text-heading border-gold-border/35 hover:border-gold hover:bg-brand-soft/60'
+                }`}
+              >
+                {t(`news.regulationSubTypes.${subId}`)}
+              </button>
+            );
+          })}
+        </div>
+      )}
 
       {/* รายการข่าวสาร */}
       {loading && allNews.length === 0 ? (
@@ -214,7 +279,10 @@ export const News: React.FC = () => {
                           <span>{t('home.pinnedTag')}</span>
                         </span>
                       )}
-                      <NewsCategoryBadge category={item.category} />
+                      <NewsCategoryBadge
+                        category={item.category}
+                        regulationType={resolveRegulationSubType(item)}
+                      />
                       <span aria-hidden="true">·</span>
                       <span>{formatDate(item.createdAt, lang, true)}</span>
                       <FallbackLangBadge show={titleRes.isFallback} />

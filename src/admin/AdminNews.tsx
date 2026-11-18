@@ -6,9 +6,10 @@
 import React, { useState, useEffect } from 'react';
 import { collection, getDocs, doc, setDoc, updateDoc, deleteDoc } from 'firebase/firestore';
 import { db } from '../lib/firebase';
-import { NewsItem, NewsCategory, ImageAsset, SocialMediaLink } from '../types';
+import { NewsItem, NewsCategory, RegulationSubType, ImageAsset, SocialMediaLink } from '../types';
 import { formatThaiDate, slugifyThai } from '../lib/format';
 import { NewsCategoryBadge } from '../components/common/StatusBadge';
+import { REGULATION_SUBTYPES, resolveRegulationSubType } from '../config/site';
 import { ImageUploader } from '../components/common/ImageUploader';
 import {
   detectSocialPlatform,
@@ -60,6 +61,7 @@ export const AdminNews: React.FC = () => {
   const [title, setTitle] = useState('');
   const [titleEn, setTitleEn] = useState('');
   const [category, setCategory] = useState<NewsCategory>('pr');
+  const [regulationType, setRegulationType] = useState<RegulationSubType>('bylaw');
   const [excerpt, setExcerpt] = useState('');
   const [excerptEn, setExcerptEn] = useState('');
   const [coverImage, setCoverImage] = useState<ImageAsset>({ url: '', alt: '' });
@@ -176,6 +178,7 @@ export const AdminNews: React.FC = () => {
     setTitle('');
     setTitleEn('');
     setCategory('pr');
+    setRegulationType('bylaw');
     setExcerpt('');
     setExcerptEn('');
     setCoverImage({ url: '', alt: '' });
@@ -197,6 +200,7 @@ export const AdminNews: React.FC = () => {
     setTitle(item.title);
     setTitleEn(item.titleEn || '');
     setCategory(item.category === 'order' ? 'regulation' : item.category);
+    setRegulationType(resolveRegulationSubType(item) || 'bylaw');
     setExcerpt(item.excerpt || '');
     setExcerptEn(item.excerptEn || '');
     setCoverImage(item.coverImage || (item.coverUrl ? { url: item.coverUrl, alt: item.title } : { url: '', alt: '' }));
@@ -315,6 +319,7 @@ export const AdminNews: React.FC = () => {
         titleEn: titleEn.trim(),
         slug: slugifyThai(title.trim()),
         category,
+        ...(category === 'regulation' ? { regulationType } : {}),
         excerpt: excerpt.trim(),
         excerptEn: excerptEn.trim(),
         content: contentHTML,
@@ -464,7 +469,10 @@ export const AdminNews: React.FC = () => {
                         <AdminEnStatusBadge translated={hasEn} />
                       </td>
                       <td className="py-3 px-4 whitespace-nowrap">
-                        <NewsCategoryBadge category={item.category} />
+                        <NewsCategoryBadge
+                          category={item.category}
+                          regulationType={resolveRegulationSubType(item)}
+                        />
                       </td>
                       <td className="py-3 px-4 whitespace-nowrap">
                         <button
@@ -603,7 +611,26 @@ export const AdminNews: React.FC = () => {
                   </select>
                 </div>
 
-                <div>
+                {category === 'regulation' && (
+                  <div>
+                    <label className="block text-xs font-semibold text-heading mb-1">
+                      ประเภท (ข้อบังคับ / ระเบียบ / คำสั่ง / ประกาศ) *
+                    </label>
+                    <select
+                      value={regulationType}
+                      onChange={(e) => setRegulationType(e.target.value as RegulationSubType)}
+                      className="w-full text-xs border border-gold-border/30 bg-surface text-text p-2 rounded-sm focus:outline-none focus:border-gold"
+                    >
+                      {REGULATION_SUBTYPES.map((st) => (
+                        <option key={st.id} value={st.id}>
+                          {st.label}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                )}
+
+                <div className={category === 'regulation' ? 'sm:col-span-2' : ''}>
                   <label className="block text-xs font-semibold text-heading mb-1">
                     ลิงก์วิดีโอ / โพสต์หลัก (YouTube / Facebook / IG / TikTok)
                   </label>

@@ -19,6 +19,7 @@ import { SeoHead } from '../components/common/SeoHead';
 import { useLanguage } from '../context/LanguageContext';
 import { pickL10n, pickHtmlL10n } from '../lib/l10n';
 import { UntranslatedBanner, FallbackLangBadge } from '../components/common/FallbackLangBadge';
+import { resolveRegulationSubType } from '../config/site';
 import {
   SocialMediaEmbed,
   SocialMediaList,
@@ -195,7 +196,10 @@ export const NewsDetail: React.FC = () => {
           <span>/</span>
           <LocLink to="/news" className="hover:text-accent">{t('nav.news')}</LocLink>
           <span>/</span>
-          <NewsCategoryBadge category={news.category} />
+          <NewsCategoryBadge
+            category={news.category}
+            regulationType={resolveRegulationSubType(news)}
+          />
         </div>
 
         {/* แจ้งผู้เข้าชมโหมดภาษาอังกฤษอย่างสุภาพเมื่อบทความยังไม่มีคำแปลภาษาอังกฤษ */}

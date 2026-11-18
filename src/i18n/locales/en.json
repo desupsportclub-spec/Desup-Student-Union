@@ -232,6 +232,14 @@
       "knowledge": "Knowledge",
       "video": "Videos"
     },
+    "regulationSubTypes": {
+      "label": "Type:",
+      "all": "All",
+      "bylaw": "Bylaws",
+      "rule": "Regulations",
+      "order": "Orders",
+      "announcement": "Announcements"
+    },
     "cardFallbackExcerpt": "Click to read the full article",
     "emptySearch": "No articles matched \"{{term}}\"",
     "emptyCategory": "No articles in this category yet",
@@ -324,13 +332,13 @@
       "eyebrowTh": "POWERS & DUTIES",
       "title": "Powers & Duties of the Student Union",
       "subtitle": "Pursuant to the Demonstration School, University of Phayao Announcement on the Student Union, B.E. 2569 (2026)",
-      "section1Title": "Powers and Duties",
+      "section1Title": "Powers and Duties of the Student Union are as follows",
       "duties": [
         { "num": "(1)", "text": "Safeguard the collective interests and legitimate rights of students concerning student affairs." },
         { "num": "(2)", "text": "Administer Student Union activities in accordance with declared policies, provided they do not conflict with school regulations, rules, announcements, or policies." },
         { "num": "(3)", "text": "Perform other duties as assigned by the school." }
       ],
-      "section2Title": "Guiding Principles of Conduct",
+      "section2Title": "The Student Union shall conduct itself as follows",
       "guidelines": [
         { "num": "(1)", "text": "Uphold the collective interests and welfare of the student body." },
         { "num": "(2)", "text": "Maintain effectiveness in organizing and advancing student activities." },
@@ -346,7 +354,7 @@
       "eyebrowEn": "BOARD & LEADERSHIP",
       "eyebrowTh": "EXECUTIVE COMMITTEE",
       "title": "Student Union Executive Committee",
-      "subtitle": "Executive Committee under the supervision of Student Affairs (1-year term) — Academic Year {{year}}",
+      "subtitle": "",
       "yearFilterLabel": "Academic Year:",
       "emptyTitle": "No executive committee records for Academic Year {{year}}",
       "emptyHint": "Committee member profiles can be managed through the Admin Portal."
@@ -376,7 +384,7 @@
       "eyebrowEn": "HALL OF PRESIDENTS",
       "eyebrowTh": "PAST & PRESENT PRESIDENTS",
       "title": "Hall of Student Union Presidents",
-      "subtitle": "Student representatives who have led and created lasting impact for Demonstration School, University of Phayao",
+      "subtitle": "",
       "roleFallback": "Student Union President",
       "emptyTitle": "No president records available yet",
       "emptyHint": "Records of Student Union presidents for each academic year can be added via the Admin Portal."

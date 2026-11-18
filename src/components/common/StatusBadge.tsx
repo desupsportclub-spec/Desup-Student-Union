@@ -5,7 +5,7 @@
 
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { ComplaintStatus, NewsCategory } from '../../types';
+import { ComplaintStatus, NewsCategory, RegulationSubType } from '../../types';
 
 interface StatusBadgeProps {
   status: ComplaintStatus;
@@ -48,15 +48,23 @@ export const ComplaintStatusBadge: React.FC<StatusBadgeProps> = ({ status, class
   );
 };
 
-export const NewsCategoryBadge: React.FC<{ category: NewsCategory; className?: string }> = ({
+export const NewsCategoryBadge: React.FC<{
+  category: NewsCategory;
+  regulationType?: RegulationSubType | null;
+  className?: string;
+}> = ({
   category,
+  regulationType,
   className = '',
 }) => {
   const { t } = useTranslation();
 
-  const label = t(`status.newsCategory.${category}`, {
-    defaultValue: t('status.newsCategory.fallback'),
-  });
+  const label =
+    (category === 'regulation' || category === 'order') && regulationType
+      ? t(`news.regulationSubTypes.${regulationType}`)
+      : t(`status.newsCategory.${category}`, {
+          defaultValue: t('status.newsCategory.fallback'),
+        });
 
   return (
     <span className={`text-[11px] uppercase tracking-[0.16em] font-medium text-gold-text ${className}`}>

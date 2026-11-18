@@ -82,9 +82,6 @@ export const AboutBoard: React.FC = () => {
           <h1 className="font-serif text-3xl md:text-4xl font-semibold text-heading mt-2">
             {t('about.board.title')}
           </h1>
-          <p className="text-xs md:text-sm text-text-muted mt-1">
-            {t('about.board.subtitle', { year: displaySelectedYear })}
-          </p>
         </div>
 
         {/* ตัวเลือกปีการศึกษา */}

@@ -52,9 +52,6 @@ export const AboutHall: React.FC = () => {
         <h1 className="font-serif text-3xl md:text-4xl font-semibold text-heading">
           {t('about.hall.title')}
         </h1>
-        <p className="text-xs md:text-sm text-text-muted">
-          {t('about.hall.subtitle')}
-        </p>
       </div>
 
       {/* ไทม์ไลน์สลับซ้ายขวาแนวตั้ง */}

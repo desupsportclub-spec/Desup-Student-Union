@@ -12,6 +12,8 @@ export interface ImageAsset {
 
 export type NewsCategory = 'pr' | 'activity' | 'regulation' | 'order' | 'knowledge' | 'video';
 
+export type RegulationSubType = 'bylaw' | 'rule' | 'order' | 'announcement';
+
 export interface NewsAttachment {
   name: string;
   url: string;
@@ -32,6 +34,7 @@ export interface NewsItem {
   titleEn?: string;
   slug: string;
   category: NewsCategory;
+  regulationType?: RegulationSubType;
   excerpt: string;
   excerptEn?: string;
   content: string; // เนื้อหา Tiptap HTML ภาษาไทย
